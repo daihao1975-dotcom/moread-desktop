@@ -2,6 +2,9 @@ module moread
 
 go 1.25.0
 
+// Release builds use a toolchain with current standard-library security fixes.
+toolchain go1.26.10
+
 require (
 	github.com/wailsapp/wails/v2 v2.17.0
 	golang.org/x/sys v0.46.0
