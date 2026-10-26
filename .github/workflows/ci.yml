@@ -26,7 +26,7 @@ jobs:
       - name: Install tools
         run: |
           go install github.com/wailsapp/wails/v2/cmd/wails@v2.17.0
-          cd frontend && npm ci
+          cd frontend && npm ci && npm run build   # Go embeds frontend/dist, so later Go steps need it
       - name: Check formatting
         run: |
           test -z "$(gofmt -l .)"
