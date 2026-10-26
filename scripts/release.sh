@@ -63,7 +63,11 @@ ditto -c -k --keepParent "$app" "$out/MoRead-$version-macOS-arm64.zip"
 cp "$exe" "$out/MoRead-$version-Windows-x64.exe"
 cp "$exe" "${docs[@]}" docs/安装说明-Windows.txt "$stage/win/MoRead-$version-Windows-x64/"
 (cd "$stage/win" && zip -qr -X "$out/MoRead-$version-Windows-x64.zip" "MoRead-$version-Windows-x64")
-cp docs/版本说明.md docs/使用手册.md docs/User-Guide.md docs/隐私说明.md "$out/"
+# Loose documents use ASCII names: GitHub release assets reject non-ASCII file names.
+cp docs/User-Guide.md "$out/"
+cp docs/使用手册.md "$out/User-Guide-zh-CN.md"
+cp docs/版本说明.md "$out/Release-Notes.md"
+cp docs/隐私说明.md "$out/Privacy.md"
 rm -rf "$stage"
 
 for f in "$out"/*; do
