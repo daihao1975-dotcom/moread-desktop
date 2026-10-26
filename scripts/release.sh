@@ -50,6 +50,7 @@ file "$exe" | grep -q "PE32+ executable (GUI) x86-64"
 echo "==> Packages in $out"
 rm -rf "$out"
 mkdir -p "$out"
+out="$(cd "$out" && pwd)"   # later steps run from temporary directories
 docs=(LICENSE THIRD_PARTY_NOTICES.txt docs/使用手册.md docs/User-Guide.md docs/版本说明.md docs/隐私说明.md)
 stage="$(mktemp -d)"
 mkdir -p "$stage/dmg" "$stage/win/MoRead-$version-Windows-x64"
