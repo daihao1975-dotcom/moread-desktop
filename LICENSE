@@ -1,0 +1,32 @@
+MIT License
+
+Copyright (c) 2026 阿屠宰
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+------------------------------------------------------------------------
+
+This license covers the source code and documentation of MoRead. The names
+"墨阅" and "MoRead", the "阿屠宰制作" attribution and the application icon are
+not licensed under it; see TRADEMARKS.md. Third-party components keep their own
+licenses; see THIRD_PARTY_NOTICES.txt.
+
+本许可（MIT）适用于墨阅 MoRead 的源代码与文档。「墨阅」「MoRead」名称、「阿屠宰制作」署名
+及应用图标不在本许可范围内，见 TRADEMARKS.md；第三方组件按其各自许可使用，见
+THIRD_PARTY_NOTICES.txt。

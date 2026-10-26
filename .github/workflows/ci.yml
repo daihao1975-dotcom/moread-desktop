@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    # Xcode 26+ is needed to compile the Icon Composer app icon.
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install tools
+        run: |
+          go install github.com/wailsapp/wails/v2/cmd/wails@v2.17.0
+          cd frontend && npm ci
+      - name: Check formatting
+        run: |
+          test -z "$(gofmt -l .)"
+          cd frontend && npx prettier --check "src/**/*.{js,css}" "test/**/*.mjs"
+      - name: Check third-party notices are current
+        run: |
+          python3 scripts/notices.py
+          git diff --exit-code THIRD_PARTY_NOTICES.txt frontend/src/font-notice.txt
+      - name: Test, build and package
+        run: scripts/release.sh dist/release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MoRead-${{ github.sha }}
+          path: dist/release
+          retention-days: 14
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: MoRead-${{ github.sha }}
+          path: release
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft \
+            --title "MoRead ${GITHUB_REF_NAME#v}" --notes-file release/版本说明.md release/*

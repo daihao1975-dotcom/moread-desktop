@@ -1,0 +1,42 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readPreferences, widthCSS } from '../src/preferences.js';
+test('legacy default width migrates to fluid without changing typography', () => {
+  const p = readPreferences({ width: 860, size: 19, theme: 'dark', sidebar: false });
+  assert.equal(p.width, 'auto');
+  assert.equal(p.size, 19);
+  assert.equal(p.theme, 'dark');
+  assert.equal(p.sidebar, false);
+});
+test('intentional fixed width choices survive migration and restart', () => {
+  for (const w of [720, 1040]) assert.equal(readPreferences({ width: w }).width, w);
+  const p = readPreferences({ layoutVersion: 2, width: 860, size: 17 });
+  assert.equal(readPreferences(JSON.parse(JSON.stringify(p))).width, 860);
+  assert.equal(readPreferences({ layoutVersion: 2, width: 'auto' }).width, 'auto');
+});
+test('width CSS accepts only fluid or bounded fixed widths', () => {
+  assert.equal(widthCSS('auto'), 'min(100%, 48em)');
+  assert.equal(widthCSS(860), '860px');
+  for (const w of ['NaN', 'undefined', '100%;color:red', null, Infinity])
+    assert.equal(widthCSS(w), 'min(100%, 48em)');
+});
+test('split ratio is kept only within the draggable range', () => {
+  assert.equal(readPreferences({}).split, 50);
+  assert.equal(readPreferences({ split: 35 }).split, 35);
+  for (const v of [10, 95, '40', 40.5, null]) assert.equal(readPreferences({ split: v }).split, 50);
+});
+test('theme follows the system by default and resolves to a concrete reading theme', async () => {
+  const { resolveTheme } = await import('../src/preferences.js');
+  assert.equal(readPreferences({}).theme, 'auto');
+  assert.equal(readPreferences({ theme: 'paper' }).theme, 'paper');
+  assert.equal(readPreferences({ theme: 'neon' }).theme, 'auto');
+  assert.equal(resolveTheme('auto', true), 'dark');
+  assert.equal(resolveTheme('auto', false), 'light');
+  assert.equal(resolveTheme('paper', true), 'paper');
+});
+test('interface language is kept only as auto or a language tag', () => {
+  assert.equal(readPreferences({}).lang, 'auto');
+  assert.equal(readPreferences({ lang: 'ja' }).lang, 'ja');
+  assert.equal(readPreferences({ lang: 'pt-BR' }).lang, 'pt-BR');
+  for (const v of ['<b>', 'zh_cn', 1, null]) assert.equal(readPreferences({ lang: v }).lang, 'auto');
+});

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "MoRead",
+  "outputfilename": "MoRead",
+  "frontend:install": "npm ci --registry=https://registry.npmjs.org",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "阿屠宰",
+    "email": ""
+  },
+  "info": {
+    "companyName": "阿屠宰",
+    "productName": "墨阅 MoRead",
+    "productVersion": "1.0.0",
+    "copyright": "Copyright © 2026 阿屠宰。保留所有权利。",
+    "comments": "阿屠宰制作 | MoRead offline Markdown reader and editor",
+    "fileAssociations": [
+      {
+        "ext": "md",
+        "name": "Markdown",
+        "role": "Editor",
+        "iconName": "appicon"
+      },
+      {
+        "ext": "markdown",
+        "name": "Markdown",
+        "role": "Editor",
+        "iconName": "appicon"
+      },
+      {
+        "ext": "mdown",
+        "name": "Markdown",
+        "role": "Editor",
+        "iconName": "appicon"
+      },
+      {
+        "ext": "mkd",
+        "name": "Markdown",
+        "role": "Editor",
+        "iconName": "appicon"
+      }
+    ]
+  }
+}

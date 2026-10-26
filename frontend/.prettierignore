@@ -1,0 +1,5 @@
+dist/
+node_modules/
+wailsjs/
+src/locales/
+package-lock.json

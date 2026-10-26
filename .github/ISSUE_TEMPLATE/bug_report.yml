@@ -1,0 +1,28 @@
+name: 问题反馈 / Bug report
+description: 软件行为与预期不符 / Something does not work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        安全问题请使用私密漏洞报告，不要在此提交。Security issues: use private vulnerability reporting instead.
+        首次打开被系统拦截属预期行为（安装包未公证/未签名），见使用手册第 1 节。Being blocked on first launch is expected; see the User Guide, section 1.
+  - type: input
+    id: version
+    attributes: { label: 版本 / Version, description: "关于墨阅与许可 → 版本 / About → Version", placeholder: "1.0.0" }
+    validations: { required: true }
+  - type: dropdown
+    id: platform
+    attributes: { label: 平台 / Platform, options: ["macOS (Apple silicon)", "Windows x64"] }
+    validations: { required: true }
+  - type: input
+    id: os
+    attributes: { label: 系统版本 / OS version, placeholder: "macOS 26.1 / Windows 11 24H2 (WebView2 13x)" }
+  - type: textarea
+    id: steps
+    attributes: { label: 复现步骤 / Steps to reproduce, description: "请附最小的虚构 Markdown 示例，不要上传私人文档。Attach a minimal made-up Markdown sample." }
+    validations: { required: true }
+  - type: textarea
+    id: expected
+    attributes: { label: 预期与实际 / Expected vs actual }
+    validations: { required: true }

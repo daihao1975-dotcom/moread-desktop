@@ -1,0 +1,13 @@
+/frontend/node_modules/
+/frontend/dist/
+/frontend/wailsjs/
+/build/bin/
+.DS_Store
+*.log
+/coverage/
+
+/frontend-build.log
+/npm-audit.json
+
+/build/windows/appicon.ico
+/dist/

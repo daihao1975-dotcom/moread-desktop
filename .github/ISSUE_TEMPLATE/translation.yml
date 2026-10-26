@@ -1,0 +1,12 @@
+name: 翻译 / Translation
+description: 译文错误或新增语言 / Wrong wording or a new language
+labels: [translation]
+body:
+  - type: input
+    id: language
+    attributes: { label: 语言 / Language, placeholder: "ja / de / ..." }
+    validations: { required: true }
+  - type: textarea
+    id: details
+    attributes: { label: 位置与建议译文 / Where and suggested wording, description: "例如 frontend/src/locales/ja.json 中的键名 / e.g. the key in frontend/src/locales/ja.json" }
+    validations: { required: true }

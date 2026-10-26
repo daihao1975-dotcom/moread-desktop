@@ -1,0 +1,16 @@
+name: 功能建议 / Feature request
+description: 提出改进建议 / Suggest an improvement
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        墨阅的定位是离线、安全的阅读与轻编辑。以下方向暂不计划：所见即所得编辑、插件系统、云同步、联网 AI、默认加载远程资源。
+        MoRead focuses on offline, safe reading and light editing. Not planned: WYSIWYG editing, plugins, cloud sync, online AI, loading remote resources by default.
+  - type: textarea
+    id: problem
+    attributes: { label: 要解决的问题 / Problem }
+    validations: { required: true }
+  - type: textarea
+    id: proposal
+    attributes: { label: 建议方案 / Proposal }
