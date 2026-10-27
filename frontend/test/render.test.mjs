@@ -179,3 +179,15 @@ test('lazy code highlighter keeps final syntax highlighting and previews plain',
   assert.match(final.body, /hljs-keyword/);
   assert.match(final.body, /answer/);
 });
+
+test('heading IDs stay unique when numbered slugs and raw HTML IDs collide', async () => {
+  const r = await renderDocument('<span id="a">target</span>\n\n# A\n\n# A\n\n# A-1\n\n# A');
+  const host = document.createElement('div');
+  host.innerHTML = r.body;
+  const ids = [...host.querySelectorAll('[id]')].map(node => node.id);
+  assert.equal(new Set(ids).size, ids.length);
+  assert.deepEqual(
+    r.outline.map(h => h.id),
+    ['a-1', 'a-2', 'a-1-1', 'a-3'],
+  );
+});

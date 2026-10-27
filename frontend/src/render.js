@@ -221,12 +221,14 @@ export async function renderDocument(
     ALLOW_DATA_ATTR: false,
   });
   const outline = [];
-  const seen = new Map();
+  const seen = new Set([...container.querySelectorAll('[id]')].map(node => node.id));
   for (const h of container.querySelectorAll('h1,h2,h3,h4,h5,h6')) {
     const base = slug(h.textContent);
-    const n = seen.get(base) || 0;
-    seen.set(base, n + 1);
-    h.id = base + (n ? '-' + n : '');
+    let candidate = base,
+      n = 0;
+    while (seen.has(candidate)) candidate = base + '-' + ++n;
+    h.id = candidate;
+    seen.add(candidate);
     outline.push({ id: h.id, text: h.textContent, level: +h.tagName[1] });
   }
   for (const bq of container.querySelectorAll('blockquote')) {
