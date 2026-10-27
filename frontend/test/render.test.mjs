@@ -191,3 +191,40 @@ test('heading IDs stay unique when numbered slugs and raw HTML IDs collide', asy
     ['a-1', 'a-2', 'a-1-1', 'a-3'],
   );
 });
+
+test('duplicate images share reads within a render but refresh on the next render', async () => {
+  let calls = 0;
+  let uri = 'data:image/png;base64,AAAA';
+  const options = {
+    id: 'doc',
+    readImage: async () => {
+      calls++;
+      return uri;
+    },
+  };
+  const source = '![first](image.png) ![again](image.png)';
+  let result = await renderDocument(source, options);
+  assert.equal(calls, 1);
+  assert.equal((result.body.match(/data:image\/png;base64,AAAA/g) || []).length, 2);
+  uri = 'data:image/png;base64,BBBB';
+  result = await renderDocument(source, options);
+  assert.equal(calls, 2);
+  assert.equal((result.body.match(/data:image\/png;base64,BBBB/g) || []).length, 2);
+});
+
+test('duplicate images still count towards the serialized document budget', async () => {
+  let calls = 0;
+  const uri = 'data:image/png;base64,' + 'A'.repeat(17 * 1024 * 1024);
+  const result = await renderDocument('![first](a.png) ![second](a.png)', {
+    id: 'doc',
+    readImage: async () => {
+      calls++;
+      return uri;
+    },
+  });
+  assert.equal(calls, 1);
+  const host = document.createElement('div');
+  host.innerHTML = result.body;
+  assert.equal(host.querySelectorAll('img').length, 1);
+  assert.equal(host.querySelectorAll('.image-placeholder').length, 1);
+});
