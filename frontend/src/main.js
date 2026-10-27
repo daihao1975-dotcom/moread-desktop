@@ -1,3 +1,4 @@
+import { readRelativeDocument } from './relative-link.js';
 import { readLineEndings, editLineEndings, writeLineEndings } from './line-endings.js';
 import { readPreferences, normalizeWidth, resolveTheme } from './preferences.js';
 import { bindTitlebar } from './titlebar.js';
@@ -139,6 +140,7 @@ let current = builtinDocument('welcome'),
   replacing = false,
   windowTitle = '',
   lastAction = { name: '', at: 0 },
+  pendingAnchor = '',
   currentHeading = '',
   scrollLead = '',
   scrollLeadAt = 0,
@@ -364,6 +366,7 @@ function switchDocument(load, valid) {
 function useDocument(d, keepScroll = false) {
   current = d;
   currentHeading = '';
+  pendingAnchor = d.navigationAnchor || '';
   const text = readLineEndings(d.content);
   newline = text.preferred;
   lineEndings = text.endings;
@@ -487,6 +490,12 @@ async function render(v) {
     if (v !== version_) return;
     rendered = { ...r, css, version: v };
     renderedTheme = theme;
+    if (pendingAnchor) {
+      const anchor = pendingAnchor;
+      const navigated = await previewFrame.anchor(anchor);
+      if (v !== version_ || navigated?.cancelled) return;
+      pendingAnchor = '';
+    }
     outline = r.outline;
     resetScroll = false;
     side();
@@ -541,11 +550,10 @@ async function previewAction(action) {
   enqueue(async () => {
     if (!valid()) return;
     await switchDocument(async () => {
-      const d = await call('OpenRelative', expectedId, href);
-      if (!valid()) return null;
-      const loaded = await call('ReadDocument', d.id);
-      if (!files.some(f => f.id === d.id)) files.push(d);
-      return loaded;
+      const result = await readRelativeDocument(expectedId, href, call, valid);
+      if (!result || !valid()) return null;
+      if (!files.some(f => f.id === result.registered.id)) files.push(result.registered);
+      return result.document;
     }, valid);
   });
 }
