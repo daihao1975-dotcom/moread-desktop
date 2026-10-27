@@ -16,6 +16,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 	"unicode/utf16"
 	"unicode/utf8"
 )
@@ -41,19 +42,21 @@ type SaveResult struct {
 }
 type record struct{ Path, Root string }
 type App struct {
-	ctx          context.Context
-	mu           sync.Mutex
-	saveMu       sync.Mutex
-	files        map[string]*record
-	pending      []string
-	domReady     bool
-	dirty        bool
-	aboutCalls   int64
-	closePending bool
-	quitApproved bool
-	lang         string
-	settings     settings
-	settingsFile string
+	openTiming     OpenTiming
+	timingDocument string
+	ctx            context.Context
+	mu             sync.Mutex
+	saveMu         sync.Mutex
+	files          map[string]*record
+	pending        []string
+	domReady       bool
+	dirty          bool
+	aboutCalls     int64
+	closePending   bool
+	quitApproved   bool
+	lang           string
+	settings       settings
+	settingsFile   string
 }
 
 func NewApp() *App { return &App{files: make(map[string]*record), lang: fallbackLanguage} }
@@ -371,6 +374,7 @@ func encodeDocument(s, enc string) []byte {
 	return []byte(s)
 }
 func (a *App) ReadDocument(id string) (Document, error) {
+	started := time.Now().UnixMilli()
 	a.mu.Lock()
 	r, ok := a.files[id]
 	if !ok {
@@ -392,6 +396,10 @@ func (a *App) ReadDocument(id string) (Document, error) {
 		return Document{}, e
 	}
 	rel, _ := filepath.Rel(root, p)
+	a.mu.Lock()
+	a.timingDocument = id
+	a.openTiming = OpenTiming{ProcessStartedAt: processStartedAt, ReadStartedAt: started}
+	a.mu.Unlock()
 	return Document{ID: id, Name: filepath.Base(p), Relative: filepath.ToSlash(rel), Content: s, Encoding: enc, Hash: hashBytes(b)}, nil
 }
 

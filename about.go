@@ -8,7 +8,7 @@ import (
 )
 
 // These values are supplied by the release build. Defaults describe an unstamped development build.
-var buildVersion = "1.0.0"
+var buildVersion = "1.0.1"
 var buildCommit = "development"
 var buildTime = "development"
 
@@ -25,21 +25,23 @@ var brandingNotice string
 var trademarkNotice string
 
 type AboutDetails struct {
-	Calls        int64  `json:"calls"`
-	Version      string `json:"version"`
-	Commit       string `json:"commit"`
-	BuiltAt      string `json:"builtAt"`
-	Platform     string `json:"platform"`
-	GoVersion    string `json:"goVersion"`
-	WailsVersion string `json:"wailsVersion"`
-	Producer     string `json:"producer"`
-	LicenseTitle string `json:"licenseTitle"`
+	OpenTiming   OpenTiming `json:"openTiming"`
+	Calls        int64      `json:"calls"`
+	Version      string     `json:"version"`
+	Commit       string     `json:"commit"`
+	BuiltAt      string     `json:"builtAt"`
+	Platform     string     `json:"platform"`
+	GoVersion    string     `json:"goVersion"`
+	WailsVersion string     `json:"wailsVersion"`
+	Producer     string     `json:"producer"`
+	LicenseTitle string     `json:"licenseTitle"`
 }
 
 func (a *App) AboutInfo() AboutDetails {
 	a.mu.Lock()
 	a.aboutCalls++
 	calls := a.aboutCalls
+	timing := a.openTiming
 	a.mu.Unlock()
 	wailsVersion := "unknown"
 	if info, ok := debug.ReadBuildInfo(); ok {
@@ -52,7 +54,7 @@ func (a *App) AboutInfo() AboutDetails {
 			}
 		}
 	}
-	return AboutDetails{Calls: calls, Version: buildVersion, Commit: buildCommit, BuiltAt: buildTime, Platform: runtime.GOOS + " / " + runtime.GOARCH, GoVersion: runtime.Version(), WailsVersion: wailsVersion, Producer: "阿屠宰制作", LicenseTitle: strings.SplitN(ownLicense, "\n", 2)[0]}
+	return AboutDetails{OpenTiming: timing, Calls: calls, Version: buildVersion, Commit: buildCommit, BuiltAt: buildTime, Platform: runtime.GOOS + " / " + runtime.GOARCH, GoVersion: runtime.Version(), WailsVersion: wailsVersion, Producer: "阿屠宰制作", LicenseTitle: strings.SplitN(ownLicense, "\n", 2)[0]}
 }
 func (a *App) LicenseTexts() map[string]string {
 	return map[string]string{"own": ownLicense, "thirdParty": dependencyNotices, "brand": trademarkNotice + "\n\n" + brandingNotice}

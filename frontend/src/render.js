@@ -2,20 +2,6 @@ import { widthCSS } from './preferences.js';
 import { t, language, localizeMessage } from './i18n.js';
 import MarkdownIt from 'markdown-it';
 import DOMPurify from 'dompurify';
-import hljs from 'highlight.js/lib/core';
-import javascript from 'highlight.js/lib/languages/javascript';
-import typescript from 'highlight.js/lib/languages/typescript';
-import python from 'highlight.js/lib/languages/python';
-import go from 'highlight.js/lib/languages/go';
-import bash from 'highlight.js/lib/languages/bash';
-import json from 'highlight.js/lib/languages/json';
-import css from 'highlight.js/lib/languages/css';
-import xml from 'highlight.js/lib/languages/xml';
-import sql from 'highlight.js/lib/languages/sql';
-import java from 'highlight.js/lib/languages/java';
-import cpp from 'highlight.js/lib/languages/cpp';
-import rust from 'highlight.js/lib/languages/rust';
-import yaml from 'highlight.js/lib/languages/yaml';
 import footnote from 'markdown-it-footnote';
 import taskLists from 'markdown-it-task-lists';
 import deflist from 'markdown-it-deflist';
@@ -27,22 +13,6 @@ import { full as emoji } from 'markdown-it-emoji';
 import codeCSS from 'highlight.js/styles/github.css?raw';
 import documentCSS from './document.css?raw';
 import fontNotice from './font-notice.txt?raw';
-for (const [name, lang] of Object.entries({
-  javascript,
-  typescript,
-  python,
-  go,
-  bash,
-  json,
-  css,
-  xml,
-  sql,
-  java,
-  cpp,
-  rust,
-  yaml,
-}))
-  hljs.registerLanguage(name, lang);
 const escape = s =>
   String(s).replace(
     /[&<>"']/g,
@@ -71,7 +41,17 @@ export function sanitize(html) {
     ALLOW_DATA_ATTR: false,
   });
 }
-function createMarkdown() {
+let highlighter, highlightPromise;
+const loadHighlight = () =>
+  (highlightPromise ??= import('./code-highlight.js')
+    .then(module => {
+      highlighter = module.default;
+    })
+    .catch(error => {
+      highlightPromise = undefined;
+      throw error;
+    }));
+function createMarkdown(highlight = true) {
   const md = new MarkdownIt({
     html: true,
     linkify: true,
@@ -80,7 +60,8 @@ function createMarkdown() {
       if (lang === 'mermaid') return `<pre class="mermaid-source">${escape(str)}</pre>`;
       let code = escape(str);
       try {
-        if (hljs.getLanguage(lang)) code = hljs.highlight(str, { language: lang }).value;
+        if (highlight && highlighter?.getLanguage(lang))
+          code = highlighter.highlight(str, { language: lang }).value;
       } catch {}
       return `<pre class="code-block"><span class="code-language">${escape(lang || 'text')}</span><button class="copy-code" type="button">${escape(t('code.copy'))}</button><code class="hljs">${code}</code></pre>`;
     },
@@ -195,10 +176,29 @@ async function loadMermaid(theme) {
 let diagram = 0;
 export async function renderDocument(
   source,
-  { id = '', readImage = async () => '', isCurrent = () => true, theme = 'light' } = {},
+  {
+    id = '',
+    readImage = async () => '',
+    isCurrent = () => true,
+    theme = 'light',
+    onPreview,
+    deferred = false,
+  } = {},
 ) {
-  const math = hasMath(source),
-    engine = math ? (await loadMath()).md : md;
+  // Publish readable, sanitized text before optional engines or image I/O can block it.
+  // The final pass still owns exports and keeps the same cancellation boundary.
+  if (onPreview && (hasMath(source) || /!\[|<img\b|mermaid|`{3,}|~{3,}/i.test(source))) {
+    const preview = await renderDocument(source, { id, isCurrent, theme, deferred: true });
+    if (!preview || !isCurrent()) return null;
+    await onPreview(preview);
+    if (!isCurrent()) return null;
+  }
+  if (!deferred && /(?:`{3,}|~{3,})/.test(source)) {
+    await loadHighlight();
+    if (!isCurrent()) return null;
+  }
+  const math = !deferred && hasMath(source),
+    engine = math ? (await loadMath()).md : deferred ? createMarkdown(false) : md;
   if (!isCurrent()) return null;
   const container = document.createElement('div');
   container.innerHTML = DOMPurify.sanitize(engine.render(source), {
@@ -252,6 +252,7 @@ export async function renderDocument(
     try {
       if (remote) throw new Error(t('img.remote'));
       if (!id) throw new Error(t('img.saveFirst'));
+      if (deferred) throw new Error(t('state.opening'));
       if (imageBudgetExhausted) throw new Error(t('img.budget'));
       const uri = await readImage(id, ref);
       if (!isCurrent()) return null;
@@ -274,6 +275,7 @@ export async function renderDocument(
     }
   }
   for (const pre of container.querySelectorAll('.mermaid-source')) {
+    if (deferred) continue;
     const text = pre.textContent;
     try {
       if (text.length > 30000 || /%%\s*\{|^\s*---|\b(click|icon|image)\b/im.test(text))

@@ -131,3 +131,29 @@ test('editor scroll sync sends a clamped integer ratio only for the current rend
   );
   t.dom.window.close();
 });
+
+test('paint timing rejects invalid acknowledgements and cancels stale requests', async () => {
+  const t = setup();
+  t.frame.begin(1);
+  t.incoming('ready', {}, 0);
+  t.el.contentWindow.postMessage = m => {
+    t.sent.push(m);
+    t.incoming(
+      'ack',
+      { request: m.request, command: m.type, result: { firstContentfulPaintAt: -1 } },
+      m.version,
+    );
+    t.incoming(
+      'ack',
+      { request: m.request, command: m.type, result: { firstContentfulPaintAt: 123 } },
+      m.version,
+    );
+  };
+  assert.deepEqual(await t.frame.paintTiming(), { firstContentfulPaintAt: 123 });
+  t.el.contentWindow.postMessage = () => {};
+  const old = t.frame.paintTiming();
+  await new Promise(resolve => setImmediate(resolve));
+  t.frame.begin(2);
+  assert.equal((await old).cancelled, true);
+  t.dom.window.close();
+});

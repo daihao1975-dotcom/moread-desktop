@@ -108,3 +108,74 @@ test('alerts, copy buttons and placeholders follow the interface language', asyn
     setLanguage('zh-CN');
   }
 });
+
+test('readable preview arrives before image I/O and math enrichment', async () => {
+  let release;
+  const image = new Promise(resolve => {
+    release = resolve;
+  });
+  const previews = [];
+  let reading = false;
+  const rendering = renderDocument('# First content\n\n$1+2$\n\n![local](test.png)', {
+    id: 'synthetic',
+    onPreview: async preview => {
+      previews.push(preview);
+    },
+    readImage: async () => {
+      reading = true;
+      return image;
+    },
+  });
+  // Wait until the final pass is blocked on the image, rather than timing a machine-dependent delay.
+  while (!reading) await new Promise(resolve => setImmediate(resolve));
+  assert.equal(previews.length, 1);
+  assert.match(previews[0].body, /First content/);
+  assert.doesNotMatch(previews[0].body, /<img|katex/);
+  assert.equal(previews[0].math, false);
+  release('data:image/png;base64,AAAA');
+  const final = await rendering;
+  assert.match(final.body, /katex/);
+  assert.match(final.body, /data:image\/png;base64,AAAA/);
+});
+
+test('cancellation after preview prevents enrichment and stale results', async () => {
+  let current = true,
+    reads = 0;
+  const result = await renderDocument('# New\n\n![local](test.png)', {
+    id: 'synthetic',
+    isCurrent: () => current,
+    onPreview: async () => {
+      current = false;
+    },
+    readImage: async () => {
+      reads++;
+      return '';
+    },
+  });
+  assert.equal(result, null);
+  assert.equal(reads, 0);
+});
+
+test('deferred preview preserves script isolation and blocks remote resources', async () => {
+  const preview = await renderDocument(
+    '# Safe\n<script>bad()</script>\n<img src="https://example.com/x" onerror="bad()">\n\n```mermaid\nflowchart LR\nA-->B\n```',
+    {
+      deferred: true,
+      readImage: async () => {
+        throw Error('must not read');
+      },
+    },
+  );
+  assert.match(preview.body, /Safe/);
+  assert.match(preview.body, /mermaid-source/);
+  assert.doesNotMatch(preview.body, /<script|<img|onerror|<svg/);
+});
+
+test('lazy code highlighter keeps final syntax highlighting and previews plain', async () => {
+  const source = '```javascript\nconst answer = 42;\n```';
+  const preview = await renderDocument(source, { deferred: true });
+  assert.doesNotMatch(preview.body, /hljs-keyword/);
+  const final = await renderDocument(source);
+  assert.match(final.body, /hljs-keyword/);
+  assert.match(final.body, /answer/);
+});

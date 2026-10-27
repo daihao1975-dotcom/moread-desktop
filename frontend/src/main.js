@@ -69,7 +69,7 @@ app.innerHTML = `<header class="topbar"><div class="toolbar">${tool('toggle-side
 <div class="zoom" id="zoom"><button data-i18n-title="zoom.close|Esc" data-i18n-label="zoom.close">${icon('x')}</button><img data-i18n-alt="zoom.alt"></div>`;
 const aboutDialog = document.createElement('dialog');
 aboutDialog.className = 'about-dialog';
-aboutDialog.innerHTML = `<div class="about-heading"><img src="${brandIcon}" alt=""><div><h2>墨阅 MoRead</h2><p data-i18n="app.producer"></p></div><span class="grow"></span><button id="about-close" data-i18n="about.close"></button></div><dl id="build-details"></dl><details class="advanced-diagnostics"><summary data-i18n="about.diagnostics"></summary><div class="isolation-check"><button id="check-isolation" data-i18n="about.check"></button><span id="isolation-result"></span></div></details><div class="about-tabs"><button data-license="own" class="active" data-i18n="about.own"></button><button data-license="thirdParty" data-i18n="about.thirdParty"></button><button data-license="brand" data-i18n="about.brand"></button></div><textarea id="license-text" readonly data-i18n-label="about.licenseLabel" spellcheck="false"></textarea>`;
+aboutDialog.innerHTML = `<div class="about-heading"><img src="${brandIcon}" alt=""><div><h2>墨阅 MoRead</h2><p data-i18n="app.producer"></p></div><span class="grow"></span><button id="about-close" data-i18n="about.close"></button></div><dl id="build-details"></dl><details class="advanced-diagnostics"><summary data-i18n="about.diagnostics"></summary><pre id="open-timing"></pre><div class="isolation-check"><button id="check-isolation" data-i18n="about.check"></button><span id="isolation-result"></span></div></details><div class="about-tabs"><button data-license="own" class="active" data-i18n="about.own"></button><button data-license="thirdParty" data-i18n="about.thirdParty"></button><button data-license="brand" data-i18n="about.brand"></button></div><textarea id="license-text" readonly data-i18n-label="about.licenseLabel" spellcheck="false"></textarea>`;
 document.body.append(aboutDialog);
 let licenseTexts = {},
   isolationBusy = false,
@@ -427,22 +427,55 @@ async function render(v) {
   $('#render-status').textContent = t('status.rendering');
   try {
     const theme = activeTheme();
+    let previewShown = false,
+      paintReported = false;
+    const documentID = current.id;
+    const reportPaint = async () => {
+      if (paintReported || !documentID || mode === 'source' || document.hidden) return;
+      // The first callback precedes a paint; the second follows that paint opportunity.
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      if (v !== version_) return;
+      paintReported = true;
+      const timing = await previewFrame.paintTiming();
+      if (v !== version_ || timing.cancelled) return;
+      call('ReportDocumentPaint', documentID, timing.firstContentfulPaintAt || 0).catch(() => {});
+    };
     const r = await renderDocument(source, {
       id: current.id,
       readImage: (...args) => call('ReadImage', ...args),
       isCurrent: () => v === version_,
       theme,
+      onPreview: !resetScroll
+        ? undefined
+        : async preview => {
+            if (v !== version_) return;
+            const css = await getCSS(false);
+            if (v !== version_) return;
+            const result = await previewFrame.render(preview.body, css, {
+              reset: resetScroll,
+              theme,
+              size: prefs.size,
+              width: prefs.width,
+            });
+            if (v !== version_ || result.cancelled) return;
+            previewShown = true;
+            outline = preview.outline;
+            side();
+            await reportPaint();
+          },
     });
     if (v !== version_ || !r) return;
     const css = await getCSS(r.math);
     if (v !== version_) return;
     const result = await previewFrame.render(r.body, css, {
-      reset: resetScroll,
+      reset: resetScroll && !previewShown,
       theme,
       size: prefs.size,
       width: prefs.width,
     });
     if (v !== version_ || result.cancelled) return;
+    await reportPaint();
+    if (v !== version_) return;
     rendered = { ...r, css, version: v };
     renderedTheme = theme;
     outline = r.outline;
@@ -924,6 +957,7 @@ async function showAbout() {
   try {
     const [info, texts] = await Promise.all([call('AboutInfo'), call('LicenseTexts')]);
     licenseTexts = texts;
+    $('#open-timing').textContent = JSON.stringify(info.openTiming, null, 2);
     $('#build-details').replaceChildren();
     for (const [label, value] of [
       ['about.version', info.version],

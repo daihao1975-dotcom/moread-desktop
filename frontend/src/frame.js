@@ -84,6 +84,13 @@ export function createFrame(element, { onAction, onShortcut, onDrop, onError, on
           ))
       )
         return;
+      if (
+        m.command === 'paint-timing' &&
+        (!exact(m.result, ['firstContentfulPaintAt']) ||
+          !Number.isSafeInteger(m.result.firstContentfulPaintAt) ||
+          m.result.firstContentfulPaintAt < 0)
+      )
+        return;
       if (m.command === 'render') {
         if (
           !exact(m.result, ['empty', 'images']) ||
@@ -275,6 +282,9 @@ export function createFrame(element, { onAction, onShortcut, onDrop, onError, on
     copyResult(id, success) {
       if (actions.has(id)) return command('copy-result', { id, success });
       return Promise.resolve();
+    },
+    paintTiming() {
+      return command('paint-timing');
     },
     inspect() {
       return command('inspect');

@@ -154,6 +154,15 @@
           };
           break;
         }
+        case 'paint-timing': {
+          const paint = performance
+            .getEntriesByType?.('paint')
+            ?.find(e => e.name === 'first-contentful-paint');
+          result = {
+            firstContentfulPaintAt: paint ? Math.round(performance.timeOrigin + paint.startTime) : 0,
+          };
+          break;
+        }
         case 'prefs':
           if (
             !['light', 'dark', 'paper'].includes(m.theme) ||
