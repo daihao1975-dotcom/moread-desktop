@@ -1,3 +1,4 @@
+import { readLineEndings, editLineEndings, writeLineEndings } from './line-endings.js';
 import { readPreferences, normalizeWidth, resolveTheme } from './preferences.js';
 import { bindTitlebar } from './titlebar.js';
 import { documentTransition } from './document-transition.js';
@@ -129,6 +130,8 @@ let current = builtinDocument('welcome'),
   opening = false,
   toastTimer,
   newline = '\n',
+  lineEndings = [],
+  baselineEndings = [],
   queue = Promise.resolve(),
   findHits = [],
   findIndex = -1,
@@ -168,7 +171,8 @@ function update() {
   app.classList.toggle('dirty', dirty());
   $('#doc-name').textContent = current.name;
   $('#doc-state').textContent = stateLabel();
-  $('#encoding').textContent = current.encoding + (newline === '\r\n' ? ' · CRLF' : ' · LF');
+  $('#encoding').textContent =
+    current.encoding + (newline === '\r\n' ? ' · CRLF' : newline === '\r' ? ' · CR' : ' · LF');
   $('#save').disabled = saveBusy || opening;
   const title = (dirty() ? '• ' : '') + current.name + ' — ' + t('app.name');
   if (title !== windowTitle) {
@@ -360,8 +364,11 @@ function switchDocument(load, valid) {
 function useDocument(d, keepScroll = false) {
   current = d;
   currentHeading = '';
-  newline = d.content.includes('\r\n') ? '\r\n' : '\n';
-  source = d.content.replace(/\r\n/g, '\n');
+  const text = readLineEndings(d.content);
+  newline = text.preferred;
+  lineEndings = text.endings;
+  baselineEndings = [...lineEndings];
+  source = text.text;
   baseline = source;
   $('#editor').value = source;
   resetScroll = !keepScroll;
@@ -390,11 +397,12 @@ async function save(as) {
   saveBusy = true;
   update();
   const text = source;
+  const savedEndings = [...lineEndings];
   try {
     const r = await call(
       'SaveDocument',
       current.id,
-      newline === '\r\n' ? text.replace(/\n/g, '\r\n') : text,
+      writeLineEndings(text, savedEndings, newline),
       current.hash,
       current.encoding,
       as,
@@ -402,6 +410,7 @@ async function save(as) {
     if (r.cancelled) return false;
     current = { ...r.document, content: source };
     baseline = text;
+    baselineEndings = savedEndings;
     externalNotice = '';
     if (!files.some(f => f.id === current.id)) files.push(current);
     side();
@@ -861,6 +870,10 @@ $('#language').onchange = e => {
 };
 $('#filter').oninput = side;
 $('#editor').oninput = e => {
+  lineEndings =
+    e.target.value === baseline
+      ? [...baselineEndings]
+      : editLineEndings(source, e.target.value, lineEndings, newline);
   source = e.target.value;
   findCycling = false;
   update();
