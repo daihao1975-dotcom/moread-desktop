@@ -3,7 +3,7 @@
 #
 #   scripts/release.sh [output-directory]
 #
-# Requires Go 1.25+, Node.js 22.12+, Wails CLI 2.17.0 and Xcode 26+ (actool compiles the
+# Requires Go 1.26.10+, Node.js 22.12+, Wails CLI 2.17.0 and Xcode 26+ (actool compiles the
 # Icon Composer icon). The working tree must be committed: the commit is stamped into "About".
 set -euo pipefail
 
