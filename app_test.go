@@ -354,3 +354,81 @@ func TestDocumentHashTracksExternalEdits(t *testing.T) {
 		t.Fatal("missing file reported as unchanged")
 	}
 }
+
+func TestStreamingHashLimitsAndBytes(t *testing.T) {
+	dir := t.TempDir()
+	p := filepath.Join(dir, "hash.md")
+	for _, content := range []string{"", "中文\r\n😀", strings.Repeat("a", 65536)} {
+		b := []byte(content)
+		if e := os.WriteFile(p, b, 0600); e != nil {
+			t.Fatal(e)
+		}
+		got, e := hashFileLimited(p, int64(len(b)))
+		if e != nil || got != hashBytes(b) {
+			t.Fatalf("hash mismatch: %s %v", got, e)
+		}
+		if len(b) > 0 {
+			if _, e := hashFileLimited(p, int64(len(b)-1)); e == nil {
+				t.Fatal("oversized file accepted")
+			}
+		}
+	}
+	if _, e := hashFileLimited(dir, maxDocument); e == nil {
+		t.Fatal("directory accepted")
+	}
+	if _, e := hashFileLimited(filepath.Join(dir, "missing"), maxDocument); e == nil {
+		t.Fatal("missing file accepted")
+	}
+}
+
+func TestDocumentHashDetectsSameSizeSameTimestampReplacement(t *testing.T) {
+	a, d, p := fixture(t)
+	st, e := os.Stat(p)
+	if e != nil {
+		t.Fatal(e)
+	}
+	b, e := os.ReadFile(p)
+	if e != nil {
+		t.Fatal(e)
+	}
+	b[0] ^= 1
+	if e = os.WriteFile(p, b, 0644); e != nil {
+		t.Fatal(e)
+	}
+	if e = os.Chtimes(p, st.ModTime(), st.ModTime()); e != nil {
+		t.Fatal(e)
+	}
+	if got, e := a.DocumentHash(d.ID); e != nil || got != hashBytes(b) || got == d.Hash {
+		t.Fatalf("missed replacement: %s %v", got, e)
+	}
+}
+
+func BenchmarkDocumentHash(b *testing.B) {
+	p := filepath.Join(b.TempDir(), "large.md")
+	if e := os.WriteFile(p, []byte(strings.Repeat("a", maxDocument)), 0600); e != nil {
+		b.Fatal(e)
+	}
+	for _, streaming := range []bool{false, true} {
+		name := "buffered"
+		if streaming {
+			name = "streaming"
+		}
+		b.Run(name, func(b *testing.B) {
+			b.ReportAllocs()
+			b.SetBytes(maxDocument)
+			for b.Loop() {
+				if streaming {
+					if _, e := hashFileLimited(p, maxDocument); e != nil {
+						b.Fatal(e)
+					}
+				} else {
+					data, e := readLimited(p, maxDocument)
+					if e != nil {
+						b.Fatal(e)
+					}
+					hashBytes(data)
+				}
+			}
+		})
+	}
+}
