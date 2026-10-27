@@ -130,22 +130,10 @@ export function insertLink(value, from, to, placeholder) {
 export function findAll(value, query, limit = Infinity) {
   const hits = [];
   if (!query) return hits;
-  const low = value.toLowerCase(),
-    q = query.toLowerCase();
-  if (low.length !== value.length) return exactFind(value, query, limit);
-  let p = 0;
-  while ((p = low.indexOf(q, p)) !== -1 && hits.length < limit) {
-    hits.push(p);
-    p += q.length;
-  }
-  return hits;
-}
-function exactFind(value, query, limit) {
-  const hits = [];
-  let p = 0;
-  while ((p = value.indexOf(query, p)) !== -1 && hits.length < limit) {
-    hits.push(p);
-    p += query.length;
+  const pattern = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'giu');
+  for (const match of value.matchAll(pattern)) {
+    if (hits.length >= limit) break;
+    hits.push(match.index);
   }
   return hits;
 }

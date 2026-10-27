@@ -157,3 +157,42 @@ test('paint timing rejects invalid acknowledgements and cancels stale requests',
   assert.equal((await old).cancelled, true);
   t.dom.window.close();
 });
+
+test('preview Unicode search preserves text and original match offsets', () => {
+  const dom = new JSDOM(
+    '<style></style><article><p>İ ABC i\u0307X [a].*</p></article><script nonce="test"></script>',
+    { runScripts: 'outside-only' },
+  );
+  const { window } = dom;
+  Object.defineProperty(window.document, 'currentScript', { value: window.document.querySelector('script') });
+  window.postMessage = () => {};
+  window.eval(readFileSync(new URL('../src/frame-bootstrap.js', import.meta.url), 'utf8'));
+  const article = window.document.querySelector('article');
+  const original = article.textContent;
+  for (const [query, matches] of [
+    ['abc', ['ABC']],
+    ['İ', ['İ']],
+    ['[A].*', ['[a].*']],
+  ]) {
+    window.dispatchEvent(
+      new window.MessageEvent('message', {
+        source: window,
+        data: {
+          channel: 'moread-host-v1',
+          token: 'test',
+          version: 0,
+          request: 1,
+          type: 'find',
+          query,
+          move: false,
+        },
+      }),
+    );
+    assert.deepEqual(
+      [...article.querySelectorAll('mark')].map(m => m.textContent),
+      matches,
+    );
+    assert.equal(article.textContent, original);
+  }
+  dom.window.close();
+});

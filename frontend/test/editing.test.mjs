@@ -74,3 +74,13 @@ test('word count treats CJK characters and Latin words as words', () => {
   assert.equal(countWords('墨阅 MoRead is light.').words, 5);
   assert.equal(countWords('一'.repeat(800)).minutes, 2);
 });
+
+test('Unicode casing never shifts source offsets or leaves partial replacements', () => {
+  assert.deepEqual(findAll('İ ABC abc', 'abc'), [2, 6]);
+  assert.deepEqual(findAll('i\u0307X', 'İ'), []);
+  assert.deepEqual(replaceAll('i\u0307X', 'İ', 'Z'), { text: 'i\u0307X', count: 0 });
+  assert.deepEqual(replaceAll('İ ABC abc', 'abc', '$&'), { text: 'İ $& $&', count: 2 });
+  assert.deepEqual(findAll('𐐀 𐐨', '𐐨'), [0, 3]);
+  assert.deepEqual(findAll('[a].* [A].*', '[a].*'), [0, 6]);
+  assert.deepEqual(findAll('İ ABC', 'abc', 0), []);
+});
