@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
+	"errors"
 	w "github.com/wailsapp/wails/v2/pkg/runtime"
 	"io"
 	"io/fs"
@@ -361,33 +362,69 @@ type FolderUpdate struct {
 // appear in the sidebar. Problems are left out here; they were reported when the folder was opened.
 func (a *App) RefreshFolders() FolderUpdate {
 	a.mu.Lock()
-	before := map[string]bool{}
-	roots := make([]string, 0, len(a.folders))
+	known := make(map[string][]string, len(a.folders))
+	wasKnown := map[string]bool{}
 	for root, ids := range a.folders {
-		roots = append(roots, root)
+		known[root] = ids
 		for _, id := range ids {
-			before[id] = true
+			wasKnown[id] = true
 		}
 	}
 	a.mu.Unlock()
+	roots := make([]string, 0, len(known))
+	for root := range known {
+		roots = append(roots, root)
+	}
 	sort.Strings(roots)
 	out := FolderUpdate{Added: []Document{}, Removed: []string{}}
-	now := map[string]bool{}
+	listed := map[string]bool{}
+	fresh := make(map[string][]string, len(known))
 	for _, root := range roots {
 		for _, d := range a.listFolder(root).Documents {
-			if !now[d.ID] && !before[d.ID] {
+			if !listed[d.ID] && !wasKnown[d.ID] {
 				out.Added = append(out.Added, d)
 			}
-			now[d.ID] = true
+			listed[d.ID] = true
+			fresh[root] = append(fresh[root], d.ID)
 		}
 	}
-	for id := range before {
-		if !now[id] {
-			out.Removed = append(out.Removed, id)
+	// A listing can be partial when a folder is briefly unreadable, so a file left out of it only counts as
+	// removed once it no longer exists. Unconfirmed files stay known, and a later deletion is still reported.
+	gone := map[string]bool{}
+	for _, root := range roots {
+		for _, id := range known[root] {
+			if listed[id] {
+				continue
+			}
+			if a.missing(id) {
+				gone[id] = true
+			} else {
+				fresh[root] = append(fresh[root], id)
+			}
 		}
+	}
+	a.mu.Lock()
+	for _, root := range roots {
+		a.folders[root] = fresh[root]
+	}
+	a.mu.Unlock()
+	for id := range gone {
+		out.Removed = append(out.Removed, id)
 	}
 	sort.Strings(out.Removed)
 	return out
+}
+
+// missing reports whether a registered file is known to be gone, as opposed to merely unreadable.
+func (a *App) missing(id string) bool {
+	a.mu.Lock()
+	r := a.files[id]
+	a.mu.Unlock()
+	if r == nil {
+		return true
+	}
+	_, e := os.Lstat(r.Path)
+	return errors.Is(e, fs.ErrNotExist)
 }
 func decodeDocument(b []byte) (string, string, error) {
 	if len(b) >= 2 && ((b[0] == 255 && b[1] == 254) || (b[0] == 254 && b[1] == 255)) {

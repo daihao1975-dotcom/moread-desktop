@@ -142,3 +142,60 @@ func TestEveryErrorCodeHasAMessage(t *testing.T) {
 		}
 	}
 }
+
+// lockDir makes a folder unreadable for the rest of the test, or skips where permissions do not apply.
+func lockDir(t *testing.T, dir string) func() {
+	t.Helper()
+	if e := os.Chmod(dir, 0); e != nil {
+		t.Fatal(e)
+	}
+	unlock := func() { os.Chmod(dir, 0755) }
+	t.Cleanup(unlock)
+	if _, e := os.ReadDir(dir); e == nil {
+		unlock()
+		t.Skip("folder permissions are not enforced here")
+	}
+	return unlock
+}
+
+func TestRefreshKeepsFilesOfUnreadableFolders(t *testing.T) {
+	a, dir := recentApp(t)
+	os.MkdirAll(filepath.Join(dir, "sub"), 0755)
+	os.WriteFile(filepath.Join(dir, "a.md"), []byte("a"), 0644)
+	os.WriteFile(filepath.Join(dir, "sub", "b.md"), []byte("b"), 0644)
+	first := a.registerPaths([]string{dir})
+	if len(first.Documents) != 2 {
+		t.Fatal(first)
+	}
+	unlockSub := lockDir(t, filepath.Join(dir, "sub"))
+	if u := a.RefreshFolders(); len(u.Added) != 0 || len(u.Removed) != 0 {
+		t.Fatalf("unreadable subfolder: %+v", u)
+	}
+	unlockSub()
+	unlockRoot := lockDir(t, dir)
+	if u := a.RefreshFolders(); len(u.Added) != 0 || len(u.Removed) != 0 {
+		t.Fatalf("unreadable folder: %+v", u)
+	}
+	// Once readable again, a real deletion is still noticed.
+	unlockRoot()
+	os.Remove(filepath.Join(dir, "sub", "b.md"))
+	u := a.RefreshFolders()
+	if len(u.Added) != 0 || len(u.Removed) != 1 || u.Removed[0] != first.Documents[1].ID {
+		t.Fatalf("after deletion: %+v", u)
+	}
+}
+
+func TestRefreshReportsDeletedFolder(t *testing.T) {
+	a, dir := recentApp(t)
+	folder := filepath.Join(dir, "notes")
+	os.MkdirAll(folder, 0755)
+	os.WriteFile(filepath.Join(folder, "a.md"), []byte("a"), 0644)
+	first := a.registerPaths([]string{folder})
+	os.RemoveAll(folder)
+	if u := a.RefreshFolders(); len(u.Removed) != 1 || u.Removed[0] != first.Documents[0].ID {
+		t.Fatalf("%+v", u)
+	}
+	if u := a.RefreshFolders(); len(u.Removed) != 0 {
+		t.Fatalf("reported twice: %+v", u)
+	}
+}
