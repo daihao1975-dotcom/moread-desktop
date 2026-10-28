@@ -2,6 +2,9 @@
 // selection and find keep their native behaviour; its text turns transparent over a coloured copy drawn
 // behind it. Long documents skip the copy and show plain text, so typing never waits on it.
 export const HIGHLIGHT_LIMIT = 150_000;
+// A single malformed line can make inline regular expressions backtrack heavily. Keep such lines plain;
+// this also bounds the work per match while normal paragraphs keep their colours.
+const INLINE_LINE_LIMIT = 4096;
 
 const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
 const span = (kind, s) => (s ? `<span class="md-${kind}">${esc(s)}</span>` : '');
@@ -10,7 +13,7 @@ const HEADING = /^ {0,3}#{1,6}(?=[ \t]|$)/;
 const RULE = /^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/;
 const MARKER = /^(?: {0,3}>[ \t]?)+|^[ \t]*(?:[-*+]|\d{1,9}[.)])(?:[ \t]+\[[ xX]\])?(?=[ \t]|$)/;
 const INLINE =
-  /(`+)[^`\n]+?\1|!?\[[^\]\n]*\]\([^()\s]*(?:[ \t]+"[^"\n]*")?\)|\*\*[^\s*](?:[^*\n]*?[^\s*])?\*\*|__[^\s_](?:[^_\n]*?[^\s_])?__|\*[^\s*](?:[^*\n]*?[^\s*])?\*|<\/?[A-Za-z][^<>\n]*>/g;
+  /(`+)[^`\n]+?\1|!?\[[^\[\]\n]*\]\([^()\s]*(?:[ \t]+"[^"\n]*")?\)|\*\*[^\s*](?:[^*\n]*?[^\s*])?\*\*|__[^\s_](?:[^_\n]*?[^\s_])?__|\*[^\s*](?:[^*\n]*?[^\s*])?\*|<\/?[A-Za-z][^<>\n]*>/g;
 
 const inlineKind = t =>
   t[0] === '`'
@@ -24,6 +27,7 @@ const inlineKind = t =>
           : 'em';
 
 function inline(s) {
+  if (s.length > INLINE_LINE_LIMIT || /`{65}/.test(s)) return esc(s);
   let out = '',
     at = 0;
   for (const m of s.matchAll(INLINE)) {

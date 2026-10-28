@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { highlightMarkdown } from '../src/source-highlight.js';
 
 const plain = html =>
@@ -59,4 +60,31 @@ test('inline marks cover only real spans', () => {
 
 test('a front matter opener without a closer is ordinary text', () => {
   assert.deepEqual(kinds(highlightMarkdown('---\n# 标题')), ['mark:---', 'heading:# 标题']);
+});
+
+test('malformed long lines stay responsive and preserve their text', () => {
+  // Isolate the computation: a regression must fail on timeout instead of freezing the test runner.
+  const result = spawnSync(
+    process.execPath,
+    [
+      '--input-type=module',
+      '-e',
+      `
+    import assert from 'node:assert/strict';
+    import { highlightMarkdown } from ${JSON.stringify(new URL('../src/source-highlight.js', import.meta.url).href)};
+    for (const src of ['['.repeat(150000), 'x' + '\u0060'.repeat(149999),
+      ('x' + '\u0060'.repeat(4095) + '\\n').repeat(36)]) {
+      const html = highlightMarkdown(src);
+      assert.equal(html.replace(/<[^>]*>/g, ''), src + (src.endsWith('\\n') ? ' ' : ''));
+    }
+  `,
+    ],
+    { timeout: 3000, encoding: 'utf8' },
+  );
+  assert.equal(result.error, undefined, result.error?.message);
+  assert.equal(result.status, 0, result.stderr);
+});
+
+test('an unmatched opening bracket does not swallow a later valid link', () => {
+  assert.deepEqual(kinds(highlightMarkdown('[[[ [valid](a.md)')), ['link:[valid](a.md)']);
 });

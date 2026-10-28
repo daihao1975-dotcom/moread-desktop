@@ -34,7 +34,7 @@ Each document can be up to 10 MB. UTF-8, UTF-8 with BOM and UTF-16 LE / BE are s
 ## 3. Views
 
 - **Read** (⌘ / Ctrl + 1): the formatted document.
-- **Source** (⌘ / Ctrl + 2): edit the Markdown text. Headings, list markers, code, links and emphasis are coloured; documents longer than about 150,000 characters stay plain so typing stays smooth.
+- **Source** (⌘ / Ctrl + 2): edit the Markdown text. Headings, list markers, code, links and emphasis are coloured; documents longer than about 150,000 characters, and unusually long lines or runs of backticks, stay plain so typing stays smooth.
 - **Split** (⌘ / Ctrl + 3): edit on the left with a live preview on the right; both sides scroll together, aligned by heading. Drag the divider to resize, double-click it to reset.
 
 Double-click empty space in the title bar to maximise or restore the window. Focus mode hides the sidebar and status bar; press Esc to leave.
