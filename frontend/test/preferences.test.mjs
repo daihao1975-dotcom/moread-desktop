@@ -40,3 +40,8 @@ test('interface language is kept only as auto or a language tag', () => {
   assert.equal(readPreferences({ lang: 'pt-BR' }).lang, 'pt-BR');
   for (const v of ['<b>', 'zh_cn', 1, null]) assert.equal(readPreferences({ lang: v }).lang, 'auto');
 });
+test('the printed table of contents is off unless chosen', () => {
+  assert.equal(readPreferences({}).printToc, false);
+  assert.equal(readPreferences({ printToc: true }).printToc, true);
+  assert.equal(readPreferences({ printToc: 'yes' }).printToc, false);
+});

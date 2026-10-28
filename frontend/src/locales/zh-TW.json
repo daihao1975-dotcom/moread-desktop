@@ -59,6 +59,8 @@
   "settings.language": "介面語言",
   "settings.recent": "記住最近開啟的檔案",
   "settings.recentHint": "只在本機儲存檔案與資料夾路徑；關閉後立即清空清單。",
+  "settings.printToc": "列印時附目錄",
+  "print.toc": "目錄",
   "lang.auto": "跟隨系統",
   "settings.hint": "匯出離線 HTML、列印 / 儲存為 PDF 位於「檔案」選單；關於與授權位於「{menu}」選單。",
   "dirty.title": "要儲存這份文件的修改嗎？",

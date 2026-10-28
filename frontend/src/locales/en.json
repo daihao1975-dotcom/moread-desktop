@@ -59,6 +59,8 @@
   "settings.language": "Language",
   "settings.recent": "Remember recent files",
   "settings.recentHint": "Only file and folder paths are saved on this computer. Turning this off clears the list.",
+  "settings.printToc": "Add contents when printing",
+  "print.toc": "Contents",
   "lang.auto": "System default",
   "settings.hint": "Export to offline HTML and Print / Save as PDF are in the File menu. About and licenses are in the {menu} menu.",
   "dirty.title": "Save changes to this document?",

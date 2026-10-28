@@ -59,6 +59,8 @@
   "settings.language": "언어",
   "settings.recent": "최근 파일 기억",
   "settings.recentHint": "이 컴퓨터에 파일과 폴더 경로만 저장합니다. 끄면 목록이 지워집니다.",
+  "settings.printToc": "인쇄 시 목차 포함",
+  "print.toc": "목차",
   "lang.auto": "시스템 기본값",
   "settings.hint": "오프라인 HTML 내보내기와 인쇄 / PDF로 저장은 ‘파일’ 메뉴에, 정보와 라이선스는 ‘{menu}’ 메뉴에 있습니다.",
   "dirty.title": "이 문서의 변경 사항을 저장할까요?",

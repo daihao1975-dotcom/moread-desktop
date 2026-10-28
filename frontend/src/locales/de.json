@@ -59,6 +59,8 @@
   "settings.language": "Sprache",
   "settings.recent": "Zuletzt geöffnete Dateien merken",
   "settings.recentHint": "Es werden nur Datei- und Ordnerpfade auf diesem Computer gespeichert. Beim Ausschalten wird die Liste gelöscht.",
+  "settings.printToc": "Beim Drucken Inhaltsverzeichnis voranstellen",
+  "print.toc": "Inhalt",
   "lang.auto": "Systemstandard",
   "settings.hint": "Offline-HTML exportieren und Drucken / Als PDF sichern finden Sie im Menü „Ablage“. Info und Lizenzen finden Sie im Menü „{menu}“.",
   "dirty.title": "Änderungen an diesem Dokument sichern?",

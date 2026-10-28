@@ -59,6 +59,8 @@
   "settings.language": "Langue",
   "settings.recent": "Mémoriser les fichiers récents",
   "settings.recentHint": "Seuls les chemins des fichiers et dossiers sont enregistrés sur cet ordinateur. Désactiver l’option efface la liste.",
+  "settings.printToc": "Ajouter une table des matières à l’impression",
+  "print.toc": "Table des matières",
   "lang.auto": "Langue du système",
   "settings.hint": "L’export HTML hors ligne et Imprimer / Enregistrer en PDF se trouvent dans le menu Fichier. À propos et licences se trouvent dans le menu {menu}.",
   "dirty.title": "Enregistrer les modifications de ce document ?",

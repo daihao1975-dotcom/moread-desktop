@@ -17,11 +17,13 @@ export function readPreferences(raw = {}) {
     sidebar: true,
     split: 50,
     lang: 'auto',
+    printToc: false,
   };
   if (Number.isInteger(raw.split) && raw.split >= 20 && raw.split <= 80) p.split = raw.split;
   if (THEMES.includes(raw.theme)) p.theme = raw.theme;
   if (Number.isInteger(raw.size) && raw.size >= 13 && raw.size <= 24) p.size = raw.size;
   if (typeof raw.sidebar === 'boolean') p.sidebar = raw.sidebar;
+  if (typeof raw.printToc === 'boolean') p.printToc = raw.printToc;
   if (typeof raw.lang === 'string' && /^(auto|[a-z]{2}(-[A-Z]{2})?)$/.test(raw.lang)) p.lang = raw.lang;
   const w = normalizeWidth(raw.width);
   p.width = raw.layoutVersion === 2 ? w : w === 860 ? 'auto' : w;

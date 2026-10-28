@@ -59,6 +59,8 @@
   "settings.language": "Idioma",
   "settings.recent": "Recordar archivos recientes",
   "settings.recentHint": "Solo se guardan en este equipo las rutas de archivos y carpetas. Al desactivarlo, la lista se borra.",
+  "settings.printToc": "Añadir índice al imprimir",
+  "print.toc": "Índice",
   "lang.auto": "Predeterminado del sistema",
   "settings.hint": "Exportar a HTML sin conexión e Imprimir / Guardar como PDF están en el menú Archivo. Acerca de y licencias están en el menú {menu}.",
   "dirty.title": "¿Guardar los cambios de este documento?",

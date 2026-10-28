@@ -799,6 +799,27 @@ body[data-theme='paper'] {
   #print-content .copy-code {
     display: none;
   }
+  .print-toc {
+    break-after: page;
+  }
+  .print-toc ol {
+    list-style: none;
+    padding: 0;
+  }
+  .print-toc li {
+    margin: 0.3em 0;
+  }
+  .print-toc .toc-1 {
+    padding-left: 1.5em;
+  }
+  .print-toc .toc-2 {
+    padding-left: 3em;
+    font-size: 0.92em;
+  }
+  .print-toc a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 .about-dialog {

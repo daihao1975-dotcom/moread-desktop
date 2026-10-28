@@ -59,6 +59,8 @@
   "settings.language": "界面语言",
   "settings.recent": "记住最近打开的文件",
   "settings.recentHint": "只在本机保存文件与文件夹路径；关闭后立即清空列表。",
+  "settings.printToc": "打印时附目录",
+  "print.toc": "目录",
   "lang.auto": "跟随系统",
   "settings.hint": "导出离线 HTML、打印 / 存为 PDF 在「文件」菜单；关于与许可在「{menu}」菜单。",
   "dirty.title": "保存这篇文档的修改？",

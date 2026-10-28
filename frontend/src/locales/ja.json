@@ -59,6 +59,8 @@
   "settings.language": "言語",
   "settings.recent": "最近使ったファイルを記憶",
   "settings.recentHint": "このコンピュータにファイルとフォルダのパスだけを保存します。オフにすると一覧は消去されます。",
+  "settings.printToc": "印刷時に目次を付ける",
+  "print.toc": "目次",
   "lang.auto": "システムに合わせる",
   "settings.hint": "オフライン HTML の書き出しと印刷 / PDF 保存は「ファイル」メニューに、情報とライセンスは「{menu}」メニューにあります。",
   "dirty.title": "この文書の変更を保存しますか？",

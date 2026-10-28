@@ -42,6 +42,7 @@ import { externalChanges } from './external-changes.js';
 import { createAbout } from './about.js';
 import { bindSplitter } from './splitter.js';
 import { layout } from './layout.js';
+import { printTocHTML } from './print-toc.js';
 const $ = s => document.querySelector(s),
   app = $('#app');
 const isMac = /Mac/.test(navigator.userAgent),
@@ -182,6 +183,7 @@ function applyPrefs() {
   $('#size-label').textContent = prefs.size;
   $('#width').value = prefs.width;
   $('#language').value = prefs.lang;
+  $('#print-toc').checked = prefs.printToc;
   document
     .querySelectorAll('.theme-options button')
     .forEach(b => b.classList.toggle('active', b.dataset.theme === prefs.theme));
@@ -826,6 +828,10 @@ $('#language').onchange = e => {
   savePrefs();
   applyLanguage();
 };
+$('#print-toc').onchange = e => {
+  prefs.printToc = e.target.checked;
+  savePrefs();
+};
 $('#remember-recent').onchange = e =>
   call('SetRememberRecent', e.target.checked)
     .then(loadRecent)
@@ -940,6 +946,7 @@ async function printDocument() {
       while (d.firstChild) section.append(d.firstChild);
       d.replaceWith(section);
     });
+    if (prefs.printToc) b.insertAdjacentHTML('afterbegin', printTocHTML(outline, t('print.toc')));
     printHost.append(s, b);
     await Promise.allSettled([...printHost.querySelectorAll('img')].map(i => i.decode()));
     await document.fonts.ready;

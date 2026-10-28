@@ -59,6 +59,8 @@
   "settings.language": "Idioma",
   "settings.recent": "Lembrar arquivos recentes",
   "settings.recentHint": "Somente caminhos de arquivos e pastas são salvos neste computador. Desativar limpa a lista.",
+  "settings.printToc": "Incluir sumário ao imprimir",
+  "print.toc": "Sumário",
   "lang.auto": "Padrão do sistema",
   "settings.hint": "Exportar HTML offline e Imprimir / Salvar como PDF estão no menu Arquivo. Sobre e licenças estão no menu {menu}.",
   "dirty.title": "Salvar as alterações deste documento?",

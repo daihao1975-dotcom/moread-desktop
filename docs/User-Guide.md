@@ -74,6 +74,7 @@ GitHub-style tables, task lists, strikethrough and autolinks; highlighted code b
 
 - **File → Export Offline HTML** creates one HTML file with images, math fonts and diagrams embedded, ready to view offline or send (up to 28 MB).
 - **File → Print / Save as PDF** (⌘ / Ctrl + P) uses the system print dialog, where you can also save a PDF. Check paper orientation and margins in the print preview.
+- **Add contents when printing** (in Settings, off by default) puts a contents page before documents with several headings, listing up to three heading levels. System printing cannot create PDF bookmarks, so this page is how readers find sections on paper.
 
 ## 7. Reading settings
 
