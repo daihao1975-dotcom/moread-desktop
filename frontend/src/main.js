@@ -43,6 +43,7 @@ import { createAbout } from './about.js';
 import { bindSplitter } from './splitter.js';
 import { layout } from './layout.js';
 import { printTocHTML } from './print-toc.js';
+import { createSourceHighlight } from './source-highlight.js';
 const $ = s => document.querySelector(s),
   app = $('#app');
 const isMac = /Mac/.test(navigator.userAgent),
@@ -158,6 +159,7 @@ function update() {
     document.title = title;
     window.runtime?.WindowSetTitle?.(title);
   }
+  sourceHighlight?.refresh();
   countLater();
 }
 // Counting a long document on every keystroke is wasteful; the status bar settles shortly after typing stops.
@@ -190,6 +192,7 @@ function applyPrefs() {
   savePrefs();
   document.documentElement.style.setProperty('--editor-size', Math.max(13, prefs.size - 2) + 'px');
   syncToggles();
+  sourceHighlight?.refresh();
   previewFrame?.prefs({ theme, size: prefs.size, width: prefs.width }).catch(e => toast(e, true));
   // Apply the new theme first, then redraw diagrams in the matching palette.
   if (renderedTheme && (renderedTheme === 'dark') !== (theme === 'dark') && hasDiagram()) scheduleRender(0);
@@ -1123,6 +1126,7 @@ const previewFrame = createFrame($('#preview'), {
   },
 });
 $('#editor').value = source;
+const sourceHighlight = createSourceHighlight($('#editor'), $('#source-layer'), $('.view-area'));
 relabel();
 applyPrefs();
 if (window.runtime?.EventsOn) {

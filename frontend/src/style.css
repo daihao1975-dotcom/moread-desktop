@@ -16,6 +16,10 @@
   --accent-soft: #e8f1ff;
   --success: #34c759;
   --on-brand: #fff;
+  --md-code: #1a7f37;
+  --md-link: #0e7490;
+  --md-emphasis: #b45309;
+  --md-selection: rgba(22, 119, 255, 0.22);
   color: var(--ink);
   background: var(--panel);
 }
@@ -372,6 +376,70 @@ textarea {
   tab-size: 2;
   overflow: auto;
 }
+/* Source colouring: the textarea text turns transparent over a coloured copy with identical metrics. */
+.source-layer {
+  display: none;
+  position: absolute;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--paper);
+  color: var(--ink);
+  font:
+    var(--editor-size, 14px) / 1.8 ui-monospace,
+    SFMono-Regular,
+    Consolas,
+    'Microsoft YaHei',
+    monospace;
+  tab-size: 2;
+}
+textarea,
+.source-layer {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+.highlighting .source-layer {
+  display: block;
+}
+.highlighting #editor.hidden ~ .source-layer {
+  display: none;
+}
+.highlighting textarea {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--ink);
+}
+.highlighting textarea::selection {
+  color: transparent;
+  background: var(--md-selection);
+}
+.highlighting.composing textarea {
+  color: var(--ink);
+}
+.highlighting.composing .source-layer,
+.highlighting.composing .source-layer span {
+  color: transparent;
+}
+.md-heading {
+  color: var(--accent);
+}
+.md-mark,
+.md-meta,
+.md-tag {
+  color: var(--muted);
+}
+.md-code {
+  color: var(--md-code);
+}
+.md-link {
+  color: var(--md-link);
+}
+.md-strong,
+.md-em {
+  color: var(--md-emphasis);
+}
 /* Source-only view keeps the same reading measure as the preview; the scrollbar stays at the window edge. */
 .view-area:not(.split) textarea {
   padding-inline: max(36px, calc((100% - 48em) / 2));
@@ -718,6 +786,10 @@ body[data-theme='dark'] {
   --accent: #69b1ff;
   --accent-soft: #1a2a44;
   --on-brand: #fff;
+  --md-code: #7ee2a8;
+  --md-link: #5ccfe6;
+  --md-emphasis: #ffb86b;
+  --md-selection: rgba(105, 177, 255, 0.32);
 }
 body[data-theme='paper'] {
   --panel: #eee8db;
@@ -728,6 +800,9 @@ body[data-theme='paper'] {
   --hover: #e5dece;
   --accent: #0b5cc5;
   --accent-soft: #e3e9f3;
+  --md-code: #2f6b34;
+  --md-link: #0f6674;
+  --md-emphasis: #9a4a0b;
 }
 @media (max-width: 1000px) {
   .doc-state,
@@ -756,6 +831,7 @@ body[data-theme='paper'] {
   .findbar,
   .settings,
   textarea,
+  .source-layer,
   .toast,
   dialog,
   .zoom {
