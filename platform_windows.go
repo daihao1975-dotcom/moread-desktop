@@ -29,3 +29,4 @@ func systemDark() bool {
 func localizeNativeMenus(string) {}
 func hideOtherApps()             {}
 func showAllApps()               {}
+func showWindowAfterLaunch()     {}

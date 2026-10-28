@@ -10,3 +10,4 @@ func systemDark() bool           { return false }
 func localizeNativeMenus(string) {}
 func hideOtherApps()             {}
 func showAllApps()               {}
+func showWindowAfterLaunch()     {}

@@ -45,6 +45,19 @@ static int moreadSystemDark(void) {
 	return [[[NSUserDefaults standardUserDefaults] stringForKey:@"AppleInterfaceStyle"] isEqualToString:@"Dark"];
 }
 
+// Launched to open a document, the window ordered front in applicationWillFinishLaunching stays
+// off screen until a system timeout (about five seconds) although the page is already drawn.
+// Ordering it front again once launching has finished shows it at once; plain launches are unaffected.
+static void moreadShowWindowAfterLaunch(void) {
+	__block id observer = [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidFinishLaunchingNotification
+		object:nil queue:nil usingBlock:^(NSNotification *note) {
+			[[NSNotificationCenter defaultCenter] removeObserver:observer];
+			for (NSWindow *window in NSApp.windows) {
+				if (window.isVisible) [window makeKeyAndOrderFront:nil];
+			}
+		}];
+}
+
 static char *moreadPreferredLanguages(void) {
 	return strdup([[NSLocale preferredLanguages] componentsJoinedByString:@"\n"].UTF8String);
 }
@@ -78,3 +91,5 @@ func systemLanguages() []string {
 func hideOtherApps()   { C.moreadHideOthers() }
 func showAllApps()     { C.moreadShowAll() }
 func systemDark() bool { return C.moreadSystemDark() != 0 }
+
+func showWindowAfterLaunch() { C.moreadShowWindowAfterLaunch() }

@@ -15,6 +15,7 @@ import (
 var assets embed.FS
 
 func main() {
+	showWindowAfterLaunch()
 	app := newDesktopApp()
 	state := options.Normal
 	if app.settings.Maximised {
