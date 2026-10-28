@@ -1,6 +1,6 @@
 # MoRead User Guide
 
-Version 1.0.1 · macOS 12 or later (Apple silicon) and Windows 10 / 11 (64-bit)
+Version 1.0.2 · macOS 12 or later (Apple silicon) and Windows 10 / 11 (64-bit)
 
 MoRead is an offline Markdown reader and light editor. Documents are read and saved only on your computer: nothing is uploaded, no network connection is made, and scripts inside documents never run.
 
@@ -8,13 +8,13 @@ MoRead is an offline Markdown reader and light editor. Documents are read and sa
 
 ### macOS
 
-1. Open `MoRead-1.0.1-macOS-arm64.dmg` and drag **MoRead** into **Applications**.
+1. Open `MoRead-1.0.2-macOS-arm64.dmg` and drag **MoRead** into **Applications**.
 2. If macOS says it cannot verify the developer the first time, Control-click MoRead in Applications and choose **Open**. If it is still blocked, go to **System Settings → Privacy & Security** and click **Open Anyway** near the bottom. You only need to do this once.
 3. To open every Markdown file with MoRead, select any `.md` file in Finder → **Get Info** → **Open with: MoRead** → **Change All**.
 
 ### Windows
 
-1. Run `MoRead-1.0.1-Windows-x64.exe`. No installation is needed; keep it in any folder and create a shortcut if you like.
+1. Run `MoRead-1.0.2-Windows-x64.exe`. No installation is needed; keep it in any folder and create a shortcut if you like.
 2. Microsoft Edge WebView2 Runtime is required (included in Windows 11 and up-to-date Windows 10). If it is missing, MoRead tells you and exits; download it from Microsoft.
 3. If SmartScreen appears on first run, click **More info → Run anyway**.
 
@@ -83,7 +83,7 @@ Click **Reading settings** at the right of the toolbar (⌘ / Ctrl + ,):
 - **Theme**: System, Light, Paper or Dark.
 - **Font size**: 13–24, also from the View menu or ⌘ / Ctrl + = / - / 0.
 - **Text width**: Fluid, Compact, Comfortable or Wide.
-- **Language**: system default, or 简体中文, 繁體中文, English, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil) or Русский. Menus, dialogs, messages and the built-in example all switch.
+- **Language**: system default, or 简体中文, 繁體中文, English, 日本語 or 한국어. Menus, dialogs, messages and the built-in example all switch.
 - **Remember recent files**: off by default. When it is on and the sidebar is empty, it lists the last 10 files or folders you opened; click one to open it again. Items that were moved or deleted drop off the list. Turning it off clears the list at once.
 
 MoRead remembers only these preferences and the window size, never document contents. File and folder paths are stored only while **Remember recent files** is on.

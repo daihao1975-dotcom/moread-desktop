@@ -35,7 +35,7 @@ These invariants keep MoRead safe and reliable: stay fully offline; never execut
 
 ## 翻译 / Translations
 
-界面文字全部在 `frontend/src/locales/<语言>.json`，前端与原生菜单共用，以 `en.json` 为基准。修改翻译只需编辑 JSON，无需构建。新增文字时必须给全部 10 种语言补齐同名键（`npm test` 会校验键、占位符与源码引用）。欢迎母语者校对现有译文。
+界面文字全部在 `frontend/src/locales/<语言>.json`，前端与原生菜单共用，以 `en.json` 为基准。修改翻译只需编辑 JSON，无需构建。新增文字时必须给全部 5 种语言补齐同名键（`npm test` 会校验键、占位符与源码引用）。欢迎母语者校对现有译文。
 
 All interface text lives in `frontend/src/locales/<lang>.json`, shared by the web UI and native menus, with `en.json` as the reference. New strings need the same key in every language; `npm test` checks keys and placeholders.
 

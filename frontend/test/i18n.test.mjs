@@ -11,6 +11,7 @@ const placeholders = s =>
     .sort()
     .join();
 test('every bundled language has exactly the English keys, placeholders and no empty text', () => {
+  assert.deepEqual(LANGUAGES.map(([tag]) => tag).sort(), ['en', 'ja', 'ko', 'zh-CN', 'zh-TW']);
   const files = readdirSync(dir)
     .filter(f => f.endsWith('.json'))
     .sort();
@@ -48,20 +49,22 @@ test('system languages map onto the bundled set and fall back to English', () =>
   assert.equal(matchLanguage(['zh-Hans-CN', 'en-CN']), 'zh-CN');
   assert.equal(matchLanguage(['zh-Hant-TW']), 'zh-TW');
   assert.equal(matchLanguage(['zh-HK']), 'zh-TW');
-  assert.equal(matchLanguage(['pt-PT']), 'pt-BR');
-  assert.equal(matchLanguage(['de-AT']), 'de');
-  assert.equal(matchLanguage(['ar-SA', 'fr-CA']), 'fr');
+  assert.equal(matchLanguage(['pt-PT']), 'en');
+  assert.equal(matchLanguage(['de-AT']), 'en');
+  assert.equal(matchLanguage(['ar-SA', 'fr-CA']), 'en');
+  assert.equal(matchLanguage(['fr-CA', 'ja-JP']), 'ja');
   assert.equal(matchLanguage(['ar-SA']), 'en');
   assert.equal(normalizeLanguage(''), '');
 });
 test('native error codes are shown in the interface language', () => {
   try {
-    setLanguage('de');
-    assert.equal(localizeMessage('Error: moread:tooLarge'), 'Die Datei überschreitet die Größenbeschränkung');
-    assert.equal(localizeMessage('a.md: moread:notFound'), 'a.md: Die Datei existiert nicht');
+    setLanguage('zh-CN');
+    assert.equal(localizeMessage('Error: moread:tooLarge'), t('err.tooLarge'));
+    assert.equal(localizeMessage('a.md: moread:notFound'), 'a.md: ' + t('err.notFound'));
     assert.match(localizeMessage('moread:exportFailed|disk full'), /disk full$/);
     assert.equal(localizeMessage('moread:unknownCode'), 'moread:unknownCode');
-    assert.equal(t('find.position', { i: 2, n: 5 }), '2 von 5');
+    assert.match(t('find.position', { i: 2, n: 5 }), /2.*5/);
+    assert.equal(setLanguage('de'), 'en');
   } finally {
     setLanguage('zh-CN');
   }

@@ -14,8 +14,13 @@ import (
 )
 
 func TestLocalesShareEnglishKeys(t *testing.T) {
-	if len(locales) != 10 {
+	if len(locales) != 5 {
 		t.Fatalf("languages %d", len(locales))
+	}
+	for _, lang := range []string{"en", "zh-CN", "zh-TW", "ja", "ko"} {
+		if _, ok := locales[lang]; !ok {
+			t.Fatalf("missing retained language %s", lang)
+		}
 	}
 	for lang, table := range locales {
 		if len(table) != len(locales[fallbackLanguage]) {
@@ -30,7 +35,7 @@ func TestLocalesShareEnglishKeys(t *testing.T) {
 }
 
 func TestLanguageMatching(t *testing.T) {
-	for in, want := range map[string]string{"zh-Hans-CN": "zh-CN", "zh_TW": "zh-TW", "zh-Hant-HK": "zh-TW", "ja-JP": "ja", "pt-PT": "pt-BR", "en-GB": "en", "ar": "", "": ""} {
+	for in, want := range map[string]string{"zh-Hans-CN": "zh-CN", "zh_TW": "zh-TW", "zh-Hant-HK": "zh-TW", "ja-JP": "ja", "pt-PT": "", "de-AT": "", "en-GB": "en", "ar": "", "": ""} {
 		if got := normalizeLanguage(in); got != want {
 			t.Fatalf("%s -> %q want %q", in, got, want)
 		}
@@ -41,13 +46,13 @@ func TestLanguageMatching(t *testing.T) {
 	if got := pickLanguage(nil); got != fallbackLanguage {
 		t.Fatal(got)
 	}
-	if translate("ru", "menu.file") != "Файл" || translate("xx", "menu.file") != "File" || translate("ru", "missing.key") != "missing.key" {
+	if translate("ja", "menu.file") != "ファイル" || translate("ru", "menu.file") != "File" || translate("ru", "missing.key") != "missing.key" {
 		t.Fatal("translate fallback")
 	}
 }
 
 func TestMenusFollowLanguage(t *testing.T) {
-	for _, lang := range []string{"en", "ja", "de"} {
+	for _, lang := range []string{"en", "zh-CN", "zh-TW", "ja", "ko"} {
 		root := buildMenu(func(string) menu.Callback { return nil }, appCommands{}, false, func(key string) string { return translate(lang, key) })
 		if root.Items[0].Label != translate(lang, "menu.file") {
 			t.Fatalf("%s first menu %q", lang, root.Items[0].Label)
@@ -78,10 +83,10 @@ func TestSettingsRoundTripAndClamp(t *testing.T) {
 	if s, e := loadSettings(p); e != nil || s.Width != defaultWidth || s.Height != defaultHeight || s.Language != "" {
 		t.Fatalf("defaults %+v", s)
 	}
-	if e := saveSettings(p, settings{Language: "fr", Width: 1500, Height: 900, Maximised: true}); e != nil {
+	if e := saveSettings(p, settings{Language: "ja", Width: 1500, Height: 900, Maximised: true}); e != nil {
 		t.Fatal(e)
 	}
-	if s, _ := loadSettings(p); s.Language != "fr" || s.Width != 1500 || s.Height != 900 || !s.Maximised {
+	if s, _ := loadSettings(p); s.Language != "ja" || s.Width != 1500 || s.Height != 900 || !s.Maximised {
 		t.Fatalf("round trip %+v", s)
 	}
 	// Windows has no POSIX permission bits to check.
@@ -99,6 +104,9 @@ func TestSettingsRoundTripAndClamp(t *testing.T) {
 	}
 	if got := a.SetLanguage("klingon"); got != fallbackLanguage {
 		t.Fatal(got)
+	}
+	if got := a.SetLanguage("pt-BR"); got != fallbackLanguage {
+		t.Fatalf("removed language selected: %q", got)
 	}
 }
 
@@ -133,11 +141,19 @@ func TestVersionIsConsistentAcrossManifests(t *testing.T) {
 	var pkg struct {
 		Version string `json:"version"`
 	}
+	var lock struct {
+		Version  string `json:"version"`
+		Packages map[string]struct {
+			Version string `json:"version"`
+		} `json:"packages"`
+	}
 	b, _ := os.ReadFile("wails.json")
 	json.Unmarshal(b, &w)
 	b, _ = os.ReadFile("frontend/package.json")
 	json.Unmarshal(b, &pkg)
-	if w.Info.ProductVersion != buildVersion || pkg.Version != buildVersion {
-		t.Fatalf("wails %s package %s about %s", w.Info.ProductVersion, pkg.Version, buildVersion)
+	b, _ = os.ReadFile("frontend/package-lock.json")
+	json.Unmarshal(b, &lock)
+	if w.Info.ProductVersion != buildVersion || pkg.Version != buildVersion || lock.Version != buildVersion || lock.Packages[""].Version != buildVersion {
+		t.Fatalf("wails %s package %s lock %s/%s about %s", w.Info.ProductVersion, pkg.Version, lock.Version, lock.Packages[""].Version, buildVersion)
 	}
 }

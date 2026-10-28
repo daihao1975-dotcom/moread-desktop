@@ -49,9 +49,6 @@ func normalizeLanguage(tag string) string {
 		return "zh-CN"
 	}
 	base := strings.SplitN(tag, "-", 2)[0]
-	if base == "pt" {
-		return "pt-BR"
-	}
 	if _, ok := locales[base]; ok {
 		return base
 	}

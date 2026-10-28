@@ -45,7 +45,8 @@ test('theme follows the system by default and resolves to a concrete reading the
 test('interface language is kept only as auto or a language tag', () => {
   assert.equal(readPreferences({}).lang, 'auto');
   assert.equal(readPreferences({ lang: 'ja' }).lang, 'ja');
-  assert.equal(readPreferences({ lang: 'pt-BR' }).lang, 'pt-BR');
+  assert.equal(readPreferences({ lang: 'pt-BR' }).lang, 'en');
+  assert.equal(readPreferences({ lang: 'zh-TW' }).lang, 'zh-TW');
   for (const v of ['<b>', 'zh_cn', 1, null]) assert.equal(readPreferences({ lang: v }).lang, 'auto');
 });
 test('the printed table of contents is off unless chosen', () => {

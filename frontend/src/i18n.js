@@ -3,11 +3,6 @@ import zhCN from './locales/zh-CN.json';
 import zhTW from './locales/zh-TW.json';
 import ja from './locales/ja.json';
 import ko from './locales/ko.json';
-import es from './locales/es.json';
-import fr from './locales/fr.json';
-import de from './locales/de.json';
-import ptBR from './locales/pt-BR.json';
-import ru from './locales/ru.json';
 // Each entry is [tag, name shown in its own language]. The same files drive the native menus.
 export const LANGUAGES = [
   ['zh-CN', '简体中文'],
@@ -15,13 +10,8 @@ export const LANGUAGES = [
   ['en', 'English'],
   ['ja', '日本語'],
   ['ko', '한국어'],
-  ['es', 'Español'],
-  ['fr', 'Français'],
-  ['de', 'Deutsch'],
-  ['pt-BR', 'Português (Brasil)'],
-  ['ru', 'Русский'],
 ];
-const tables = { en, 'zh-CN': zhCN, 'zh-TW': zhTW, ja, ko, es, fr, de, 'pt-BR': ptBR, ru };
+const tables = { en, 'zh-CN': zhCN, 'zh-TW': zhTW, ja, ko };
 let lang = 'en';
 // Mirrors normalizeLanguage in i18n.go.
 export function normalizeLanguage(tag) {
@@ -32,7 +22,6 @@ export function normalizeLanguage(tag) {
   if (!t) return '';
   if (t.startsWith('zh')) return /hant|-tw|-hk|-mo/.test(t) ? 'zh-TW' : 'zh-CN';
   const base = t.split('-')[0];
-  if (base === 'pt') return 'pt-BR';
   return tables[base] ? base : '';
 }
 export function matchLanguage(list) {

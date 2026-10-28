@@ -26,7 +26,8 @@ export function readPreferences(raw = {}) {
   if (Number.isInteger(raw.size) && raw.size >= 13 && raw.size <= 24) p.size = raw.size;
   if (typeof raw.sidebar === 'boolean') p.sidebar = raw.sidebar;
   if (typeof raw.printToc === 'boolean') p.printToc = raw.printToc;
-  if (typeof raw.lang === 'string' && /^(auto|[a-z]{2}(-[A-Z]{2})?)$/.test(raw.lang)) p.lang = raw.lang;
+  if (typeof raw.lang === 'string' && /^(auto|[a-z]{2}(-[A-Z]{2})?)$/.test(raw.lang))
+    p.lang = ['auto', 'en', 'zh-CN', 'zh-TW', 'ja', 'ko'].includes(raw.lang) ? raw.lang : 'en';
   const w = normalizeWidth(raw.width);
   p.width = raw.layoutVersion === 2 ? w : w === 860 ? 'auto' : w;
   return p;

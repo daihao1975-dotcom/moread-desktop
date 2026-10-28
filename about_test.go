@@ -8,7 +8,7 @@ import (
 func TestAboutAndLicenseTexts(t *testing.T) {
 	a := NewApp()
 	info := a.AboutInfo()
-	if info.Producer != "阿屠宰制作" || info.Version != "1.0.1" || info.GoVersion == "" || info.Platform == "" {
+	if info.Producer != "阿屠宰制作" || info.Version != "1.0.2" || info.GoVersion == "" || info.Platform == "" {
 		t.Fatalf("bad about: %+v", info)
 	}
 	texts := a.LicenseTexts()

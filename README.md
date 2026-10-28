@@ -1,8 +1,8 @@
 # 墨阅 MoRead
 
-轻巧、离线、安全的 Markdown 阅读与编辑器，支持 macOS（Apple 芯片）与 Windows（64 位），界面提供 10 种语言。
+轻巧、离线、安全的 Markdown 阅读与编辑器，支持 macOS（Apple 芯片）与 Windows（64 位），界面提供 5 种语言。
 
-A light, offline and safe Markdown reader and editor for macOS (Apple silicon) and Windows (64-bit), with an interface in 10 languages. [English below](#english).
+A light, offline and safe Markdown reader and editor for macOS (Apple silicon) and Windows (64-bit), with an interface in 5 languages. [English below](#english).
 
 ## 特点
 
@@ -13,7 +13,7 @@ A light, offline and safe Markdown reader and editor for macOS (Apple silicon) a
 - **Markdown 编辑辅助**：列表续写、Tab 嵌套、加粗 / 斜体 / 代码 / 链接快捷键。
 - **丰富语法**：GFM 表格与任务列表、脚注、提示块、KaTeX 公式、Mermaid 图表、安全 HTML。
 - **导出**：单文件离线 HTML，或打印 / 存为 PDF。
-- **主题与语言**：跟随系统 / 浅色 / 纸色 / 深色；简体中文、繁體中文、English、日本語、한국어、Español、Français、Deutsch、Português (Brasil)、Русский。
+- **主题与语言**：跟随系统 / 浅色 / 纸色 / 深色；简体中文、繁體中文、English、日本語、한국어。
 - **小巧**：macOS 安装包约 10 MB，Windows 单文件约 17 MB，无内置浏览器内核。
 
 ## 下载与安装
