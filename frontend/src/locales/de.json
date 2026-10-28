@@ -23,6 +23,7 @@
   "side.openFolder": "Ordner öffnen",
   "side.openFile": "Datei öffnen",
   "side.sample": "Vollständiges Beispiel ansehen",
+  "side.recent": "Zuletzt geöffnet",
   "side.footer": "Lokal lesen · nichts wird hochgeladen",
   "find.placeholder": "Im Dokument suchen …",
   "find.prev": "Vorheriger Treffer",
@@ -56,6 +57,8 @@
   "width.860": "Angenehm",
   "width.1040": "Breit",
   "settings.language": "Sprache",
+  "settings.recent": "Zuletzt geöffnete Dateien merken",
+  "settings.recentHint": "Es werden nur Datei- und Ordnerpfade auf diesem Computer gespeichert. Beim Ausschalten wird die Liste gelöscht.",
   "lang.auto": "Systemstandard",
   "settings.hint": "Offline-HTML exportieren und Drucken / Als PDF sichern finden Sie im Menü „Ablage“. Info und Lizenzen finden Sie im Menü „{menu}“.",
   "dirty.title": "Änderungen an diesem Dokument sichern?",
@@ -291,5 +294,7 @@
   "err.svgDTD": "SVG-Dateien mit DTD sind nicht erlaubt",
   "err.svgInvalid": "Die SVG-Datei ist ungültig",
   "err.notFound": "Die Datei existiert nicht",
+  "err.recentUnknown": "Dieser Eintrag ist nicht in der Liste der zuletzt geöffneten",
+  "err.recentMissing": "Es wurde verschoben oder gelöscht und aus der Liste entfernt",
   "err.permission": "Zugriff verweigert"
 }

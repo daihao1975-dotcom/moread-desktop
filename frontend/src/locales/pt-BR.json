@@ -23,6 +23,7 @@
   "side.openFolder": "Abrir pasta",
   "side.openFile": "Abrir arquivo",
   "side.sample": "Ver o exemplo completo",
+  "side.recent": "Recentes",
   "side.footer": "Leitura local · nada é enviado",
   "find.placeholder": "Buscar no documento…",
   "find.prev": "Resultado anterior",
@@ -56,6 +57,8 @@
   "width.860": "Confortável",
   "width.1040": "Ampla",
   "settings.language": "Idioma",
+  "settings.recent": "Lembrar arquivos recentes",
+  "settings.recentHint": "Somente caminhos de arquivos e pastas são salvos neste computador. Desativar limpa a lista.",
   "lang.auto": "Padrão do sistema",
   "settings.hint": "Exportar HTML offline e Imprimir / Salvar como PDF estão no menu Arquivo. Sobre e licenças estão no menu {menu}.",
   "dirty.title": "Salvar as alterações deste documento?",
@@ -291,5 +294,7 @@
   "err.svgDTD": "Arquivos SVG com DTD não são permitidos",
   "err.svgInvalid": "O arquivo SVG é inválido",
   "err.notFound": "O arquivo não existe",
+  "err.recentUnknown": "Este item não está na lista de recentes",
+  "err.recentMissing": "Foi movido ou excluído e saiu da lista de recentes",
   "err.permission": "Permissão negada"
 }

@@ -23,6 +23,7 @@
   "side.openFolder": "フォルダを開く",
   "side.openFile": "ファイルを開く",
   "side.sample": "総合サンプルを見る",
+  "side.recent": "最近使った項目",
   "side.footer": "ローカルで閲覧 · 内容はアップロードされません",
   "find.placeholder": "この文書内を検索…",
   "find.prev": "前の一致",
@@ -56,6 +57,8 @@
   "width.860": "標準",
   "width.1040": "広め",
   "settings.language": "言語",
+  "settings.recent": "最近使ったファイルを記憶",
+  "settings.recentHint": "このコンピュータにファイルとフォルダのパスだけを保存します。オフにすると一覧は消去されます。",
   "lang.auto": "システムに合わせる",
   "settings.hint": "オフライン HTML の書き出しと印刷 / PDF 保存は「ファイル」メニューに、情報とライセンスは「{menu}」メニューにあります。",
   "dirty.title": "この文書の変更を保存しますか？",
@@ -291,5 +294,7 @@
   "err.svgDTD": "DTD を含む SVG は使用できません",
   "err.svgInvalid": "SVG ファイルが無効です",
   "err.notFound": "ファイルが存在しません",
+  "err.recentUnknown": "この項目は最近使った項目にありません",
+  "err.recentMissing": "移動または削除されたため、最近使った項目から外しました",
   "err.permission": "アクセス権がありません"
 }

@@ -17,12 +17,19 @@ const (
 	minHeight     = 540
 )
 
-// settings holds what the native side needs before the interface loads. Document content and history are never stored.
+// settings holds what the native side needs before the interface loads. Document content is never stored;
+// recently opened paths are kept only after the reader turns the list on.
 type settings struct {
-	Language  string `json:"language,omitempty"`
-	Width     int    `json:"width,omitempty"`
-	Height    int    `json:"height,omitempty"`
-	Maximised bool   `json:"maximised,omitempty"`
+	Language       string        `json:"language,omitempty"`
+	Width          int           `json:"width,omitempty"`
+	Height         int           `json:"height,omitempty"`
+	Maximised      bool          `json:"maximised,omitempty"`
+	RememberRecent bool          `json:"rememberRecent,omitempty"`
+	Recent         []recentEntry `json:"recent,omitempty"`
+}
+type recentEntry struct {
+	Path   string `json:"path"`
+	Folder bool   `json:"folder,omitempty"`
 }
 
 func settingsPath() string {
@@ -52,6 +59,13 @@ func loadSettings(p string) (settings, error) {
 		}
 	}
 	s.Language = normalizeLanguage(s.Language)
+	recent := s.Recent
+	s.Recent = nil
+	for _, r := range recent {
+		if s.RememberRecent && filepath.IsAbs(r.Path) && len(s.Recent) < maxRecent {
+			s.Recent = append(s.Recent, r)
+		}
+	}
 	return s.clamped(), problem
 }
 
@@ -81,16 +95,18 @@ func (a *App) rememberWindow() {
 	if a.ctx == nil || w.WindowIsFullscreen(a.ctx) {
 		return
 	}
-	a.mu.Lock()
-	s := a.settings
-	a.mu.Unlock()
-	s.Maximised = w.WindowIsMaximised(a.ctx)
-	if !s.Maximised && !w.WindowIsMinimised(a.ctx) {
-		s.Width, s.Height = w.WindowGetSize(a.ctx)
+	maximised := w.WindowIsMaximised(a.ctx)
+	width, height := 0, 0
+	if !maximised && !w.WindowIsMinimised(a.ctx) {
+		width, height = w.WindowGetSize(a.ctx)
 	}
-	s = s.clamped()
 	a.mu.Lock()
-	a.settings = s
+	a.settings.Maximised = maximised
+	if width > 0 {
+		a.settings.Width, a.settings.Height = width, height
+	}
+	a.settings = a.settings.clamped()
+	s := a.settings
 	a.mu.Unlock()
 	a.noteSettings(saveSettings(a.settingsFile, s))
 }

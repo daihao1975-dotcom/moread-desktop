@@ -23,7 +23,7 @@ MoRead is an offline Markdown reader and light editor. Documents are read and sa
 | How | Notes |
 | --- | --- |
 | Open File | Toolbar or ⌘ / Ctrl + O; select several files at once |
-| Open Folder | Lists every Markdown file in the folder and its subfolders, up to 2,000 |
+| Open Folder | Lists every Markdown file in the folder and its subfolders, up to 2,000. Files created, renamed or deleted in other apps show up when you come back to MoRead |
 | Drag and drop | Drop files or folders onto the window |
 | From Finder / Explorer | Open `.md`, `.markdown`, `.mdown` or `.mkd` files with MoRead |
 
@@ -83,8 +83,9 @@ Click **Reading settings** at the right of the toolbar (⌘ / Ctrl + ,):
 - **Font size**: 13–24, also from the View menu or ⌘ / Ctrl + = / - / 0.
 - **Text width**: Fluid, Compact, Comfortable or Wide.
 - **Language**: system default, or 简体中文, 繁體中文, English, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil) or Русский. Menus, dialogs, messages and the built-in example all switch.
+- **Remember recent files**: off by default. When it is on and the sidebar is empty, it lists the last 10 files or folders you opened; click one to open it again. Items that were moved or deleted drop off the list. Turning it off clears the list at once.
 
-MoRead remembers only these preferences and the window size. It does not store document contents or a history of opened files.
+MoRead remembers only these preferences and the window size, never document contents. File and folder paths are stored only while **Remember recent files** is on.
 
 ## 8. Questions
 

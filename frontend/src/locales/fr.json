@@ -23,6 +23,7 @@
   "side.openFolder": "Ouvrir un dossier",
   "side.openFile": "Ouvrir un fichier",
   "side.sample": "Voir l’exemple complet",
+  "side.recent": "Récents",
   "side.footer": "Lecture locale · rien n’est envoyé",
   "find.placeholder": "Rechercher dans le document…",
   "find.prev": "Occurrence précédente",
@@ -56,6 +57,8 @@
   "width.860": "Confortable",
   "width.1040": "Large",
   "settings.language": "Langue",
+  "settings.recent": "Mémoriser les fichiers récents",
+  "settings.recentHint": "Seuls les chemins des fichiers et dossiers sont enregistrés sur cet ordinateur. Désactiver l’option efface la liste.",
   "lang.auto": "Langue du système",
   "settings.hint": "L’export HTML hors ligne et Imprimer / Enregistrer en PDF se trouvent dans le menu Fichier. À propos et licences se trouvent dans le menu {menu}.",
   "dirty.title": "Enregistrer les modifications de ce document ?",
@@ -291,5 +294,7 @@
   "err.svgDTD": "Les SVG avec DTD ne sont pas autorisés",
   "err.svgInvalid": "Le fichier SVG n’est pas valide",
   "err.notFound": "Le fichier n’existe pas",
+  "err.recentUnknown": "Cet élément ne figure pas dans la liste des récents",
+  "err.recentMissing": "Il a été déplacé ou supprimé et retiré de la liste des récents",
   "err.permission": "Autorisation refusée"
 }

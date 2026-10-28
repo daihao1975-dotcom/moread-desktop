@@ -23,6 +23,7 @@
   "side.openFolder": "打开文件夹",
   "side.openFile": "打开文件",
   "side.sample": "看看综合示例",
+  "side.recent": "最近打开",
   "side.footer": "本地阅读 · 内容不上传",
   "find.placeholder": "查找当前文档…",
   "find.prev": "上一个匹配",
@@ -56,6 +57,8 @@
   "width.860": "舒适",
   "width.1040": "宽阔",
   "settings.language": "界面语言",
+  "settings.recent": "记住最近打开的文件",
+  "settings.recentHint": "只在本机保存文件与文件夹路径；关闭后立即清空列表。",
   "lang.auto": "跟随系统",
   "settings.hint": "导出离线 HTML、打印 / 存为 PDF 在「文件」菜单；关于与许可在「{menu}」菜单。",
   "dirty.title": "保存这篇文档的修改？",
@@ -291,5 +294,7 @@
   "err.svgDTD": "SVG 不允许 DTD",
   "err.svgInvalid": "SVG 无效",
   "err.notFound": "文件不存在",
+  "err.recentUnknown": "该项目不在最近打开列表中",
+  "err.recentMissing": "它已被移动或删除，已从最近打开列表中移除",
   "err.permission": "没有访问权限"
 }

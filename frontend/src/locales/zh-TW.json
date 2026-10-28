@@ -23,6 +23,7 @@
   "side.openFolder": "開啟資料夾",
   "side.openFile": "開啟檔案",
   "side.sample": "看看綜合範例",
+  "side.recent": "最近開啟",
   "side.footer": "本機閱讀 · 內容不上傳",
   "find.placeholder": "在目前文件中尋找…",
   "find.prev": "上一個符合項目",
@@ -56,6 +57,8 @@
   "width.860": "舒適",
   "width.1040": "寬闊",
   "settings.language": "介面語言",
+  "settings.recent": "記住最近開啟的檔案",
+  "settings.recentHint": "只在本機儲存檔案與資料夾路徑；關閉後立即清空清單。",
   "lang.auto": "跟隨系統",
   "settings.hint": "匯出離線 HTML、列印 / 儲存為 PDF 位於「檔案」選單；關於與授權位於「{menu}」選單。",
   "dirty.title": "要儲存這份文件的修改嗎？",
@@ -291,5 +294,7 @@
   "err.svgDTD": "SVG 不允許 DTD",
   "err.svgInvalid": "SVG 無效",
   "err.notFound": "檔案不存在",
+  "err.recentUnknown": "此項目不在最近開啟清單中",
+  "err.recentMissing": "它已被移動或刪除，已從最近開啟清單中移除",
   "err.permission": "沒有存取權限"
 }

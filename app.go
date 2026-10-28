@@ -55,6 +55,7 @@ type App struct {
 	mu             sync.Mutex
 	saveMu         sync.Mutex
 	files          map[string]*record
+	folders        map[string][]string
 	pending        []string
 	domReady       bool
 	dirty          bool
@@ -275,12 +276,14 @@ func (a *App) registerPaths(paths []string) OpenResult {
 			r := a.listFolder(p)
 			out.Documents = append(out.Documents, r.Documents...)
 			out.Skipped = append(out.Skipped, r.Skipped...)
+			a.remember(p, true)
 		} else {
 			d, e := a.register(p, "", true)
 			if e != nil {
 				out.Skipped = append(out.Skipped, filepath.Base(p)+": "+describe(e))
 			} else {
 				out.Documents = append(out.Documents, d)
+				a.remember(p, false)
 			}
 		}
 	}
@@ -295,7 +298,9 @@ func (a *App) OpenFolder() (OpenResult, error) {
 	if e != nil || p == "" {
 		return OpenResult{}, e
 	}
-	return a.listFolder(p), nil
+	r := a.listFolder(p)
+	a.remember(p, true)
+	return r, nil
 }
 func (a *App) listFolder(root string) OpenResult {
 	out := OpenResult{Documents: []Document{}, Skipped: []string{}}
@@ -334,6 +339,54 @@ func (a *App) listFolder(root string) OpenResult {
 		out.Skipped = append(out.Skipped, describe(e))
 	}
 	sort.Slice(out.Documents, func(i, j int) bool { return out.Documents[i].Relative < out.Documents[j].Relative })
+	ids := make([]string, len(out.Documents))
+	for i, d := range out.Documents {
+		ids[i] = d.ID
+	}
+	a.mu.Lock()
+	if a.folders == nil {
+		a.folders = make(map[string][]string)
+	}
+	a.folders[root] = ids
+	a.mu.Unlock()
+	return out
+}
+
+type FolderUpdate struct {
+	Added   []Document `json:"added"`
+	Removed []string   `json:"removed"`
+}
+
+// RefreshFolders lists every opened folder again, so files created, renamed or deleted outside MoRead
+// appear in the sidebar. Problems are left out here; they were reported when the folder was opened.
+func (a *App) RefreshFolders() FolderUpdate {
+	a.mu.Lock()
+	before := map[string]bool{}
+	roots := make([]string, 0, len(a.folders))
+	for root, ids := range a.folders {
+		roots = append(roots, root)
+		for _, id := range ids {
+			before[id] = true
+		}
+	}
+	a.mu.Unlock()
+	sort.Strings(roots)
+	out := FolderUpdate{Added: []Document{}, Removed: []string{}}
+	now := map[string]bool{}
+	for _, root := range roots {
+		for _, d := range a.listFolder(root).Documents {
+			if !now[d.ID] && !before[d.ID] {
+				out.Added = append(out.Added, d)
+			}
+			now[d.ID] = true
+		}
+	}
+	for id := range before {
+		if !now[id] {
+			out.Removed = append(out.Removed, id)
+		}
+	}
+	sort.Strings(out.Removed)
 	return out
 }
 func decodeDocument(b []byte) (string, string, error) {

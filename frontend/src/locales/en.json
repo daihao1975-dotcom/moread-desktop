@@ -23,6 +23,7 @@
   "side.openFolder": "Open folder",
   "side.openFile": "Open file",
   "side.sample": "See the full example",
+  "side.recent": "Recent",
   "side.footer": "Local reading · nothing is uploaded",
   "find.placeholder": "Find in document…",
   "find.prev": "Previous match",
@@ -56,6 +57,8 @@
   "width.860": "Comfortable",
   "width.1040": "Wide",
   "settings.language": "Language",
+  "settings.recent": "Remember recent files",
+  "settings.recentHint": "Only file and folder paths are saved on this computer. Turning this off clears the list.",
   "lang.auto": "System default",
   "settings.hint": "Export to offline HTML and Print / Save as PDF are in the File menu. About and licenses are in the {menu} menu.",
   "dirty.title": "Save changes to this document?",
@@ -291,5 +294,7 @@
   "err.svgDTD": "SVG files with a DTD are not allowed",
   "err.svgInvalid": "The SVG file is invalid",
   "err.notFound": "The file does not exist",
+  "err.recentUnknown": "This item is not in the recent list",
+  "err.recentMissing": "It was moved or deleted and has been removed from the recent list",
   "err.permission": "Permission denied"
 }

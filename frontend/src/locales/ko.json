@@ -23,6 +23,7 @@
   "side.openFolder": "폴더 열기",
   "side.openFile": "파일 열기",
   "side.sample": "전체 예제 보기",
+  "side.recent": "최근 항목",
   "side.footer": "로컬에서 읽기 · 내용은 업로드되지 않음",
   "find.placeholder": "문서에서 찾기…",
   "find.prev": "이전 결과",
@@ -56,6 +57,8 @@
   "width.860": "보통",
   "width.1040": "넓게",
   "settings.language": "언어",
+  "settings.recent": "최근 파일 기억",
+  "settings.recentHint": "이 컴퓨터에 파일과 폴더 경로만 저장합니다. 끄면 목록이 지워집니다.",
   "lang.auto": "시스템 기본값",
   "settings.hint": "오프라인 HTML 내보내기와 인쇄 / PDF로 저장은 ‘파일’ 메뉴에, 정보와 라이선스는 ‘{menu}’ 메뉴에 있습니다.",
   "dirty.title": "이 문서의 변경 사항을 저장할까요?",
@@ -291,5 +294,7 @@
   "err.svgDTD": "DTD가 있는 SVG는 사용할 수 없습니다",
   "err.svgInvalid": "SVG 파일이 올바르지 않습니다",
   "err.notFound": "파일이 없습니다",
+  "err.recentUnknown": "이 항목은 최근 목록에 없습니다",
+  "err.recentMissing": "이동되었거나 삭제되어 최근 목록에서 제거했습니다",
   "err.permission": "접근 권한이 없습니다"
 }

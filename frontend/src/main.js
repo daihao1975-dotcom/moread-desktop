@@ -33,6 +33,7 @@ import {
   X,
 } from 'lucide';
 import { sample, welcome } from './sample.js';
+import { applyFolderUpdate, mergeFiles } from './file-list.js';
 import { createFrame } from './frame.js';
 import { renderDocument, getCSS, page } from './render.js';
 import { locate, place, caretTop, headingTops } from './scroll-sync.js';
@@ -94,6 +95,7 @@ let current = builtinDocument('welcome'),
   baseline = current.content,
   source = current.content,
   files = [],
+  recent = { enabled: false, items: [] },
   outline = [],
   sideTab = 'files',
   mode = 'read',
@@ -267,6 +269,20 @@ function side() {
         b.onclick = () => runAction(action);
         box.append(b);
       }
+      if (recent.items.length) {
+        const title = document.createElement('p');
+        title.className = 'recent-title';
+        title.textContent = t('side.recent');
+        box.append(title);
+      }
+      for (const r of recent.items) {
+        const b = document.createElement('button');
+        b.className = 'file-row';
+        b.textContent = r.folder ? r.name + '/' : r.name;
+        b.dataset.tip = r.path;
+        b.onclick = () => openRecent(r.path);
+        box.append(b);
+      }
       list.append(box);
     }
   }
@@ -360,13 +376,42 @@ async function activate(d, force = false) {
 async function addResult(r) {
   if (r?.skipped?.length) toast(t('toast.skipped') + '\n' + r.skipped.slice(0, 5).join('\n'), true);
   const ds = r?.documents || [];
-  const seen = new Map(files.map(d => [d.id, d]));
-  for (const d of ds) seen.set(d.id, d);
-  files = [...seen.values()].sort((a, b) =>
-    (a.relative || a.name).localeCompare(b.relative || b.name, language()),
-  );
+  files = mergeFiles(files, ds, language());
   side();
+  if (recent.enabled) loadRecent().catch(e => toast(e, true));
   if (ds.length) await activate(ds[0], true);
+}
+// Recent files live on the native side and stay empty until the reader turns the list on.
+async function loadRecent(state) {
+  recent = state || (await call('Recent'));
+  $('#remember-recent').checked = recent.enabled;
+  if (!files.length) side();
+}
+const openRecent = path =>
+  enqueue(async () => {
+    try {
+      await addResult(await call('OpenRecent', path));
+    } catch (e) {
+      await loadRecent();
+      throw e;
+    }
+  });
+// Opened folders are listed again when the window comes back and every few seconds while it is in front.
+let refreshingFolders = false;
+async function refreshFolders() {
+  if (refreshingFolders || !native() || document.hidden || opening) return;
+  refreshingFolders = true;
+  try {
+    const next = applyFolderUpdate(files, await call('RefreshFolders'), current.id, language());
+    if (next !== files) {
+      files = next;
+      side();
+    }
+  } catch {
+    // A folder that cannot be listed right now keeps its last known files.
+  } finally {
+    refreshingFolders = false;
+  }
 }
 async function save(as) {
   if (saveBusy || opening) return false;
@@ -781,6 +826,10 @@ $('#language').onchange = e => {
   savePrefs();
   applyLanguage();
 };
+$('#remember-recent').onchange = e =>
+  call('SetRememberRecent', e.target.checked)
+    .then(loadRecent)
+    .catch(err => toast(err, true));
 $('#filter').oninput = side;
 $('#editor').oninput = e => {
   lineEndings =
@@ -983,13 +1032,21 @@ const external = externalChanges({
   warn: kind => toast(t(kind === 'missing' ? 'toast.missing' : 'toast.externalDirty'), true),
 });
 const checkExternal = () => external.check();
-addEventListener('focus', checkExternal);
+addEventListener('focus', () => {
+  checkExternal();
+  refreshFolders();
+});
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) checkExternal();
+  if (document.hidden) return;
+  checkExternal();
+  refreshFolders();
 });
 setInterval(() => {
   if (!document.hidden && document.hasFocus()) checkExternal();
 }, 4000);
+setInterval(() => {
+  if (document.hasFocus()) refreshFolders();
+}, 10000);
 const editorTops = headingTops();
 // Reading position from the preview drives the outline highlight and, in split view, the editor.
 function handlePosition({ ratio, heading, section, progress }) {
@@ -1087,6 +1144,8 @@ if (window.runtime?.EventsOn) {
       }
     });
   });
+  $('#recent-setting').classList.remove('hidden');
+  loadRecent().catch(e => toast(e, true));
   initializeDocuments({
     runtime: window.runtime,
     ready: () => call('FrontendReady'),
