@@ -986,6 +986,8 @@ async function showAbout() {
       ['about.built', info.builtAt],
       ['about.commit', info.commit],
       ['about.runtime', info.goVersion + ' · Wails ' + info.wailsVersion],
+      // Shown only when the settings file could not be read or saved.
+      ...(info.settingsError ? [['about.settings', info.settingsError]] : []),
     ]) {
       const dt = document.createElement('dt'),
         dd = document.createElement('dd');

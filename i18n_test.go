@@ -75,13 +75,13 @@ func TestErrorsCrossAsCodes(t *testing.T) {
 
 func TestSettingsRoundTripAndClamp(t *testing.T) {
 	p := filepath.Join(t.TempDir(), "MoRead", "settings.json")
-	if s := loadSettings(p); s.Width != defaultWidth || s.Height != defaultHeight || s.Language != "" {
+	if s, e := loadSettings(p); e != nil || s.Width != defaultWidth || s.Height != defaultHeight || s.Language != "" {
 		t.Fatalf("defaults %+v", s)
 	}
 	if e := saveSettings(p, settings{Language: "fr", Width: 1500, Height: 900, Maximised: true}); e != nil {
 		t.Fatal(e)
 	}
-	if s := loadSettings(p); s.Language != "fr" || s.Width != 1500 || s.Height != 900 || !s.Maximised {
+	if s, _ := loadSettings(p); s.Language != "fr" || s.Width != 1500 || s.Height != 900 || !s.Maximised {
 		t.Fatalf("round trip %+v", s)
 	}
 	// Windows has no POSIX permission bits to check.
@@ -89,7 +89,7 @@ func TestSettingsRoundTripAndClamp(t *testing.T) {
 		t.Fatalf("mode %v", st.Mode())
 	}
 	os.WriteFile(p, []byte(`{"language":"<x>","width":50,"height":99999}`), 0600)
-	if s := loadSettings(p); s.Language != "" || s.Width != defaultWidth || s.Height != defaultHeight {
+	if s, _ := loadSettings(p); s.Language != "" || s.Width != defaultWidth || s.Height != defaultHeight {
 		t.Fatalf("clamp %+v", s)
 	}
 	a := NewApp()
@@ -99,6 +99,28 @@ func TestSettingsRoundTripAndClamp(t *testing.T) {
 	}
 	if got := a.SetLanguage("klingon"); got != fallbackLanguage {
 		t.Fatal(got)
+	}
+}
+
+func TestSettingsProblemsAreReported(t *testing.T) {
+	dir := t.TempDir()
+	p := filepath.Join(dir, "settings.json")
+	os.WriteFile(p, []byte("{not json"), 0600)
+	if s, e := loadSettings(p); e == nil || s.Width != defaultWidth {
+		t.Fatalf("broken file %+v %v", s, e)
+	}
+	a := NewApp()
+	// A directory in place of the settings file makes every save fail.
+	a.settingsFile = filepath.Join(dir, "blocked")
+	os.Mkdir(a.settingsFile, 0700)
+	a.SetLanguage("fr")
+	if a.AboutInfo().SettingsError == "" {
+		t.Fatal("save failure hidden")
+	}
+	a.settingsFile = p
+	a.SetLanguage("de")
+	if got := a.AboutInfo().SettingsError; got != "" {
+		t.Fatalf("stale error %q", got)
 	}
 }
 

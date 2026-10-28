@@ -79,6 +79,7 @@
   "about.built": "建置時間 UTC",
   "about.commit": "原始碼提交",
   "about.runtime": "執行元件",
+  "about.settings": "設定檔",
   "about.isoPass": "通過：父頁存取被拒絕；原生唯讀探測已被阻擋（父頁查詢 2 次，額外呼叫 {n} 次）",
   "about.isoPartial": "父頁存取被拒絕；此平台不執行原生橋接探測",
   "about.isoFail": "隔離檢查未通過",

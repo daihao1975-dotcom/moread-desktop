@@ -79,6 +79,7 @@
   "about.built": "Build-Zeit (UTC)",
   "about.commit": "Quell-Commit",
   "about.runtime": "Laufzeit",
+  "about.settings": "Einstellungsdatei",
   "about.isoPass": "Bestanden: Zugriff auf die übergeordnete Seite verweigert; native Nur-Lese-Prüfung blockiert (übergeordnete Seite 2-mal abgefragt, {n} zusätzliche Aufrufe)",
   "about.isoPartial": "Zugriff auf die übergeordnete Seite verweigert; die Prüfung der nativen Brücke läuft auf dieser Plattform nicht",
   "about.isoFail": "Isolierungsprüfung fehlgeschlagen",

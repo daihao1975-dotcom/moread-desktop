@@ -79,6 +79,7 @@
   "about.built": "构建时间 UTC",
   "about.commit": "源码提交",
   "about.runtime": "运行组件",
+  "about.settings": "设置文件",
   "about.isoPass": "通过：父页访问被拒绝；原生只读探测被阻断（父页查询 2 次，额外调用 {n} 次）",
   "about.isoPartial": "父页访问被拒绝；本平台不执行原生桥探测",
   "about.isoFail": "隔离检查未通过",

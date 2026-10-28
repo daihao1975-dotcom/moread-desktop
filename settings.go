@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 
@@ -31,15 +33,26 @@ func settingsPath() string {
 	return filepath.Join(dir, "MoRead", "settings.json")
 }
 
-func loadSettings(p string) settings {
+// loadSettings falls back to defaults on any problem; a missing file is normal on first launch and not reported.
+func loadSettings(p string) (settings, error) {
 	s := settings{}
+	var problem error
 	if p != "" {
-		if b, e := os.ReadFile(p); e == nil && len(b) <= 64*1024 {
-			json.Unmarshal(b, &s)
+		b, e := os.ReadFile(p)
+		switch {
+		case errors.Is(e, fs.ErrNotExist):
+		case e != nil:
+			problem = e
+		case len(b) > 64*1024:
+			problem = fail("tooLarge")
+		default:
+			if e = json.Unmarshal(b, &s); e != nil {
+				s, problem = settings{}, e
+			}
 		}
 	}
 	s.Language = normalizeLanguage(s.Language)
-	return s.clamped()
+	return s.clamped(), problem
 }
 
 func (s settings) clamped() settings {
@@ -79,7 +92,18 @@ func (a *App) rememberWindow() {
 	a.mu.Lock()
 	a.settings = s
 	a.mu.Unlock()
-	saveSettings(a.settingsFile, s)
+	a.noteSettings(saveSettings(a.settingsFile, s))
+}
+
+// noteSettings keeps the latest settings problem for the About diagnostics, so a forgotten language or
+// window size can be explained. A later successful save clears it.
+func (a *App) noteSettings(e error) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.settingsError = ""
+	if e != nil {
+		a.settingsError = e.Error()
+	}
 }
 
 // SetLanguage switches native menus and dialogs to the interface language and remembers it.
@@ -99,6 +123,6 @@ func (a *App) SetLanguage(tag string) string {
 		w.MenuUpdateApplicationMenu(a.ctx)
 		localizeNativeMenus(lang)
 	}
-	saveSettings(a.settingsFile, s)
+	a.noteSettings(saveSettings(a.settingsFile, s))
 	return lang
 }

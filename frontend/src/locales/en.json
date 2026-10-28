@@ -79,6 +79,7 @@
   "about.built": "Build time (UTC)",
   "about.commit": "Source commit",
   "about.runtime": "Runtime",
+  "about.settings": "Settings file",
   "about.isoPass": "Passed: parent access denied; native read-only probe blocked (parent queried twice, {n} extra calls)",
   "about.isoPartial": "Parent access denied; the native bridge probe does not run on this platform",
   "about.isoFail": "Isolation check failed",

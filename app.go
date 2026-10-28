@@ -57,6 +57,7 @@ type App struct {
 	lang           string
 	settings       settings
 	settingsFile   string
+	settingsError  string
 }
 
 func NewApp() *App { return &App{files: make(map[string]*record), lang: fallbackLanguage} }
@@ -65,7 +66,9 @@ func NewApp() *App { return &App{files: make(map[string]*record), lang: fallback
 func newDesktopApp() *App {
 	a := NewApp()
 	a.settingsFile = settingsPath()
-	a.settings = loadSettings(a.settingsFile)
+	var e error
+	a.settings, e = loadSettings(a.settingsFile)
+	a.noteSettings(e)
 	a.lang = a.settings.Language
 	if a.lang == "" {
 		a.lang = pickLanguage(systemLanguages())

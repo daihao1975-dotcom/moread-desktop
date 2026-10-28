@@ -79,6 +79,7 @@
   "about.built": "Compilación (UTC)",
   "about.commit": "Commit de origen",
   "about.runtime": "Entorno",
+  "about.settings": "Archivo de ajustes",
   "about.isoPass": "Superada: acceso a la página principal denegado; sonda nativa de solo lectura bloqueada (página principal consultada 2 veces, {n} llamadas adicionales)",
   "about.isoPartial": "Acceso a la página principal denegado; la sonda del puente nativo no se ejecuta en esta plataforma",
   "about.isoFail": "La comprobación de aislamiento ha fallado",

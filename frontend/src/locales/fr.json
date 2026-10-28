@@ -79,6 +79,7 @@
   "about.built": "Compilation (UTC)",
   "about.commit": "Commit source",
   "about.runtime": "Environnement",
+  "about.settings": "Fichier de réglages",
   "about.isoPass": "Réussi : accès à la page parente refusé ; sonde native en lecture seule bloquée (page parente interrogée 2 fois, {n} appels supplémentaires)",
   "about.isoPartial": "Accès à la page parente refusé ; la sonde du pont natif ne s’exécute pas sur cette plateforme",
   "about.isoFail": "La vérification de l’isolation a échoué",

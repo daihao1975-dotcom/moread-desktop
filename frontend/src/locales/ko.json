@@ -79,6 +79,7 @@
   "about.built": "빌드 시간(UTC)",
   "about.commit": "소스 커밋",
   "about.runtime": "런타임",
+  "about.settings": "설정 파일",
   "about.isoPass": "통과: 상위 페이지 접근이 거부되었고 네이티브 읽기 전용 프로브가 차단되었습니다(상위 페이지 조회 2회, 추가 호출 {n}회)",
   "about.isoPartial": "상위 페이지 접근이 거부되었습니다. 이 플랫폼에서는 네이티브 브리지 프로브를 실행하지 않습니다",
   "about.isoFail": "격리 확인에 실패했습니다",
