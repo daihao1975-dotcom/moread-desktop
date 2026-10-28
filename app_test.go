@@ -441,3 +441,11 @@ func BenchmarkDocumentHash(b *testing.B) {
 		})
 	}
 }
+
+func TestFileOpenBeforeStartupQueuesWithoutRuntime(t *testing.T) {
+	a := NewApp()
+	a.fileOpen("early.md")
+	if len(a.pending) != 1 || a.pending[0] != "early.md" {
+		t.Fatal("file open before startup must queue without calling window runtime")
+	}
+}

@@ -14,6 +14,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"sync"
@@ -123,7 +124,28 @@ func (a *App) FrontendReady() OpenResult {
 	}
 	return a.registerPaths(p)
 }
-func (a *App) fileOpen(p string) { a.sendPaths([]string{p}) }
+func (a *App) fileOpen(p string) {
+	a.mu.Lock()
+	ready := a.domReady
+	a.mu.Unlock()
+	if ready && a.ctx != nil {
+		w.Show(a.ctx)
+		w.WindowUnminimise(a.ctx)
+		w.WindowShow(a.ctx)
+	}
+	a.sendPaths([]string{p})
+}
+
+// Closing a Mac window keeps the document (including unsaved edits) alive.
+// Quit remains a separate operation protected by the frontend save/discard guard.
+func (a *App) CloseWindow() {
+	if runtime.GOOS == "darwin" {
+		a.rememberWindow()
+		w.Hide(a.ctx)
+		return
+	}
+	w.Quit(a.ctx)
+}
 func (a *App) sendPaths(paths []string) {
 	a.mu.Lock()
 	if !a.domReady {
@@ -157,6 +179,11 @@ func (a *App) beforeClose(ctx context.Context) bool {
 	ready := a.domReady
 	a.mu.Unlock()
 	if notify && ready {
+		if runtime.GOOS == "darwin" {
+			w.Show(ctx)
+			w.WindowUnminimise(ctx)
+			w.WindowShow(ctx)
+		}
 		w.EventsEmit(ctx, "close-request")
 	}
 	return true

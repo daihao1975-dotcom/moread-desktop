@@ -10,7 +10,7 @@ import (
 )
 
 // These values are supplied by the release build. Defaults describe an unstamped development build.
-var buildVersion = "1.0.3"
+var buildVersion = "1.0.4"
 var buildCommit = "development"
 var buildTime = "development"
 

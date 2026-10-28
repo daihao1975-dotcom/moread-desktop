@@ -1,6 +1,6 @@
 # MoRead User Guide
 
-Version 1.0.3 · macOS 12 or later (Apple silicon) and Windows 10 / 11 (64-bit)
+Version 1.0.4 · macOS 12 or later (Apple silicon) and Windows 10 / 11 (64-bit)
 
 MoRead is an offline Markdown reader and light editor. Documents are read and saved only on your computer: nothing is uploaded, no network connection is made, and scripts inside documents never run.
 
@@ -8,13 +8,13 @@ MoRead is an offline Markdown reader and light editor. Documents are read and sa
 
 ### macOS
 
-1. Open `MoRead-1.0.3-macOS-arm64.dmg` and drag **MoRead** into **Applications**.
+1. Open `MoRead-1.0.4-macOS-arm64.dmg` and drag **MoRead** into **Applications**.
 2. If macOS says it cannot verify the developer the first time, Control-click MoRead in Applications and choose **Open**. If it is still blocked, go to **System Settings → Privacy & Security** and click **Open Anyway** near the bottom. You only need to do this once.
 3. To open every Markdown file with MoRead, select any `.md` file in Finder → **Get Info** → **Open with: MoRead** → **Change All**.
 
 ### Windows
 
-1. Run `MoRead-1.0.3-Windows-x64.exe`. No installation is needed; keep it in any folder and create a shortcut if you like.
+1. Run `MoRead-1.0.4-Windows-x64.exe`. No installation is needed; keep it in any folder and create a shortcut if you like.
 2. Microsoft Edge WebView2 Runtime is required (included in Windows 11 and up-to-date Windows 10). If it is missing, MoRead tells you and exits; download it from Microsoft.
 3. If SmartScreen appears on first run, click **More info → Run anyway**.
 
@@ -101,3 +101,10 @@ MoRead remembers only these preferences and the window size, never document cont
 **Version and licences.** macOS: **MoRead → About MoRead and Licenses**; Windows: **Help → About MoRead and Licenses**. All shortcuts are under **Help → Keyboard Shortcuts** (⌘ / Ctrl + /).
 
 **Is there a newer version?** MoRead never checks by itself. Choose **Check for Updates…** in the same menu, or **Check for updates** in the About window, to open the release page in your browser and compare it with the version shown in About.
+
+### macOS window controls
+
+- Red close button or ⌘W closes the reader window while keeping MoRead and unsaved edits in memory. Click MoRead in the Dock or open a document to show it again.
+- Yellow button or ⌘M minimizes the window.
+- ⌘Q quits MoRead and asks you to save or discard unsaved changes.
+- Use ⌘ for application shortcuts on Mac; Control remains available for native text editing.

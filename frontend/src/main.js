@@ -977,6 +977,7 @@ async function printDocument() {
   }
 }
 const actions = {
+  'close-window': () => call('CloseWindow'),
   open: () => $('#open').click(),
   folder: () => $('#folder').click(),
   new: () => $('#new').click(),

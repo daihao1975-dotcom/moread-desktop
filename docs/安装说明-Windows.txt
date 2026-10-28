@@ -1,4 +1,4 @@
-墨阅 MoRead 1.0.3 · Windows 安装说明
+墨阅 MoRead 1.0.4 · Windows 安装说明
 
 1. 将本文件夹放到任意位置，双击 MoRead.exe 运行，无需安装。
 2. 首次运行如出现 SmartScreen 提示，点按「更多信息 → 仍要运行」。
@@ -7,7 +7,7 @@
 
 系统要求：Windows 10 / 11，64 位。
 
-MoRead 1.0.3 · Windows installation
+MoRead 1.0.4 · Windows installation
 
 1. Put this folder anywhere and double-click MoRead.exe. No installation is needed.
 2. If SmartScreen appears on first run, click More info → Run anyway.

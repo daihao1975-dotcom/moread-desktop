@@ -9,6 +9,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
 	"os"
+	"runtime"
 )
 
 //go:embed all:frontend/dist
@@ -26,11 +27,12 @@ func main() {
 		BackgroundColour: startupBackground(),
 		AssetServer:      &assetserver.Options{Assets: assets},
 		OnStartup:        app.startup, OnDomReady: app.ready, OnBeforeClose: app.beforeClose,
-		Menu:        app.menu(),
-		Bind:        []interface{}{app},
-		DragAndDrop: &options.DragAndDrop{EnableFileDrop: true, DisableWebViewDrop: true},
-		Mac:         &mac.Options{TitleBar: mac.TitleBarHiddenInset(), OnFileOpen: app.fileOpen},
-		Windows:     &windows.Options{WebviewUserDataPath: "", Theme: windows.SystemDefault, DisablePinchZoom: false},
+		HideWindowOnClose: runtime.GOOS == "darwin",
+		Menu:              app.menu(),
+		Bind:              []interface{}{app},
+		DragAndDrop:       &options.DragAndDrop{EnableFileDrop: true, DisableWebViewDrop: true},
+		Mac:               &mac.Options{TitleBar: mac.TitleBarHiddenInset(), OnFileOpen: app.fileOpen},
+		Windows:           &windows.Options{WebviewUserDataPath: "", Theme: windows.SystemDefault, DisablePinchZoom: false},
 	})
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)

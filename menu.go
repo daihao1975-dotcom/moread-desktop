@@ -21,11 +21,11 @@ func (a *App) menu() *menu.Menu {
 	a.mu.Lock()
 	lang := a.lang
 	a.mu.Unlock()
-	return buildMenu(a.emit, appCommands{hide: func() { w.Hide(a.ctx) }, hideOthers: hideOtherApps, showAll: showAllApps, quit: func() { w.Quit(a.ctx) }, releases: a.OpenReleases}, goruntime.GOOS == "darwin", func(key string) string { return translate(lang, key) })
+	return buildMenu(a.emit, appCommands{hide: func() { w.Hide(a.ctx) }, hideOthers: hideOtherApps, showAll: showAllApps, close: a.CloseWindow, quit: func() { w.Quit(a.ctx) }, releases: a.OpenReleases}, goruntime.GOOS == "darwin", func(key string) string { return translate(lang, key) })
 }
 
 // appCommands are the window-level actions the native menu runs itself instead of sending to the frontend.
-type appCommands struct{ hide, hideOthers, showAll, quit, releases func() }
+type appCommands struct{ hide, hideOthers, showAll, close, quit, releases func() }
 
 func run(f func()) menu.Callback { return func(*menu.CallbackData) { f() } }
 
@@ -56,6 +56,10 @@ func buildMenu(emit func(string) menu.Callback, cmd appCommands, mac bool, tr fu
 	file.AddSeparator()
 	file.AddText(tr("menu.export"), nil, emit("export"))
 	file.AddText(tr("menu.print"), keys.CmdOrCtrl("p"), emit("print"))
+	if mac {
+		file.AddSeparator()
+		file.AddText(tr("menu.closeWindow"), keys.CmdOrCtrl("w"), run(cmd.close))
+	}
 	if !mac {
 		file.AddSeparator()
 		file.AddText(tr("menu.exit"), nil, run(cmd.quit))

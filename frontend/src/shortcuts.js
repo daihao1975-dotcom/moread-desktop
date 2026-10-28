@@ -1,5 +1,6 @@
 // Keyboard shortcuts: the key-to-action table, key event matching and the reference shown in Help.
 export const shortcutActions = {
+  w: 'close-window',
   o: 'open',
   s: 'save',
   'save-as': 'save-as',
@@ -17,15 +18,20 @@ export const shortcutActions = {
   ']': 'indent',
   '[': 'outdent',
   '/': 'shortcuts',
+  '=': 'font-bigger',
+  '-': 'font-smaller',
+  0: 'font-reset',
   replace: 'replace',
 };
 // shortcutKey returns the shortcutActions key for a Cmd/Ctrl key press, or '' when it is not a shortcut.
 export function shortcutKey(e, isMac) {
-  if (!(e.metaKey || e.ctrlKey) || e.isComposing) return '';
+  if ((isMac ? !e.metaKey || e.ctrlKey : !e.ctrlKey || e.metaKey) || e.isComposing) return '';
   const k = e.key.toLowerCase();
-  if (e.altKey && e.code === 'KeyF') return 'replace';
-  if (!isMac && k === 'h' && !e.altKey) return 'replace';
-  if (k === 's' && e.shiftKey) return 'save-as';
+  if (!isMac && k === 'w') return '';
+  if (e.altKey && !e.shiftKey && e.code === 'KeyF') return 'replace';
+  if (!isMac && k === 'h' && !e.altKey && !e.shiftKey) return 'replace';
+  if (k === 's' && e.shiftKey && !e.altKey) return 'save-as';
+  if (!e.altKey && (k === '+' || k === '=')) return '=';
   if (!e.altKey && !e.shiftKey && k in shortcutActions && k !== 'save-as' && k !== 'replace') return k;
   return '';
 }
@@ -42,6 +48,12 @@ export function renderShortcuts(list, isMac, t) {
         ['shortcuts.save', [m, 'S']],
         ['shortcuts.saveAs', [m, sh, 'S']],
         ['shortcuts.print', [m, 'P']],
+        ...(isMac
+          ? [
+              ['shortcuts.closeWindow', [m, 'W']],
+              ['shortcuts.quit', [m, 'Q']],
+            ]
+          : []),
       ],
     ],
     [

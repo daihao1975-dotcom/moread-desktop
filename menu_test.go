@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/wailsapp/wails/v2/pkg/menu/keys"
+	"reflect"
 	"sort"
 	"strings"
 	"testing"
@@ -13,14 +15,17 @@ func menuActions(t *testing.T, mac bool) (actions []string, titles []string, hid
 	emit := func(action string) menu.Callback {
 		return func(*menu.CallbackData) { actions = append(actions, action) }
 	}
-	others, shown := 0, 0
-	root := buildMenu(emit, appCommands{hide: func() { hidden++ }, hideOthers: func() { others++ }, showAll: func() { shown++ }, quit: func() { quit++ }, releases: func() { releases++ }}, mac, func(key string) string { return translate("zh-CN", key) })
+	others, shown, closed := 0, 0, 0
+	root := buildMenu(emit, appCommands{hide: func() { hidden++ }, hideOthers: func() { others++ }, showAll: func() { shown++ }, close: func() { closed++ }, quit: func() { quit++ }, releases: func() { releases++ }}, mac, func(key string) string { return translate("zh-CN", key) })
 	for _, top := range root.Items {
 		titles = append(titles, top.Label)
 		if top.SubMenu == nil {
 			continue
 		}
 		for _, item := range top.SubMenu.Items {
+			if item.Label == translate("zh-CN", "menu.closeWindow") && !reflect.DeepEqual(item.Accelerator, keys.CmdOrCtrl("w")) {
+				t.Fatal("Close Window must use Command-W")
+			}
 			if item.Click != nil {
 				item.Click(&menu.CallbackData{MenuItem: item})
 			}
@@ -28,6 +33,9 @@ func menuActions(t *testing.T, mac bool) (actions []string, titles []string, hid
 	}
 	if mac && (others != 1 || shown != 1) || !mac && (others != 0 || shown != 0) {
 		t.Fatalf("mac=%v hide others=%d show all=%d", mac, others, shown)
+	}
+	if mac && closed != 1 || !mac && closed != 0 {
+		t.Fatalf("mac=%v close items=%d", mac, closed)
 	}
 	sort.Strings(actions)
 	return

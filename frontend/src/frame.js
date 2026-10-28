@@ -134,7 +134,25 @@ export function createFrame(element, { onAction, onShortcut, onDrop, onError, on
     } else if (
       m.type === 'shortcut' &&
       exact(m, ['channel', 'token', 'version', 'type', 'key']) &&
-      ['o', 's', 'save-as', 'n', 'f', 'p', ',', '1', '2', '3', 'escape'].includes(m.key)
+      [
+        'o',
+        's',
+        'save-as',
+        'n',
+        'f',
+        'p',
+        ',',
+        '1',
+        '2',
+        '3',
+        'w',
+        'replace',
+        '=',
+        '-',
+        '0',
+        '/',
+        'escape',
+      ].includes(m.key)
     )
       onShortcut?.(m.key);
     else if (

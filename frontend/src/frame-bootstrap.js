@@ -272,10 +272,22 @@
     if (!event.isTrusted) return;
     let key = '';
     if (event.key === 'Escape') key = 'escape';
-    else if (event.metaKey || event.ctrlKey) {
+    else if (!event.isComposing) {
+      const mac = /Mac/.test(navigator.userAgent);
+      const mod = mac ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey;
       const k = event.key.toLowerCase();
-      if (['o', 's', 'n', 'f', 'p', ',', '1', '2', '3'].includes(k))
-        key = k === 's' && event.shiftKey ? 'save-as' : k;
+      if (mod) {
+        if (event.altKey && !event.shiftKey && event.code === 'KeyF') key = 'replace';
+        else if (!event.altKey) {
+          if (k === 's' && event.shiftKey) key = 'save-as';
+          else if (k === '+' || k === '=') key = '=';
+          else if (!event.shiftKey) {
+            if (!mac && k === 'h') key = 'replace';
+            else if (mac && k === 'w') key = 'w';
+            else if (['o', 's', 'n', 'f', 'p', ',', '1', '2', '3', '-', '0', '/'].includes(k)) key = k;
+          }
+        }
+      }
     }
     if (key) {
       event.preventDefault();

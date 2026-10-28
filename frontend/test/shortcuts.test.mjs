@@ -33,3 +33,25 @@ test('save as and replace follow each platform', () => {
 test('every shortcut names an action', () => {
   for (const [k, action] of Object.entries(shortcutActions)) assert.ok(action, k);
 });
+
+test('Mac close and platform modifiers do not hijack Control editing shortcuts', () => {
+  assert.equal(shortcutActions[shortcutKey(key('w', { metaKey: true }), true)], 'close-window');
+  assert.equal(shortcutKey(key('w', { ctrlKey: true }), false), '');
+  for (const k of ['w', 's', 'n', 'f', 'p', 'b', 'i', 'e']) {
+    assert.equal(shortcutKey(key(k, { ctrlKey: true }), true), '');
+    assert.equal(shortcutKey(key(k, { metaKey: true }), false), '');
+  }
+  assert.equal(shortcutKey(key('w', { metaKey: true, shiftKey: true }), true), '');
+  assert.equal(shortcutKey(key('S', { metaKey: true, shiftKey: true, altKey: true }), true), '');
+});
+
+test('font size shortcuts accept the plus key on standard keyboards', () => {
+  for (const [k, mods] of [
+    ['=', {}],
+    ['+', { shiftKey: true }],
+  ]) {
+    assert.equal(shortcutActions[shortcutKey(key(k, { metaKey: true, ...mods }), true)], 'font-bigger');
+  }
+  assert.equal(shortcutActions[shortcutKey(key('-', { metaKey: true }), true)], 'font-smaller');
+  assert.equal(shortcutActions[shortcutKey(key('0', { metaKey: true }), true)], 'font-reset');
+});
