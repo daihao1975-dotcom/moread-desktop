@@ -181,9 +181,18 @@ func TestRegisterChecksMetadataWithoutReadingBody(t *testing.T) {
 	if e = os.WriteFile(blocked, []byte("synthetic"), 0000); e != nil {
 		t.Fatal(e)
 	}
-	if _, e = a.register(blocked, root, true); e == nil {
-		t.Fatal("unreadable file registered")
-	}
+	t.Run("unreadable permissions", func(t *testing.T) {
+		st, err := os.Stat(blocked)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if st.Mode().Perm()&0444 != 0 {
+			t.Skip("filesystem does not represent chmod(000) as unreadable")
+		}
+		if _, err := a.register(blocked, root, true); err == nil {
+			t.Fatal("unreadable file registered")
+		}
+	})
 	link := filepath.Join(root, "linked.md")
 	if e = os.Symlink(p, link); e == nil {
 		if _, e = a.register(link, root, true); e != nil {
