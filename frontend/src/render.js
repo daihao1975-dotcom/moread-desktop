@@ -221,12 +221,14 @@ export async function renderDocument(
     ALLOW_DATA_ATTR: false,
   });
   const outline = [];
-  const seen = new Map();
+  const seen = new Set([...container.querySelectorAll('[id]')].map(node => node.id));
   for (const h of container.querySelectorAll('h1,h2,h3,h4,h5,h6')) {
     const base = slug(h.textContent);
-    const n = seen.get(base) || 0;
-    seen.set(base, n + 1);
-    h.id = base + (n ? '-' + n : '');
+    let candidate = base,
+      n = 0;
+    while (seen.has(candidate)) candidate = base + '-' + ++n;
+    h.id = candidate;
+    seen.add(candidate);
     outline.push({ id: h.id, text: h.textContent, level: +h.tagName[1] });
   }
   for (const bq of container.querySelectorAll('blockquote')) {
@@ -242,6 +244,8 @@ export async function renderDocument(
       }
     }
   }
+  // Cache only within this render: duplicates share I/O, later renders see disk edits.
+  const imageSources = new Map();
   let imageChars = 0,
     imageBudgetExhausted = false;
   for (const img of container.querySelectorAll('img')) {
@@ -254,7 +258,7 @@ export async function renderDocument(
       if (!id) throw new Error(t('img.saveFirst'));
       if (deferred) throw new Error(t('state.opening'));
       if (imageBudgetExhausted) throw new Error(t('img.budget'));
-      const uri = await readImage(id, ref);
+      const uri = imageSources.get(ref) || (await readImage(id, ref));
       if (!isCurrent()) return null;
       if (!/^data:image\/(png|jpeg|gif|webp|avif|svg\+xml);base64,/.test(uri))
         throw new Error(t('img.format'));
@@ -263,6 +267,7 @@ export async function renderDocument(
         throw new Error(t('img.budget'));
       }
       imageChars += uri.length;
+      imageSources.set(ref, uri);
       img.src = uri;
       img.classList.add('zoomable');
       img.loading = 'eager';

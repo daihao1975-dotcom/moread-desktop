@@ -417,12 +417,38 @@ func (a *App) DocumentHash(id string) (string, error) {
 	if e != nil || !within(root, real) {
 		return "", fail("moved")
 	}
-	b, e := readLimited(real, maxDocument)
+	return hashFileLimited(real, maxDocument)
+}
+
+// hashFileLimited checks external changes without allocating a document-sized buffer.
+// Always hash the bytes: file size and modification time alone can miss replacements.
+func hashFileLimited(p string, limit int64) (string, error) {
+	f, e := openReadFile(p)
 	if e != nil {
 		return "", e
 	}
-	return hashBytes(b), nil
+	defer f.Close()
+	st, e := f.Stat()
+	if e != nil {
+		return "", e
+	}
+	if !st.Mode().IsRegular() {
+		return "", fail("notRegular")
+	}
+	if st.Size() > limit {
+		return "", fail("tooLarge")
+	}
+	h := sha256.New()
+	n, e := io.Copy(h, io.LimitReader(f, limit+1))
+	if e != nil {
+		return "", e
+	}
+	if n > limit {
+		return "", fail("tooLarge")
+	}
+	return hex.EncodeToString(h.Sum(nil)), nil
 }
+
 func atomicWrite(p string, b []byte, mode fs.FileMode) error {
 	f, e := os.CreateTemp(filepath.Dir(p), ".moread-*")
 	if e != nil {

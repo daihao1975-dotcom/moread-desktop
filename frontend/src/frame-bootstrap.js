@@ -53,22 +53,22 @@
           ? NodeFilter.FILTER_REJECT
           : NodeFilter.FILTER_ACCEPT,
     });
+    const pattern = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'giu');
     const nodes = [];
     while (walker.nextNode()) nodes.push(walker.currentNode);
     for (const node of nodes) {
-      const text = node.textContent,
-        low = text.toLowerCase();
-      let start = 0,
-        pos;
+      const text = node.textContent;
+      let start = 0;
       const frag = document.createDocumentFragment();
-      while ((pos = low.indexOf(query.toLowerCase(), start)) !== -1) {
+      for (const match of text.matchAll(pattern)) {
+        const pos = match.index;
         frag.append(document.createTextNode(text.slice(start, pos)));
         const mark = document.createElement('mark');
         mark.className = 'search-hit';
-        mark.textContent = text.slice(pos, pos + query.length);
+        mark.textContent = match[0];
         frag.append(mark);
         hits.push(mark);
-        start = pos + query.length;
+        start = pos + match[0].length;
         if (hits.length >= 2000) break;
       }
       if (start) {

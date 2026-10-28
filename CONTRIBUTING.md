@@ -4,7 +4,7 @@
 
 ## 开发环境 / Setup
 
-- Go 1.25+、Node.js 22.12+、Wails CLI 2.17.0（`go install github.com/wailsapp/wails/v2/cmd/wails@v2.17.0`）
+- Go 1.26.10+、Node.js 22.12+、Wails CLI 2.17.0（`go install github.com/wailsapp/wails/v2/cmd/wails@v2.17.0`）
 - macOS 构建需 Xcode 26+；Windows 构建需 WebView2 运行时
 
 ```sh

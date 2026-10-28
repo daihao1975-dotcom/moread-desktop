@@ -28,7 +28,7 @@ A light, offline and safe Markdown reader and editor for macOS (Apple silicon) a
 
 ## 从源码构建
 
-需要 Go 1.25+、Node.js 22.12+、Wails CLI 2.17.0；macOS 构建另需 Xcode 26+（编译系统图标）。依赖版本由 `go.mod`、`frontend/package-lock.json` 锁定。
+需要 Go 1.26.10+、Node.js 22.12+、Wails CLI 2.17.0；macOS 构建另需 Xcode 26+（编译系统图标）。依赖版本由 `go.mod`、`frontend/package-lock.json` 锁定。
 
 ```sh
 cd frontend && npm ci && cd ..
@@ -69,7 +69,7 @@ scripts/release.sh            # 测试 → 构建 → 打包，输出到 dist/Mo
 
 **Documents**: [User Guide](docs/User-Guide.md) · [Release notes](docs/版本说明.md) · [Privacy](docs/隐私说明.md)
 
-**Build**: Go 1.25+, Node.js 22.12+, Wails CLI 2.17.0 and, on macOS, Xcode 26+. Run `cd frontend && npm ci`, then `scripts/release.sh`, which tests, builds, stamps the commit and build time, compiles the macOS icon, verifies signatures and writes DMG / ZIP / EXE packages with SHA256SUMS.
+**Build**: Go 1.26.10+, Node.js 22.12+, Wails CLI 2.17.0 and, on macOS, Xcode 26+. Run `cd frontend && npm ci`, then `scripts/release.sh`, which tests, builds, stamps the commit and build time, compiles the macOS icon, verifies signatures and writes DMG / ZIP / EXE packages with SHA256SUMS.
 
 **License**: source code under the [MIT License](LICENSE), © 2026 阿屠宰. The names "墨阅" / "MoRead" and the app icon are not covered; forks must use their own name and icon ([TRADEMARKS.md](TRADEMARKS.md)). Third-party components keep their own licenses ([THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt)).
 

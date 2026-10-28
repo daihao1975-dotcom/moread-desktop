@@ -1,3 +1,5 @@
+import { readRelativeDocument } from './relative-link.js';
+import { readLineEndings, editLineEndings, writeLineEndings } from './line-endings.js';
 import { readPreferences, normalizeWidth, resolveTheme } from './preferences.js';
 import { bindTitlebar } from './titlebar.js';
 import { documentTransition } from './document-transition.js';
@@ -129,6 +131,8 @@ let current = builtinDocument('welcome'),
   opening = false,
   toastTimer,
   newline = '\n',
+  lineEndings = [],
+  baselineEndings = [],
   queue = Promise.resolve(),
   findHits = [],
   findIndex = -1,
@@ -136,6 +140,7 @@ let current = builtinDocument('welcome'),
   replacing = false,
   windowTitle = '',
   lastAction = { name: '', at: 0 },
+  pendingAnchor = '',
   currentHeading = '',
   scrollLead = '',
   scrollLeadAt = 0,
@@ -168,7 +173,8 @@ function update() {
   app.classList.toggle('dirty', dirty());
   $('#doc-name').textContent = current.name;
   $('#doc-state').textContent = stateLabel();
-  $('#encoding').textContent = current.encoding + (newline === '\r\n' ? ' · CRLF' : ' · LF');
+  $('#encoding').textContent =
+    current.encoding + (newline === '\r\n' ? ' · CRLF' : newline === '\r' ? ' · CR' : ' · LF');
   $('#save').disabled = saveBusy || opening;
   const title = (dirty() ? '• ' : '') + current.name + ' — ' + t('app.name');
   if (title !== windowTitle) {
@@ -360,8 +366,12 @@ function switchDocument(load, valid) {
 function useDocument(d, keepScroll = false) {
   current = d;
   currentHeading = '';
-  newline = d.content.includes('\r\n') ? '\r\n' : '\n';
-  source = d.content.replace(/\r\n/g, '\n');
+  pendingAnchor = d.navigationAnchor || '';
+  const text = readLineEndings(d.content);
+  newline = text.preferred;
+  lineEndings = text.endings;
+  baselineEndings = [...lineEndings];
+  source = text.text;
   baseline = source;
   $('#editor').value = source;
   resetScroll = !keepScroll;
@@ -390,11 +400,12 @@ async function save(as) {
   saveBusy = true;
   update();
   const text = source;
+  const savedEndings = [...lineEndings];
   try {
     const r = await call(
       'SaveDocument',
       current.id,
-      newline === '\r\n' ? text.replace(/\n/g, '\r\n') : text,
+      writeLineEndings(text, savedEndings, newline),
       current.hash,
       current.encoding,
       as,
@@ -402,6 +413,7 @@ async function save(as) {
     if (r.cancelled) return false;
     current = { ...r.document, content: source };
     baseline = text;
+    baselineEndings = savedEndings;
     externalNotice = '';
     if (!files.some(f => f.id === current.id)) files.push(current);
     side();
@@ -478,6 +490,12 @@ async function render(v) {
     if (v !== version_) return;
     rendered = { ...r, css, version: v };
     renderedTheme = theme;
+    if (pendingAnchor) {
+      const anchor = pendingAnchor;
+      const navigated = await previewFrame.anchor(anchor);
+      if (v !== version_ || navigated?.cancelled) return;
+      pendingAnchor = '';
+    }
     outline = r.outline;
     resetScroll = false;
     side();
@@ -532,11 +550,10 @@ async function previewAction(action) {
   enqueue(async () => {
     if (!valid()) return;
     await switchDocument(async () => {
-      const d = await call('OpenRelative', expectedId, href);
-      if (!valid()) return null;
-      const loaded = await call('ReadDocument', d.id);
-      if (!files.some(f => f.id === d.id)) files.push(d);
-      return loaded;
+      const result = await readRelativeDocument(expectedId, href, call, valid);
+      if (!result || !valid()) return null;
+      if (!files.some(f => f.id === result.registered.id)) files.push(result.registered);
+      return result.document;
     }, valid);
   });
 }
@@ -861,6 +878,10 @@ $('#language').onchange = e => {
 };
 $('#filter').oninput = side;
 $('#editor').oninput = e => {
+  lineEndings =
+    e.target.value === baseline
+      ? [...baselineEndings]
+      : editLineEndings(source, e.target.value, lineEndings, newline);
   source = e.target.value;
   findCycling = false;
   update();
