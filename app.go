@@ -41,6 +41,13 @@ type SaveResult struct {
 	Document  Document `json:"document"`
 }
 type record struct{ Path, Root string }
+
+// dialogs are the native file pickers; tests replace them so the save and export rules can run headless.
+type dialogs struct {
+	openFiles  func(w.OpenDialogOptions) ([]string, error)
+	openFolder func(w.OpenDialogOptions) (string, error)
+	saveFile   func(w.SaveDialogOptions) (string, error)
+}
 type App struct {
 	openTiming     OpenTiming
 	timingDocument string
@@ -58,9 +65,21 @@ type App struct {
 	settings       settings
 	settingsFile   string
 	settingsError  string
+	dialog         *dialogs
 }
 
 func NewApp() *App { return &App{files: make(map[string]*record), lang: fallbackLanguage} }
+
+func (a *App) pickers() dialogs {
+	if a.dialog != nil {
+		return *a.dialog
+	}
+	return dialogs{
+		openFiles:  func(o w.OpenDialogOptions) ([]string, error) { return w.OpenMultipleFilesDialog(a.ctx, o) },
+		openFolder: func(o w.OpenDialogOptions) (string, error) { return w.OpenDirectoryDialog(a.ctx, o) },
+		saveFile:   func(o w.SaveDialogOptions) (string, error) { return w.SaveFileDialog(a.ctx, o) },
+	}
+}
 
 // newDesktopApp restores the saved language and window size, or follows the system language on first launch.
 func newDesktopApp() *App {
@@ -268,11 +287,11 @@ func (a *App) registerPaths(paths []string) OpenResult {
 	return out
 }
 func (a *App) OpenFiles() (OpenResult, error) {
-	p, e := w.OpenMultipleFilesDialog(a.ctx, w.OpenDialogOptions{Title: a.tr("dialog.open"), Filters: []w.FileFilter{{DisplayName: a.tr("dialog.markdown"), Pattern: "*.md;*.markdown;*.mdown;*.mkd"}}})
+	p, e := a.pickers().openFiles(w.OpenDialogOptions{Title: a.tr("dialog.open"), Filters: []w.FileFilter{{DisplayName: a.tr("dialog.markdown"), Pattern: "*.md;*.markdown;*.mdown;*.mkd"}}})
 	return a.registerPaths(p), e
 }
 func (a *App) OpenFolder() (OpenResult, error) {
-	p, e := w.OpenDirectoryDialog(a.ctx, w.OpenDialogOptions{Title: a.tr("dialog.folder")})
+	p, e := a.pickers().openFolder(w.OpenDialogOptions{Title: a.tr("dialog.folder")})
 	if e != nil || p == "" {
 		return OpenResult{}, e
 	}
@@ -525,7 +544,7 @@ func (a *App) SaveDocument(id, content, baseline, encoding string, saveAs bool) 
 		if known {
 			name = filepath.Base(p)
 		}
-		p, e = w.SaveFileDialog(a.ctx, w.SaveDialogOptions{Title: a.tr("dialog.save"), DefaultFilename: name, Filters: []w.FileFilter{{DisplayName: a.tr("dialog.markdown"), Pattern: "*.md;*.markdown"}}})
+		p, e = a.pickers().saveFile(w.SaveDialogOptions{Title: a.tr("dialog.save"), DefaultFilename: name, Filters: []w.FileFilter{{DisplayName: a.tr("dialog.markdown"), Pattern: "*.md;*.markdown"}}})
 		if e != nil {
 			return SaveResult{}, e
 		}
@@ -632,7 +651,7 @@ func (a *App) ExportHTML(name, html string) (string, error) {
 	if len(html) > 28*1024*1024 {
 		return "", fail("exportTooLarge")
 	}
-	p, e := w.SaveFileDialog(a.ctx, w.SaveDialogOptions{Title: a.tr("dialog.export"), DefaultFilename: strings.TrimSuffix(name, filepath.Ext(name)) + ".html", Filters: []w.FileFilter{{DisplayName: a.tr("dialog.html"), Pattern: "*.html"}}})
+	p, e := a.pickers().saveFile(w.SaveDialogOptions{Title: a.tr("dialog.export"), DefaultFilename: strings.TrimSuffix(name, filepath.Ext(name)) + ".html", Filters: []w.FileFilter{{DisplayName: a.tr("dialog.html"), Pattern: "*.html"}}})
 	if e != nil || p == "" {
 		return "", e
 	}
