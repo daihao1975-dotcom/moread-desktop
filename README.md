@@ -37,6 +37,8 @@ scripts/release.sh            # 测试 → 构建 → 打包，输出到 dist/Mo
 
 `scripts/release.sh` 依次运行前端与 Go 测试（含 race）、构建 macOS / Windows 版本并写入提交号与构建时间、编译 macOS 图标、校验签名、生成 DMG / ZIP / EXE 与 SHA256SUMS，并检查每个文件不超过 30,000,000 字节。工作区未提交时脚本会拒绝构建（本地试构建可设 `ALLOW_DIRTY=1`）。
 
+正式签名为可选项，设置环境变量后自动启用：`MACOS_SIGN_IDENTITY`（Developer ID Application 证书名）用于 macOS 签名并开启加固运行时，再设 `NOTARY_PROFILE`（`xcrun notarytool store-credentials` 保存的钥匙串配置名）即对应用与 DMG 公证并装订；`WINDOWS_SIGN_COMMAND` 为对 exe 原地签名的命令，脚本以文件路径为唯一参数调用。未设置时 macOS 使用临时签名，Windows 不签名。
+
 图标由 `scripts/make_icons.py` 绘制并生成；第三方声明由 `scripts/notices.py` 生成。界面文字位于 `frontend/src/locales/*.json`，前端与原生菜单共用，新增文字须同时补齐全部语言（测试会校验）。
 
 ## 许可
@@ -69,7 +71,7 @@ scripts/release.sh            # 测试 → 构建 → 打包，输出到 dist/Mo
 
 **Documents**: [User Guide](docs/User-Guide.md) · [Release notes](docs/版本说明.md) · [Privacy](docs/隐私说明.md)
 
-**Build**: Go 1.26.10+, Node.js 22.12+, Wails CLI 2.17.0 and, on macOS, Xcode 26+. Run `cd frontend && npm ci`, then `scripts/release.sh`, which tests, builds, stamps the commit and build time, compiles the macOS icon, verifies signatures and writes DMG / ZIP / EXE packages with SHA256SUMS.
+**Build**: Go 1.26.10+, Node.js 22.12+, Wails CLI 2.17.0 and, on macOS, Xcode 26+. Run `cd frontend && npm ci`, then `scripts/release.sh`, which tests, builds, stamps the commit and build time, compiles the macOS icon, verifies signatures and writes DMG / ZIP / EXE packages with SHA256SUMS. Signing is optional: set `MACOS_SIGN_IDENTITY` (Developer ID Application) to sign with the hardened runtime, add `NOTARY_PROFILE` (a `notarytool` keychain profile) to notarize and staple the app and DMG, and set `WINDOWS_SIGN_COMMAND` to a command that signs the exe in place. Without them the macOS app is ad-hoc signed and the Windows exe is unsigned.
 
 **License**: source code under the [MIT License](LICENSE), © 2026 阿屠宰. The names "墨阅" / "MoRead" and the app icon are not covered; forks must use their own name and icon ([TRADEMARKS.md](TRADEMARKS.md)). Third-party components keep their own licenses ([THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt)).
 
