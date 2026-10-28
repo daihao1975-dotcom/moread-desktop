@@ -4,7 +4,7 @@ import { readPreferences, normalizeWidth, resolveTheme } from './preferences.js'
 import { bindTitlebar } from './titlebar.js';
 import { documentTransition } from './document-transition.js';
 import { initializeDocuments } from './initial-documents.js';
-import { LANGUAGES, matchLanguage, setLanguage, language, t, translate, localizeMessage } from './i18n.js';
+import { matchLanguage, setLanguage, language, t, translate, localizeMessage } from './i18n.js';
 import { bindTooltips } from './tooltip.js';
 import {
   continueList,
@@ -35,9 +35,14 @@ import {
 import { sample, welcome } from './sample.js';
 import { createFrame } from './frame.js';
 import { renderDocument, getCSS, page } from './render.js';
+import { locate, place, caretTop, headingTops } from './scroll-sync.js';
+import { shortcutActions, shortcutKey, renderShortcuts } from './shortcuts.js';
+import { externalChanges } from './external-changes.js';
+import { createAbout } from './about.js';
+import { bindSplitter } from './splitter.js';
+import { layout } from './layout.js';
 const $ = s => document.querySelector(s),
   app = $('#app');
-const icon = name => `<i data-lucide="${name}"></i>`;
 const isMac = /Mac/.test(navigator.userAgent),
   mod = isMac ? '⌘' : 'Ctrl+';
 let prefs = readPreferences();
@@ -51,41 +56,10 @@ const preferredLanguage = () =>
     ? matchLanguage(navigator.languages?.length ? navigator.languages : [navigator.language])
     : matchLanguage([prefs.lang]);
 setLanguage(preferredLanguage());
-// Static labels carry data-i18n keys; translate() fills them now and again after a language switch.
-const tool = (id, name, key, shortcut) =>
-  `<button id="${id}" class="icon-button" data-i18n-title="${key}${shortcut ? '|' + shortcut : ''}" data-i18n-label="${key}">${icon(name)}</button>`;
 if (isMac && window.runtime) document.body.classList.add('mac');
-app.innerHTML = `<header class="topbar"><div class="toolbar">${tool('toggle-side', 'panel-left', 'tb.sidebar')}<div class="divider"></div>${tool('open', 'file-text', 'tb.open', mod + 'O')}${tool('folder', 'folder-open', 'tb.folder')}${tool('new', 'file-plus', 'tb.new', mod + 'N')}${tool('save', 'save', 'tb.save', mod + 'S')}<div class="doc-title"><span class="document-name" id="doc-name"></span><span class="doc-state" id="doc-state"></span></div></div>
-<div class="segmented"><button data-mode="read" class="active" data-i18n="mode.read" data-i18n-title="mode.read|${mod}1"></button><button data-mode="source" data-i18n="mode.source" data-i18n-title="mode.source|${mod}2"></button><button data-mode="split" data-i18n="mode.split" data-i18n-title="mode.split|${mod}3"></button></div>
-<div class="toolbar toolbar-end">${tool('find', 'search', 'tb.find', mod + 'F')}${tool('focus', 'maximize-2', 'tb.focus', 'Esc')}${tool('settings-toggle', 'sliders-horizontal', 'tb.settings', mod + ',')}</div></header>
-<div class="workspace"><aside id="sidebar"><div class="side-tabs"><button data-tab="files" class="active" data-i18n="side.files"></button><button data-tab="outline" data-i18n="side.outline"></button></div><div class="filter-wrap"><input id="filter" data-i18n-placeholder="side.filter" data-i18n-label="side.filter"></div><nav class="side-list" id="side-list"></nav><div class="side-footer"><img src="${brandIcon}" alt=""><b data-i18n="app.name"></b><span data-i18n="side.footer"></span></div></aside>
-<main><div class="findbar" id="findbar"><div class="find-row"><input id="query" data-i18n-placeholder="find.placeholder" data-i18n-label="find.placeholder"><span id="match-count" aria-live="polite"></span><button id="prev-match" data-i18n-title="find.prev|Shift+Enter" data-i18n-label="find.prev">${icon('chevron-up')}</button><button id="next-match" data-i18n-title="find.next|Enter" data-i18n-label="find.next">${icon('chevron-down')}</button><span class="grow"></span><button id="close-find" data-i18n-title="find.close|Esc" data-i18n-label="find.close">${icon('x')}</button></div><div class="replace-row"><input id="replacement" data-i18n-placeholder="replace.placeholder" data-i18n-label="replace.placeholder"><button id="replace-one" class="text-button" data-i18n="replace.one"></button><button id="replace-all" class="text-button" data-i18n="replace.all"></button></div></div>
-<div class="view-area"><textarea id="editor" data-i18n-label="editor.label" spellcheck="false" class="hidden"></textarea><div class="splitter" id="splitter" role="separator" aria-orientation="vertical" data-i18n-label="splitter.label" tabindex="0"></div><iframe id="preview" data-i18n-title="preview.title" sandbox="allow-scripts"></iframe></div></main></div>
-<footer class="statusbar"><span><b class="online-dot"></b><span data-i18n="status.offline"></span></span><span id="encoding"></span><span id="words"></span><span class="grow"></span><span id="render-status"></span><span id="app-version"></span></footer>
-<div class="settings" id="settings"><div class="setting-title" data-i18n="settings.theme"></div><div class="theme-options"><button data-theme="auto" data-i18n="theme.auto"></button><button data-theme="light" data-i18n="theme.light"></button><button data-theme="paper" data-i18n="theme.paper"></button><button data-theme="dark" data-i18n="theme.dark"></button></div>
-<div class="setting-row"><span><span data-i18n="settings.size"></span> <b id="size-label"></b></span><input id="font-size" type="range" min="13" max="24" data-i18n-label="settings.size"></div>
-<div class="setting-row"><span data-i18n="settings.width"></span><select id="width"><option value="auto" data-i18n="width.auto"></option><option value="720" data-i18n="width.720"></option><option value="860" data-i18n="width.860"></option><option value="1040" data-i18n="width.1040"></option></select></div>
-<div class="setting-row"><span data-i18n="settings.language"></span><select id="language"><option value="auto" data-i18n="lang.auto"></option>${LANGUAGES.map(([tag, name]) => `<option value="${tag}" lang="${tag}">${name}</option>`).join('')}</select></div><p class="setting-hint"></p></div>
-<dialog id="dirty-dialog"><h2 data-i18n="dirty.title"></h2><p data-i18n="dirty.body"></p><div class="dialog-actions"><button data-answer="cancel" data-i18n="dirty.cancel"></button><button data-answer="discard" data-i18n="dirty.discard"></button><button data-answer="save" class="primary" data-i18n="dirty.save"></button></div></dialog>
-<dialog id="shortcuts-dialog" class="shortcuts-dialog"><div class="dialog-heading"><h2 data-i18n="shortcuts.title"></h2><span class="grow"></span><button id="shortcuts-close" data-i18n="shortcuts.close"></button></div><div id="shortcut-list"></div></dialog>
-<div class="zoom" id="zoom"><button data-i18n-title="zoom.close|Esc" data-i18n-label="zoom.close">${icon('x')}</button><img data-i18n-alt="zoom.alt"></div>`;
-const aboutDialog = document.createElement('dialog');
-aboutDialog.className = 'about-dialog';
-aboutDialog.innerHTML = `<div class="about-heading"><img src="${brandIcon}" alt=""><div><h2>墨阅 MoRead</h2><p data-i18n="app.producer"></p></div><span class="grow"></span><button id="about-close" data-i18n="about.close"></button></div><dl id="build-details"></dl><details class="advanced-diagnostics"><summary data-i18n="about.diagnostics"></summary><pre id="open-timing"></pre><div class="isolation-check"><button id="check-isolation" data-i18n="about.check"></button><span id="isolation-result"></span></div></details><div class="about-tabs"><button data-license="own" class="active" data-i18n="about.own"></button><button data-license="thirdParty" data-i18n="about.thirdParty"></button><button data-license="brand" data-i18n="about.brand"></button></div><textarea id="license-text" readonly data-i18n-label="about.licenseLabel" spellcheck="false"></textarea>`;
-document.body.append(aboutDialog);
-let licenseTexts = {},
-  isolationBusy = false,
-  closeInFlight = false,
+app.innerHTML = layout({ mod, brandIcon });
+let closeInFlight = false,
   closeApproved = false;
-$('#about-close').onclick = () => aboutDialog.close();
-aboutDialog.querySelectorAll('[data-license]').forEach(
-  b =>
-    (b.onclick = () => {
-      aboutDialog.querySelectorAll('[data-license]').forEach(t => t.classList.toggle('active', t === b));
-      $('#license-text').value = licenseTexts[b.dataset.license] || '';
-      $('#license-text').scrollTop = 0;
-    }),
-);
 $('#shortcuts-close').onclick = () => $('#shortcuts-dialog').close();
 bindTitlebar($('.topbar'), window.runtime);
 const tooltips = bindTooltips(document);
@@ -145,8 +119,7 @@ let current = builtinDocument('welcome'),
   scrollLead = '',
   scrollLeadAt = 0,
   renderedTheme = '',
-  countTimer,
-  externalNotice = '';
+  countTimer;
 const native = () => window.go?.main?.App;
 async function call(name, ...args) {
   if (!native()) throw new Error(t('toast.desktopOnly'));
@@ -225,7 +198,7 @@ function relabel() {
   translate(document);
   $('.setting-hint').textContent = t('settings.hint', { menu: isMac ? t('menu.app') : t('menu.help') });
   $('#app-version').textContent = t('status.version', { v: version });
-  buildShortcuts();
+  renderShortcuts($('#shortcut-list'), isMac, t);
   update();
   side();
   syncToggles();
@@ -414,7 +387,7 @@ async function save(as) {
     current = { ...r.document, content: source };
     baseline = text;
     baselineEndings = savedEndings;
-    externalNotice = '';
+    external.reset();
     if (!files.some(f => f.id === current.id)) files.push(current);
     side();
     update();
@@ -583,7 +556,7 @@ function showSourceHit(i, focus) {
     findCycling = true;
   }
   ed.setSelectionRange(p, p + q.length);
-  ed.scrollTop = Math.max(0, caretTop(p) - ed.clientHeight / 3);
+  ed.scrollTop = Math.max(0, caretTop(ed, source, p) - ed.clientHeight / 3);
   $('#match-count').textContent = countLabel(findHits.length, i);
 }
 async function runFind(move = true) {
@@ -739,74 +712,6 @@ function toggleFind(open = true, withReplace = false) {
     runFind(false);
   } else clearFind();
 }
-function buildShortcuts() {
-  const m = isMac ? '⌘' : 'Ctrl',
-    sh = isMac ? '⇧' : 'Shift',
-    alt = isMac ? '⌥' : 'Alt';
-  const groups = [
-    [
-      'shortcuts.files',
-      [
-        ['shortcuts.open', [m, 'O']],
-        ['shortcuts.new', [m, 'N']],
-        ['shortcuts.save', [m, 'S']],
-        ['shortcuts.saveAs', [m, sh, 'S']],
-        ['shortcuts.print', [m, 'P']],
-      ],
-    ],
-    [
-      'shortcuts.editing',
-      [
-        ['shortcuts.bold', [m, 'B']],
-        ['shortcuts.italic', [m, 'I']],
-        ['shortcuts.code', [m, 'E']],
-        ['shortcuts.link', [m, 'K']],
-        ['shortcuts.indent', ['Tab', '/', sh, 'Tab']],
-        ['shortcuts.list', ['Enter']],
-        ['shortcuts.find', [m, 'F']],
-        ['shortcuts.replace', isMac ? [m, alt, 'F'] : [m, 'H']],
-      ],
-    ],
-    [
-      'shortcuts.viewing',
-      [
-        ['shortcuts.modes', [m, '1', '/', '2', '/', '3']],
-        ['shortcuts.fontSize', [m, '=', '/', '-', '/', '0']],
-        ['shortcuts.settings', [m, ',']],
-        ['shortcuts.help', [m, '/']],
-        ['shortcuts.escape', ['Esc']],
-      ],
-    ],
-  ];
-  const list = $('#shortcut-list');
-  list.replaceChildren();
-  for (const [title, rows] of groups) {
-    const section = document.createElement('section'),
-      h = document.createElement('h3');
-    h.textContent = t(title);
-    section.append(h);
-    for (const [label, keys] of rows) {
-      const row = document.createElement('div'),
-        name = document.createElement('span'),
-        combo = document.createElement('span');
-      row.className = 'shortcut-row';
-      name.textContent = t(label);
-      combo.className = 'keys';
-      keys.forEach((k, i) => {
-        if (k === '/' && i > 0 && i < keys.length - 1) {
-          combo.append(' / ');
-          return;
-        }
-        const kbd = document.createElement('kbd');
-        kbd.textContent = k;
-        combo.append(kbd);
-      });
-      row.append(name, combo);
-      section.append(row);
-    }
-    list.append(section);
-  }
-}
 async function snapshot() {
   clearTimeout(timer);
   const v = ++version_;
@@ -943,68 +848,13 @@ $('#replacement').onkeydown = e => {
   }
 };
 $('#zoom').onclick = () => $('#zoom').classList.remove('open');
-$('#check-isolation').onclick = async () => {
-  if (isolationBusy) return;
-  isolationBusy = true;
-  const control = $('#check-isolation'),
-    target = $('#isolation-result');
-  control.disabled = true;
-  target.textContent = t('about.checking');
-  try {
-    const before = await call('AboutInfo');
-    const result = await previewFrame.inspect();
-    const first = await call('AboutInfo');
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const after = await call('AboutInfo');
-    if (result.cancelled) throw new Error(t('about.isoRetry'));
-    const extra = after.calls - before.calls - 2;
-    if (
-      !result.parentAccessDenied ||
-      (result.nativeProbeAttempted && (first.calls - before.calls !== 1 || extra !== 0)) ||
-      (!result.nativeProbeAttempted && result.goVisible)
-    )
-      throw new Error(t('about.isoFail'));
-    target.textContent = result.nativeProbeAttempted
-      ? t('about.isoPass', { n: extra })
-      : t('about.isoPartial');
-  } catch (e) {
-    target.textContent = localizeMessage(e.message || e);
-  } finally {
-    isolationBusy = false;
-    control.disabled = false;
-  }
-};
-async function showAbout() {
-  try {
-    const [info, texts] = await Promise.all([call('AboutInfo'), call('LicenseTexts')]);
-    licenseTexts = texts;
-    $('#open-timing').textContent = JSON.stringify(info.openTiming, null, 2);
-    $('#build-details').replaceChildren();
-    for (const [label, value] of [
-      ['about.version', info.version],
-      ['about.platform', info.platform],
-      ['about.built', info.builtAt],
-      ['about.commit', info.commit],
-      ['about.runtime', info.goVersion + ' · Wails ' + info.wailsVersion],
-      // Shown only when the settings file could not be read or saved.
-      ...(info.settingsError ? [['about.settings', info.settingsError]] : []),
-    ]) {
-      const dt = document.createElement('dt'),
-        dd = document.createElement('dd');
-      dt.textContent = t(label);
-      dd.textContent = value;
-      $('#build-details').append(dt, dd);
-    }
-    $('#license-text').value = texts.own;
-    aboutDialog
-      .querySelectorAll('[data-license]')
-      .forEach(b => b.classList.toggle('active', b.dataset.license === 'own'));
-    toggleSettings(false);
-    aboutDialog.showModal();
-  } catch (e) {
-    toast(e, true);
-  }
-}
+const about = createAbout({
+  icon: brandIcon,
+  call,
+  inspect: () => previewFrame.inspect(),
+  beforeShow: () => toggleSettings(false),
+  onError: e => toast(e, true),
+});
 function showShortcuts() {
   toggleSettings(false);
   $('#shortcuts-dialog').showModal();
@@ -1058,7 +908,7 @@ const actions = {
   'save-as': () => save(true),
   export: exportHTML,
   print: printDocument,
-  about: showAbout,
+  about: () => about.show(),
   shortcuts: showShortcuts,
   sample: loadSample,
   settings: () => toggleSettings(),
@@ -1078,26 +928,6 @@ const actions = {
   link: () => formatSource('link'),
   indent: () => formatSource('indent'),
   outdent: () => formatSource('outdent'),
-};
-const shortcutActions = {
-  o: 'open',
-  s: 'save',
-  'save-as': 'save-as',
-  n: 'new',
-  f: 'find',
-  p: 'print',
-  ',': 'settings',
-  1: 'read',
-  2: 'source',
-  3: 'split',
-  b: 'bold',
-  i: 'italic',
-  e: 'code',
-  k: 'link',
-  ']': 'indent',
-  '[': 'outdent',
-  '/': 'shortcuts',
-  replace: 'replace',
 };
 // A menu accelerator and the in-page shortcut can both fire for one key press; run each action once.
 function runAction(name) {
@@ -1123,13 +953,7 @@ document.addEventListener('keydown', e => {
     handleShortcut('escape');
     return;
   }
-  if (!(e.metaKey || e.ctrlKey) || e.isComposing) return;
-  const k = e.key.toLowerCase();
-  let name = '';
-  if (e.altKey && e.code === 'KeyF') name = 'replace';
-  else if (!isMac && k === 'h' && !e.altKey) name = 'replace';
-  else if (k === 's' && e.shiftKey) name = 'save-as';
-  else if (!e.altKey && !e.shiftKey && k in shortcutActions && k !== 'save-as' && k !== 'replace') name = k;
+  const name = shortcutKey(e, isMac);
   if (name) {
     e.preventDefault();
     handleShortcut(name);
@@ -1138,23 +962,12 @@ document.addEventListener('keydown', e => {
 function hasDiagram() {
   return /^\s*(```|~~~)\s*mermaid/m.test(source);
 }
-// Another program may change the open file. A clean document reloads in place; an edited one keeps its text and is warned once.
-async function checkExternal() {
-  if (!current.id || opening || saveBusy || !native()) return;
-  const id = current.id,
-    hash = current.hash;
-  let now;
-  try {
-    now = await call('DocumentHash', id);
-  } catch {
-    if (current.id === id && externalNotice !== id + ':missing') {
-      externalNotice = id + ':missing';
-      toast(t('toast.missing'), true);
-    }
-    return;
-  }
-  if (current.id !== id || current.hash !== hash || now === hash) return;
-  if (!dirty()) {
+const external = externalChanges({
+  open: () => current,
+  busy: () => opening || saveBusy || !native(),
+  dirty,
+  readHash: id => call('DocumentHash', id),
+  reload: (id, hash) =>
     enqueue(() =>
       documentTransition({
         guard: async () => current.id === id && current.hash === hash && !dirty(),
@@ -1166,14 +979,10 @@ async function checkExternal() {
         },
         setOpening,
       }),
-    );
-    return;
-  }
-  if (externalNotice !== id + ':' + now) {
-    externalNotice = id + ':' + now;
-    toast(t('toast.externalDirty'), true);
-  }
-}
+    ),
+  warn: kind => toast(t(kind === 'missing' ? 'toast.missing' : 'toast.externalDirty'), true),
+});
+const checkExternal = () => external.check();
 addEventListener('focus', checkExternal);
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) checkExternal();
@@ -1181,6 +990,7 @@ document.addEventListener('visibilitychange', () => {
 setInterval(() => {
   if (!document.hidden && document.hasFocus()) checkExternal();
 }, 4000);
+const editorTops = headingTops();
 // Reading position from the preview drives the outline highlight and, in split view, the editor.
 function handlePosition({ ratio, heading, section, progress }) {
   if (heading !== currentHeading) {
@@ -1199,7 +1009,7 @@ function handlePosition({ ratio, heading, section, progress }) {
   scrollLeadAt = Date.now();
   const ed = $('#editor'),
     max = ed.scrollHeight - ed.clientHeight,
-    tops = editorTops();
+    tops = editorTops($('#editor'), source, rendered);
   ed.scrollTop = tops && section < tops.length ? place(tops, section, progress, max) : ratio * max;
 }
 let editorScrollQueued = false;
@@ -1220,7 +1030,7 @@ $('#editor').addEventListener(
       const ed = $('#editor'),
         max = ed.scrollHeight - ed.clientHeight,
         y = Math.min(ed.scrollTop, max),
-        tops = editorTops();
+        tops = editorTops($('#editor'), source, rendered);
       if (tops) {
         const at = locate(tops, y, max);
         previewFrame.scrollTo(at.progress, at.section).catch(() => {});
@@ -1229,137 +1039,11 @@ $('#editor').addEventListener(
   },
   { passive: true },
 );
-// Split view aligns both panes by heading; these mirror the preview-side helpers in frame-bootstrap.js.
-const span = (tops, k, max) => [k < 0 ? 0 : tops[k], Math.min(k + 1 < tops.length ? tops[k + 1] : max, max)];
-const locate = (tops, y, max) => {
-  let k = -1;
-  while (k + 1 < tops.length && tops[k + 1] <= y) k++;
-  const [a, b] = span(tops, k, max);
-  return { section: k, progress: b > a ? Math.min(1, Math.max(0, (y - a) / (b - a))) : 0 };
-};
-const place = (tops, k, p, max) => {
-  const [a, b] = span(tops, k, max);
-  return a + Math.max(0, b - a) * p;
-};
-function sourceHeadingLines(lines) {
-  const out = [];
-  let fence = '';
-  lines.forEach((l, i) => {
-    const f = l.match(/^ {0,3}(`{3,}|~{3,})/);
-    if (f) {
-      if (!fence) fence = f[1][0];
-      else if (f[1][0] === fence) fence = '';
-      return;
-    }
-    if (!fence && /^ {0,3}#{1,6}(\s|$)/.test(l)) out.push(i);
-  });
-  return out;
-}
-// A hidden mirror wraps text exactly like the textarea, so pixel positions of lines can be measured.
-function mirrorOf(ed) {
-  const cs = getComputedStyle(ed),
-    m = document.createElement('div');
-  for (const p of [
-    'fontFamily',
-    'fontSize',
-    'fontWeight',
-    'lineHeight',
-    'letterSpacing',
-    'tabSize',
-    'paddingTop',
-    'paddingRight',
-    'paddingBottom',
-    'paddingLeft',
-    'overflowWrap',
-    'wordBreak',
-  ])
-    m.style[p] = cs[p];
-  Object.assign(m.style, {
-    position: 'absolute',
-    visibility: 'hidden',
-    left: '-99999px',
-    top: '0',
-    boxSizing: 'border-box',
-    whiteSpace: 'pre-wrap',
-    width: ed.clientWidth + 'px',
-  });
-  return m;
-}
-function caretTop(pos) {
-  const ed = $('#editor');
-  if (source.length > 2e6) {
-    const lh = parseFloat(getComputedStyle(ed).lineHeight) || 25;
-    return (source.slice(0, pos).split('\n').length - 1) * lh;
-  }
-  const m = mirrorOf(ed),
-    mark = document.createElement('span');
-  m.append(source.slice(0, pos), mark);
-  document.body.append(m);
-  const top = mark.offsetTop;
-  m.remove();
-  return top;
-}
-let mirrorKey = '',
-  mirrorTops = null;
-// Pixel tops of each heading line in the textarea.
-function editorTops() {
-  const ed = $('#editor');
-  if (!rendered || source.length > 2e6) return null;
-  const cs = getComputedStyle(ed),
-    key = rendered.version + ':' + source.length + ':' + ed.clientWidth + ':' + cs.fontSize;
-  if (key === mirrorKey) return mirrorTops;
-  mirrorKey = key;
-  mirrorTops = null;
-  const lines = source.split('\n'),
-    heads = sourceHeadingLines(lines);
-  if (heads.length !== rendered.outline.length) return null;
-  const m = mirrorOf(ed);
-  const marks = [];
-  let start = 0;
-  for (const i of heads) {
-    if (i > start) m.append(lines.slice(start, i).join('\n') + '\n');
-    const s = document.createElement('span');
-    m.append(s);
-    marks.push(s);
-    start = i;
-  }
-  m.append(lines.slice(start).join('\n'));
-  document.body.append(m);
-  mirrorTops = marks.map(s => s.offsetTop);
-  m.remove();
-  return mirrorTops;
-}
-const splitter = $('#splitter');
-function setSplit(v) {
-  prefs.split = Math.min(80, Math.max(20, Math.round(v)));
-  $('.view-area').style.setProperty('--split', prefs.split + '%');
-}
-splitter.onpointerdown = e => {
-  e.preventDefault();
-  splitter.setPointerCapture(e.pointerId);
-  document.body.classList.add('resizing');
-};
-splitter.onpointermove = e => {
-  if (!splitter.hasPointerCapture(e.pointerId)) return;
-  const r = $('.view-area').getBoundingClientRect();
-  setSplit(((e.clientX - r.left) / r.width) * 100);
-};
-splitter.onpointerup = splitter.onpointercancel = e => {
-  if (splitter.hasPointerCapture(e.pointerId)) splitter.releasePointerCapture(e.pointerId);
-  document.body.classList.remove('resizing');
-  applyPrefs();
-};
-splitter.ondblclick = () => {
-  setSplit(50);
-  applyPrefs();
-};
-splitter.onkeydown = e => {
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-    e.preventDefault();
-    setSplit(prefs.split + (e.key === 'ArrowLeft' ? -5 : 5));
-    applyPrefs();
-  }
-};
+bindSplitter($('#splitter'), $('.view-area'), {
+  get: () => prefs.split,
+  set: v => (prefs.split = v),
+  commit: applyPrefs,
+});
 window.addEventListener('error', e => toast(e.message, true));
 window.addEventListener('unhandledrejection', e => toast(e.reason, true));
 const previewFrame = createFrame($('#preview'), {
