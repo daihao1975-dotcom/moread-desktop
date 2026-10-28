@@ -98,3 +98,5 @@ MoRead remembers only these preferences and the window size, never document cont
 **MoRead does not start on Windows.** Check that Microsoft Edge WebView2 Runtime is installed.
 
 **Version and licences.** macOS: **MoRead → About MoRead and Licenses**; Windows: **Help → About MoRead and Licenses**. All shortcuts are under **Help → Keyboard Shortcuts** (⌘ / Ctrl + /).
+
+**Is there a newer version?** MoRead never checks by itself. Choose **Check for Updates…** in the same menu, or **Check for updates** in the About window, to open the release page in your browser and compare it with the version shown in About.

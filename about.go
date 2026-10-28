@@ -5,6 +5,8 @@ import (
 	"runtime"
 	"runtime/debug"
 	"strings"
+
+	w "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // These values are supplied by the release build. Defaults describe an unstamped development build.
@@ -59,6 +61,12 @@ func (a *App) AboutInfo() AboutDetails {
 	}
 	return AboutDetails{OpenTiming: timing, Calls: calls, Version: buildVersion, Commit: buildCommit, BuiltAt: buildTime, Platform: runtime.GOOS + " / " + runtime.GOARCH, GoVersion: runtime.Version(), WailsVersion: wailsVersion, Producer: "阿屠宰制作", LicenseTitle: strings.SplitN(ownLicense, "\n", 2)[0], SettingsError: settingsError}
 }
+
+// releasesURL lists published versions. MoRead never contacts it by itself; the reader opens it on request.
+const releasesURL = "https://github.com/daihao1975-dotcom/moread-desktop/releases/latest"
+
+// OpenReleases shows the latest release in the browser, so the reader compares versions there.
+func (a *App) OpenReleases() { w.BrowserOpenURL(a.ctx, releasesURL) }
 func (a *App) LicenseTexts() map[string]string {
 	return map[string]string{"own": ownLicense, "thirdParty": dependencyNotices, "brand": trademarkNotice + "\n\n" + brandingNotice}
 }

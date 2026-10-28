@@ -4,11 +4,12 @@ export function createAbout({ icon, call, inspect, beforeShow, onError }) {
   const $ = s => dialog.querySelector(s);
   const dialog = document.createElement('dialog');
   dialog.className = 'about-dialog';
-  dialog.innerHTML = `<div class="about-heading"><img src="${icon}" alt=""><div><h2>墨阅 MoRead</h2><p data-i18n="app.producer"></p></div><span class="grow"></span><button id="about-close" data-i18n="about.close"></button></div><dl id="build-details"></dl><details class="advanced-diagnostics"><summary data-i18n="about.diagnostics"></summary><pre id="open-timing"></pre><div class="isolation-check"><button id="check-isolation" data-i18n="about.check"></button><span id="isolation-result"></span></div></details><div class="about-tabs"><button data-license="own" class="active" data-i18n="about.own"></button><button data-license="thirdParty" data-i18n="about.thirdParty"></button><button data-license="brand" data-i18n="about.brand"></button></div><textarea id="license-text" readonly data-i18n-label="about.licenseLabel" spellcheck="false"></textarea>`;
+  dialog.innerHTML = `<div class="about-heading"><img src="${icon}" alt=""><div><h2>墨阅 MoRead</h2><p data-i18n="app.producer"></p></div><span class="grow"></span><button id="about-updates" data-i18n="about.updates" data-i18n-title="about.updatesHint"></button><button id="about-close" data-i18n="about.close"></button></div><dl id="build-details"></dl><details class="advanced-diagnostics"><summary data-i18n="about.diagnostics"></summary><pre id="open-timing"></pre><div class="isolation-check"><button id="check-isolation" data-i18n="about.check"></button><span id="isolation-result"></span></div></details><div class="about-tabs"><button data-license="own" class="active" data-i18n="about.own"></button><button data-license="thirdParty" data-i18n="about.thirdParty"></button><button data-license="brand" data-i18n="about.brand"></button></div><textarea id="license-text" readonly data-i18n-label="about.licenseLabel" spellcheck="false"></textarea>`;
   document.body.append(dialog);
   let licenseTexts = {},
     isolationBusy = false;
   $('#about-close').onclick = () => dialog.close();
+  $('#about-updates').onclick = () => call('OpenReleases').catch(onError);
   dialog.querySelectorAll('[data-license]').forEach(
     b =>
       (b.onclick = () => {

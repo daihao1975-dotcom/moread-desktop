@@ -21,11 +21,11 @@ func (a *App) menu() *menu.Menu {
 	a.mu.Lock()
 	lang := a.lang
 	a.mu.Unlock()
-	return buildMenu(a.emit, appCommands{hide: func() { w.Hide(a.ctx) }, hideOthers: hideOtherApps, showAll: showAllApps, quit: func() { w.Quit(a.ctx) }}, goruntime.GOOS == "darwin", func(key string) string { return translate(lang, key) })
+	return buildMenu(a.emit, appCommands{hide: func() { w.Hide(a.ctx) }, hideOthers: hideOtherApps, showAll: showAllApps, quit: func() { w.Quit(a.ctx) }, releases: a.OpenReleases}, goruntime.GOOS == "darwin", func(key string) string { return translate(lang, key) })
 }
 
 // appCommands are the window-level actions the native menu runs itself instead of sending to the frontend.
-type appCommands struct{ hide, hideOthers, showAll, quit func() }
+type appCommands struct{ hide, hideOthers, showAll, quit, releases func() }
 
 func run(f func()) menu.Callback { return func(*menu.CallbackData) { f() } }
 
@@ -35,6 +35,7 @@ func buildMenu(emit func(string) menu.Callback, cmd appCommands, mac bool, tr fu
 		// macOS shows the first submenu as the application menu.
 		app := root.AddSubmenu(tr("menu.app"))
 		app.AddText(tr("menu.about"), nil, emit("about"))
+		app.AddText(tr("menu.updates"), nil, run(cmd.releases))
 		app.AddSeparator()
 		app.AddText(tr("menu.settings"), keys.CmdOrCtrl(","), emit("settings"))
 		app.AddSeparator()
@@ -106,6 +107,7 @@ func buildMenu(emit func(string) menu.Callback, cmd appCommands, mac bool, tr fu
 	if !mac {
 		help.AddSeparator()
 		help.AddText(tr("menu.about"), nil, emit("about"))
+		help.AddText(tr("menu.updates"), nil, run(cmd.releases))
 	}
 	return root
 }
