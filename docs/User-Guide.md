@@ -35,7 +35,7 @@ Each document can be up to 10 MB. UTF-8, UTF-8 with BOM and UTF-16 LE / BE are s
 
 - **Read** (⌘ / Ctrl + 1): the formatted document.
 - **Source** (⌘ / Ctrl + 2): edit the Markdown text. Headings, list markers, code, links and emphasis are coloured; documents longer than about 150,000 characters, and unusually long lines or runs of backticks, stay plain so typing stays smooth.
-- **Split** (⌘ / Ctrl + 3): edit on the left with a live preview on the right; both sides scroll together, aligned by heading. Drag the divider to resize, double-click it to reset.
+- **Split** (⌘ / Ctrl + 3): edit on the left with a live preview on the right by default; both sides scroll together, aligned by heading. Use “Swap left and right panes” in the toolbar to exchange their positions. Settings also offers pane order and left pane width (20%–80%). Drag the divider to resize, double-click it to reset. Order and width are remembered for the next launch.
 
 Double-click empty space in the title bar to maximise or restore the window. Focus mode hides the sidebar and status bar; press Esc to leave.
 

@@ -301,5 +301,10 @@
   "err.notFound": "ファイルが存在しません",
   "err.recentUnknown": "この項目は最近使った項目にありません",
   "err.recentMissing": "移動または削除されたため、最近使った項目から外しました",
-  "err.permission": "アクセス権がありません"
+  "err.permission": "アクセス権がありません",
+  "tb.swapPanes": "左右のペインを入れ替え",
+  "settings.splitOrder": "ペインの順序",
+  "split.sourceLeft": "左にソース · 右にプレビュー",
+  "split.previewLeft": "左にプレビュー · 右にソース",
+  "settings.splitWidth": "左ペインの幅"
 }

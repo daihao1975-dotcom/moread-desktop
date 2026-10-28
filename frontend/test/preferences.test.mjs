@@ -25,6 +25,14 @@ test('split ratio is kept only within the draggable range', () => {
   assert.equal(readPreferences({ split: 35 }).split, 35);
   for (const v of [10, 95, '40', 40.5, null]) assert.equal(readPreferences({ split: v }).split, 50);
 });
+test('pane order and left pane width survive restart together', () => {
+  assert.equal(readPreferences({}).previewOnLeft, false);
+  const saved = readPreferences({ previewOnLeft: true, split: 70 });
+  const restored = readPreferences(JSON.parse(JSON.stringify(saved)));
+  assert.equal(restored.previewOnLeft, true);
+  assert.equal(restored.split, 70);
+  assert.equal(readPreferences({ previewOnLeft: 'true' }).previewOnLeft, false);
+});
 test('theme follows the system by default and resolves to a concrete reading theme', async () => {
   const { resolveTheme } = await import('../src/preferences.js');
   assert.equal(readPreferences({}).theme, 'auto');

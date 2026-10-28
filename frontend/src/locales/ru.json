@@ -301,5 +301,10 @@
   "err.notFound": "Файл не существует",
   "err.recentUnknown": "Этого элемента нет в списке недавних",
   "err.recentMissing": "Он был перемещён или удалён и убран из списка недавних",
-  "err.permission": "Доступ запрещён"
+  "err.permission": "Доступ запрещён",
+  "tb.swapPanes": "Поменять левую и правую панели",
+  "settings.splitOrder": "Порядок панелей",
+  "split.sourceLeft": "Исходный текст слева · Просмотр справа",
+  "split.previewLeft": "Просмотр слева · Исходный текст справа",
+  "settings.splitWidth": "Ширина левой панели"
 }

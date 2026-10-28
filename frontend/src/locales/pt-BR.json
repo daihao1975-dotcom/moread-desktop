@@ -301,5 +301,10 @@
   "err.notFound": "O arquivo não existe",
   "err.recentUnknown": "Este item não está na lista de recentes",
   "err.recentMissing": "Foi movido ou excluído e saiu da lista de recentes",
-  "err.permission": "Permissão negada"
+  "err.permission": "Permissão negada",
+  "tb.swapPanes": "Trocar os painéis esquerdo e direito",
+  "settings.splitOrder": "Ordem dos painéis",
+  "split.sourceLeft": "Fonte à esquerda · Prévia à direita",
+  "split.previewLeft": "Prévia à esquerda · Fonte à direita",
+  "settings.splitWidth": "Largura do painel esquerdo"
 }

@@ -31,6 +31,7 @@ import {
   ChevronUp,
   ChevronDown,
   X,
+  ArrowLeftRight,
 } from 'lucide';
 import { sample, welcome } from './sample.js';
 import { applyFolderUpdate, mergeFiles } from './file-list.js';
@@ -40,7 +41,7 @@ import { locate, place, caretTop, headingTops } from './scroll-sync.js';
 import { shortcutActions, shortcutKey, renderShortcuts } from './shortcuts.js';
 import { externalChanges } from './external-changes.js';
 import { createAbout } from './about.js';
-import { bindSplitter } from './splitter.js';
+import { applySplitLayout, bindSplitter, clampSplit } from './splitter.js';
 import { layout } from './layout.js';
 import { printTocHTML } from './print-toc.js';
 import { createSourceHighlight } from './source-highlight.js';
@@ -82,6 +83,7 @@ createIcons({
     ChevronUp,
     ChevronDown,
     X,
+    ArrowLeftRight,
   },
 });
 // builtin marks the welcome page and the full example, which follow the interface language until edited.
@@ -178,8 +180,10 @@ function savePrefs() {
 function applyPrefs() {
   const theme = activeTheme();
   document.body.dataset.theme = theme;
-  $('.view-area').style.setProperty('--split', prefs.split + '%');
-  $('#splitter').setAttribute('aria-valuenow', prefs.split);
+  applySplitLayout($('.view-area'), $('#splitter'), prefs);
+  $('#split-order').value = prefs.previewOnLeft ? 'preview' : 'source';
+  $('#split-width').value = prefs.split;
+  $('#split-width-label').textContent = prefs.split + '%';
   $('#sidebar').classList.toggle('hidden', !prefs.sidebar);
   $('#font-size').value = prefs.size;
   $('#size-label').textContent = prefs.size;
@@ -308,6 +312,7 @@ function setMode(v) {
   }
   document.querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('active', b.dataset.mode === v));
   $('.view-area').classList.toggle('split', v === 'split');
+  $('#swap-panes').classList.toggle('hidden', v !== 'split');
   $('#editor').classList.toggle('hidden', v === 'read');
   $('#preview').classList.toggle('hidden', v === 'source');
   if (v !== 'read') $('#editor').focus();
@@ -804,6 +809,18 @@ document.addEventListener('click', e => {
     toggleSettings(false);
 });
 document.querySelectorAll('[data-mode]').forEach(b => (b.onclick = () => setMode(b.dataset.mode)));
+$('#swap-panes').onclick = () => {
+  prefs.previewOnLeft = !prefs.previewOnLeft;
+  applyPrefs();
+};
+$('#split-order').onchange = e => {
+  prefs.previewOnLeft = e.target.value === 'preview';
+  applyPrefs();
+};
+$('#split-width').oninput = e => {
+  prefs.split = clampSplit(+e.target.value);
+  applyPrefs();
+};
 document.querySelectorAll('[data-tab]').forEach(
   b =>
     (b.onclick = () => {

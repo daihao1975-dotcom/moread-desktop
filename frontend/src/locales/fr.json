@@ -301,5 +301,10 @@
   "err.notFound": "Le fichier n’existe pas",
   "err.recentUnknown": "Cet élément ne figure pas dans la liste des récents",
   "err.recentMissing": "Il a été déplacé ou supprimé et retiré de la liste des récents",
-  "err.permission": "Autorisation refusée"
+  "err.permission": "Autorisation refusée",
+  "tb.swapPanes": "Permuter les volets gauche et droit",
+  "settings.splitOrder": "Ordre des volets",
+  "split.sourceLeft": "Source à gauche · Aperçu à droite",
+  "split.previewLeft": "Aperçu à gauche · Source à droite",
+  "settings.splitWidth": "Largeur du volet gauche"
 }

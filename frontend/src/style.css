@@ -452,6 +452,12 @@ textarea,
   flex: 1 1 0;
   width: auto;
 }
+.split.preview-left {
+  flex-direction: row-reverse;
+}
+.split.preview-left textarea {
+  flex-basis: calc(100% - var(--split, 50%));
+}
 .splitter {
   display: none;
   flex: none;
@@ -532,6 +538,8 @@ textarea,
   border: 1px solid var(--line);
   border-radius: 12px;
   width: 300px;
+  max-height: calc(100vh - 72px);
+  overflow-y: auto;
   padding: 18px;
   display: none;
 }

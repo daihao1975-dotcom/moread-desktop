@@ -301,5 +301,10 @@
   "err.notFound": "Die Datei existiert nicht",
   "err.recentUnknown": "Dieser Eintrag ist nicht in der Liste der zuletzt geöffneten",
   "err.recentMissing": "Es wurde verschoben oder gelöscht und aus der Liste entfernt",
-  "err.permission": "Zugriff verweigert"
+  "err.permission": "Zugriff verweigert",
+  "tb.swapPanes": "Linken und rechten Bereich tauschen",
+  "settings.splitOrder": "Bereichsreihenfolge",
+  "split.sourceLeft": "Quelltext links · Vorschau rechts",
+  "split.previewLeft": "Vorschau links · Quelltext rechts",
+  "settings.splitWidth": "Breite des linken Bereichs"
 }

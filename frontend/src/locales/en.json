@@ -301,5 +301,10 @@
   "err.notFound": "The file does not exist",
   "err.recentUnknown": "This item is not in the recent list",
   "err.recentMissing": "It was moved or deleted and has been removed from the recent list",
-  "err.permission": "Permission denied"
+  "err.permission": "Permission denied",
+  "tb.swapPanes": "Swap left and right panes",
+  "settings.splitOrder": "Pane order",
+  "split.sourceLeft": "Source left · Preview right",
+  "split.previewLeft": "Preview left · Source right",
+  "settings.splitWidth": "Left pane width"
 }

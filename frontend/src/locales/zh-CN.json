@@ -301,5 +301,10 @@
   "err.notFound": "文件不存在",
   "err.recentUnknown": "该项目不在最近打开列表中",
   "err.recentMissing": "它已被移动或删除，已从最近打开列表中移除",
-  "err.permission": "没有访问权限"
+  "err.permission": "没有访问权限",
+  "tb.swapPanes": "交换左右分栏",
+  "settings.splitOrder": "分栏顺序",
+  "split.sourceLeft": "左侧源码 · 右侧预览",
+  "split.previewLeft": "左侧预览 · 右侧源码",
+  "settings.splitWidth": "左栏占比"
 }

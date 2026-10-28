@@ -301,5 +301,10 @@
   "err.notFound": "檔案不存在",
   "err.recentUnknown": "此項目不在最近開啟清單中",
   "err.recentMissing": "它已被移動或刪除，已從最近開啟清單中移除",
-  "err.permission": "沒有存取權限"
+  "err.permission": "沒有存取權限",
+  "tb.swapPanes": "交換左右分欄",
+  "settings.splitOrder": "分欄順序",
+  "split.sourceLeft": "左側原始碼 · 右側預覽",
+  "split.previewLeft": "左側預覽 · 右側原始碼",
+  "settings.splitWidth": "左欄比例"
 }

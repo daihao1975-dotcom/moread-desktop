@@ -301,5 +301,10 @@
   "err.notFound": "파일이 없습니다",
   "err.recentUnknown": "이 항목은 최근 목록에 없습니다",
   "err.recentMissing": "이동되었거나 삭제되어 최근 목록에서 제거했습니다",
-  "err.permission": "접근 권한이 없습니다"
+  "err.permission": "접근 권한이 없습니다",
+  "tb.swapPanes": "좌우 패널 바꾸기",
+  "settings.splitOrder": "패널 순서",
+  "split.sourceLeft": "왼쪽 소스 · 오른쪽 미리보기",
+  "split.previewLeft": "왼쪽 미리보기 · 오른쪽 소스",
+  "settings.splitWidth": "왼쪽 패널 너비"
 }
