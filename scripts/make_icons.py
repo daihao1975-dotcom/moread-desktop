@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Build every MoRead icon from build/icon-art.png.
+"""Build every MoRead icon from a vector mark drawn here: an open book under an ink drop.
 
-The artwork has soft, irregular edges. macOS 26 places icons that do not follow the standard
-rounded-square template on a light plate and shrinks them, so the artwork is laid on a matching
-blue-to-aqua gradient and cut to a continuous-corner square:
+The mark is plain geometry (no generated artwork), drawn white on a DingTalk-blue to Apple-green
+diagonal gradient and cut to a continuous-corner square:
 
+- build/icon-art.png           the mark alone, white on transparent, 1024 px (reference source)
 - build/appicon.png            macOS grid: 824 px shape inset 100 px in a 1024 px canvas, with shadow
 - build/windows/icon.ico       full-bleed shape, 16–256 px
 - frontend/src/assets/icon.png full-bleed shape, 128 px, for the sidebar and About dialog
@@ -16,9 +16,9 @@ import pathlib
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 root = pathlib.Path(__file__).resolve().parents[1]
-ART = root / 'build/icon-art.png'
-TOP_LEFT, BOTTOM_RIGHT = (1, 120, 253), (6, 238, 220)
-ART_SCALE = 0.84  # leaves breathing room between the character and the icon edge
+TOP_LEFT, BOTTOM_RIGHT = (22, 119, 255), (52, 199, 89)  # #1677FF -> #34C759
+MARK_SCALE = 0.80  # leaves breathing room between the mark and the icon edge
+SUPERSAMPLE = 4
 
 
 def gradient(size):
@@ -45,35 +45,49 @@ def squircle(size, exponent=5.0, supersample=4):
     return mask.resize((size, size), Image.LANCZOS)
 
 
-def character():
-    """Lift the character off the artwork's own blue-to-aqua plate with a soft colour key."""
-    art = Image.open(ART).convert('RGBA')
-    pixels = art.load()
-    for y in range(art.height):
-        for x in range(art.width):
-            r, g, b, a = pixels[x, y]
-            plate = min(1.0, max(0.0, (min(g, b) - r - 40) / 50), max(0.0, (max(g, b) - 165) / 50))
-            pixels[x, y] = (r, g, b, round(a * (1 - plate)))
-    alpha = art.getchannel('A').filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(1.2))
-    art.putalpha(alpha)
+def _cubic(p0, p1, p2, p3, n=64):
+    return [tuple(((1 - t) ** 3 * a + 3 * (1 - t) ** 2 * t * b + 3 * (1 - t) * t ** 2 * c + t ** 3 * d) * SUPERSAMPLE
+                  for a, b, c, d in zip(p0, p1, p2, p3)) for t in (i / n for i in range(n + 1))]
+
+
+def _page(sign, top, bottom, edge_top, edge_bottom, width, gap):
+    """One page in 1024-unit space: inner edge at the spine, curved top and bottom, straight outer edge."""
+    inner, outer = 512 + sign * gap, 512 + sign * width
+    return (_cubic((inner, top), (512 + sign * 120, top - 70), (512 + sign * 220, edge_top - 10), (outer, edge_top)) +
+            _cubic((outer, edge_bottom), (512 + sign * 220, edge_bottom - 10), (512 + sign * 120, bottom - 70), (inner, bottom)))
+
+
+def mark():
+    """White book-and-ink-drop mark on transparent, 1024 px, vertically centred."""
+    big = Image.new('L', (1024 * SUPERSAMPLE,) * 2, 0)
+    draw = ImageDraw.Draw(big)
+    for sign in (-1, 1):  # back pages, lower and wider: reads as the page stack
+        draw.polygon(_page(sign, 474, 840, 426, 776, 318, 6), fill=150)
+    for sign in (-1, 1):
+        draw.polygon(_page(sign, 438, 804, 390, 740, 296, 14), fill=255)
+    tip, cy, r = 184, 320, 74  # ink drop above the spine
+    draw.polygon(_cubic((512, tip), (530, tip + 50), (512 + r, cy - 56), (512 + r, cy)) +
+                 _cubic((512 + r, cy), (512 + r, cy + 1.33 * r), (512 - r, cy + 1.33 * r), (512 - r, cy)) +
+                 _cubic((512 - r, cy), (512 - r, cy - 56), (494, tip + 50), (512, tip)), fill=255)
+    art = Image.new('RGBA', (1024, 1024), (255, 255, 255, 0))
+    art.putalpha(big.resize((1024, 1024), Image.LANCZOS))
     return art
 
 
-_figure = None
+_mark = None
 
 
 def filled(size, masked=True):
-    """The character at ART_SCALE, centred on the gradient sampled from the original plate."""
-    global _figure
-    _figure = _figure or character()
+    """The mark at MARK_SCALE, centred on the gradient."""
+    global _mark
+    _mark = _mark or mark()
     tile = gradient(size)
     glow = Image.new('RGBA', (size, size), (255, 255, 255, 0))
-    ImageDraw.Draw(glow).ellipse((size * .12, size * .08, size * .88, size * .84), fill=(255, 255, 255, 46))
+    ImageDraw.Draw(glow).ellipse((size * .12, size * .08, size * .88, size * .84), fill=(255, 255, 255, 28))
     tile.alpha_composite(glow.filter(ImageFilter.GaussianBlur(size / 9)))
-    inner = round(size * ART_SCALE)
-    figure = _figure.resize((inner, inner), Image.LANCZOS)
+    inner = round(size * MARK_SCALE)
     offset = (size - inner) // 2
-    tile.alpha_composite(figure, (offset, size - inner + round(size * 0.015)))  # the cut-off sleeves sit on the bottom edge
+    tile.alpha_composite(_mark.resize((inner, inner), Image.LANCZOS), (offset, offset))
     if masked:
         tile.putalpha(squircle(size))
     return tile
@@ -92,6 +106,7 @@ def mac_icon():
 
 
 if __name__ == '__main__':
+    mark().save(root / 'build/icon-art.png', optimize=True)
     mac_icon().save(root / 'build/appicon.png', optimize=True)
     full = filled(1024)
     full.save(root / 'build/windows/icon.ico', sizes=[(s, s) for s in (16, 20, 24, 32, 40, 48, 64, 128, 256)])

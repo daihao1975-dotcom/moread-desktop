@@ -37,7 +37,7 @@ scripts/release.sh            # 测试 → 构建 → 打包，输出到 dist/Mo
 
 `scripts/release.sh` 依次运行前端与 Go 测试（含 race）、构建 macOS / Windows 版本并写入提交号与构建时间、编译 macOS 图标、校验签名、生成 DMG / ZIP / EXE 与 SHA256SUMS，并检查每个文件不超过 30,000,000 字节。工作区未提交时脚本会拒绝构建（本地试构建可设 `ALLOW_DIRTY=1`）。
 
-图标由 `build/icon-art.png` 经 `scripts/make_icons.py` 生成；第三方声明由 `scripts/notices.py` 生成。界面文字位于 `frontend/src/locales/*.json`，前端与原生菜单共用，新增文字须同时补齐全部语言（测试会校验）。
+图标由 `scripts/make_icons.py` 绘制并生成；第三方声明由 `scripts/notices.py` 生成。界面文字位于 `frontend/src/locales/*.json`，前端与原生菜单共用，新增文字须同时补齐全部语言（测试会校验）。
 
 ## 许可
 
