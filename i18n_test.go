@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -83,7 +84,8 @@ func TestSettingsRoundTripAndClamp(t *testing.T) {
 	if s := loadSettings(p); s.Language != "fr" || s.Width != 1500 || s.Height != 900 || !s.Maximised {
 		t.Fatalf("round trip %+v", s)
 	}
-	if st, _ := os.Stat(p); st.Mode().Perm() != 0600 {
+	// Windows has no POSIX permission bits to check.
+	if st, _ := os.Stat(p); runtime.GOOS != "windows" && st.Mode().Perm() != 0600 {
 		t.Fatalf("mode %v", st.Mode())
 	}
 	os.WriteFile(p, []byte(`{"language":"<x>","width":50,"height":99999}`), 0600)
