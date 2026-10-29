@@ -19,6 +19,7 @@ const (
 
 // settings holds what the native side needs before the interface loads. Document content is never stored;
 // recently opened paths are kept only after the reader turns the list on.
+// Logical sidebar references live separately in library.json.
 type settings struct {
 	Language       string        `json:"language,omitempty"`
 	Width          int           `json:"width,omitempty"`
