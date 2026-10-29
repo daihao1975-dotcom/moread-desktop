@@ -196,3 +196,50 @@ test('preview Unicode search preserves text and original match offsets', () => {
   }
   dom.window.close();
 });
+
+test('text-only selection paint preserves native rich selections and clears when deselected', () => {
+  const dom = new JSDOM(
+    '<style></style><article><h2>Heading</h2><ol><li>First <strong>bold</strong> item</li><li>Second item</li></ol></article><script nonce="test"></script>',
+    { runScripts: 'outside-only' },
+  );
+  const { window } = dom;
+  Object.defineProperty(window.document, 'currentScript', { value: window.document.querySelector('script') });
+  window.postMessage = () => {};
+  window.CSS = { highlights: new Map() };
+  window.Highlight = class extends Set {};
+  window.eval(readFileSync(new URL('../src/frame-bootstrap.js', import.meta.url), 'utf8'));
+  const article = window.document.querySelector('article');
+  const original = article.innerHTML;
+  const selection = window.getSelection();
+  const range = window.document.createRange();
+  range.setStart(article.querySelector('li').firstChild, 2);
+  range.setEnd(article.querySelectorAll('li')[1].firstChild, 6);
+  selection.addRange(range);
+  window.document.dispatchEvent(new window.Event('selectionchange'));
+  const highlight = window.CSS.highlights.get('moread-selection');
+  assert.equal(window.document.documentElement.classList.contains('text-selection'), true);
+  assert.equal(highlight.size, 1);
+  assert.equal([...highlight][0].toString(), selection.toString());
+  assert.equal([...highlight][0].startOffset, 2);
+  assert.equal([...highlight][0].endOffset, 6);
+  assert.notEqual([...highlight][0], range);
+  assert.equal(selection.getRangeAt(0), range);
+  assert.equal(article.innerHTML, original);
+  assert.equal(range.cloneContents().querySelector('strong').textContent, 'bold');
+  selection.removeAllRanges();
+  window.document.dispatchEvent(new window.Event('selectionchange'));
+  assert.equal(highlight.size, 0);
+  dom.window.close();
+});
+
+test('older webviews retain visible native selection when custom highlights are unavailable', () => {
+  const dom = new JSDOM('<style></style><article>Readable text</article><script nonce="test"></script>', {
+    runScripts: 'outside-only',
+  });
+  const { window } = dom;
+  Object.defineProperty(window.document, 'currentScript', { value: window.document.querySelector('script') });
+  window.postMessage = () => {};
+  window.eval(readFileSync(new URL('../src/frame-bootstrap.js', import.meta.url), 'utf8'));
+  assert.equal(window.document.documentElement.classList.contains('text-selection'), false);
+  dom.window.close();
+});

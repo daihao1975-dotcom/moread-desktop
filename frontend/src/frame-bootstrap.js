@@ -5,6 +5,19 @@
   const host = parent;
   const article = document.querySelector('article');
   const sheet = document.querySelector('style');
+  // Paint only selected text, without WebKit's selection gaps across block margins.
+  // Keep the native selection itself so copying, keyboard selection and links are unchanged.
+  if (globalThis.Highlight && globalThis.CSS?.highlights) {
+    const highlight = new Highlight();
+    CSS.highlights.set('moread-selection', highlight);
+    document.documentElement.classList.add('text-selection');
+    document.addEventListener('selectionchange', () => {
+      highlight.clear();
+      const selection = getSelection();
+      if (!selection || selection.isCollapsed) return;
+      for (let i = 0; i < selection.rangeCount; i++) highlight.add(selection.getRangeAt(i).cloneRange());
+    });
+  }
   let version = 0,
     hits = [],
     hitIndex = -1,

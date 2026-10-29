@@ -348,6 +348,15 @@ dd {
 html[data-theme='dark'] ::selection {
   background: #1f3a66;
 }
+html.text-selection ::selection {
+  background: transparent;
+}
+::highlight(moread-selection) {
+  background: #cfe2ff;
+}
+html[data-theme='dark'] ::highlight(moread-selection) {
+  background: #1f3a66;
+}
 mark.search-hit {
   background: #f7d46d;
   color: #302a16;
