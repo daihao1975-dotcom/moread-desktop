@@ -5,6 +5,8 @@ import { bindTitlebar } from './titlebar.js';
 import { documentTransition } from './document-transition.js';
 import { initializeDocuments } from './initial-documents.js';
 import { createLibrary } from './library.js';
+import { createLibraryWriter } from './library-writer.js';
+import { createCloseRequest } from './close-request.js';
 import { assignDocuments, savedDocument } from './library-model.js';
 import { matchLanguage, setLanguage, language, t, translate, localizeMessage } from './i18n.js';
 import { bindTooltips } from './tooltip.js';
@@ -65,8 +67,7 @@ const preferredLanguage = () =>
 setLanguage(preferredLanguage());
 if (isMac && window.runtime) document.body.classList.add('mac');
 app.innerHTML = layout({ mod, brandIcon });
-let closeInFlight = false,
-  closeApproved = false;
+let closeApproved = false;
 $('#shortcuts-close').onclick = () => $('#shortcuts-dialog').close();
 bindTitlebar($('.topbar'), window.runtime);
 const tooltips = bindTooltips(document);
@@ -130,8 +131,11 @@ let current = builtinDocument('welcome'),
   scrollLeadAt = 0,
   renderedTheme = '',
   countTimer;
-let libraryReady = !window.runtime?.EventsOn,
-  libraryWrites = Promise.resolve();
+let libraryReady = !window.runtime?.EventsOn;
+const libraryWriter = createLibraryWriter({
+  write: state => call('SetLibrary', state),
+  onError: e => toast(e, true),
+});
 const library = createLibrary({
   list: $('#side-list'),
   changed: () => persistLibrary(),
@@ -157,10 +161,8 @@ const library = createLibrary({
   onError: e => toast(e, true),
 });
 function persistLibrary() {
-  if (!libraryReady || !native()) return libraryWrites;
-  const state = JSON.parse(JSON.stringify(library.state()));
-  libraryWrites = libraryWrites.then(() => call('SetLibrary', state)).catch(e => toast(e, true));
-  return libraryWrites;
+  if (!libraryReady || !native()) return;
+  return libraryWriter.persist(library.state());
 }
 async function restoreLibrary() {
   try {
@@ -366,7 +368,7 @@ function setMode(v) {
   clearFind();
 }
 function enqueue(fn) {
-  queue = queue.then(fn).catch(e => toast(e, true));
+  queue = queue.then(() => !closeApproved && fn()).catch(e => toast(e, true));
   return queue;
 }
 function choice() {
@@ -458,10 +460,11 @@ const openRecent = path =>
 // Opened folders are listed again when the window comes back and every few seconds while it is in front.
 let refreshingFolders = false;
 async function refreshFolders() {
-  if (refreshingFolders || !native() || document.hidden || opening) return;
+  if (refreshingFolders || !native() || document.hidden || opening || closeApproved) return;
   refreshingFolders = true;
   try {
     const next = applyFolderUpdate(files, await call('RefreshFolders'), current.id, language());
+    if (closeApproved) return;
     if (next !== files) {
       files = next;
       assignDocuments(library.state(), files);
@@ -596,7 +599,10 @@ async function previewAction(action) {
   const expectedId = current.id,
     expectedVersion = version_;
   const valid = () =>
-    current.id === expectedId && version_ === expectedVersion && previewFrame.current(action.version);
+    !closeApproved &&
+    current.id === expectedId &&
+    version_ === expectedVersion &&
+    previewFrame.current(action.version);
   if (!valid()) return;
   if (action.kind === 'copy') {
     try {
@@ -925,6 +931,10 @@ $('#remember-recent').onchange = e =>
     .catch(err => toast(err, true));
 $('#filter').oninput = side;
 $('#editor').oninput = e => {
+  if (closeApproved) {
+    e.target.value = source;
+    return;
+  }
   lineEndings =
     e.target.value === baseline
       ? [...baselineEndings]
@@ -1109,13 +1119,13 @@ function hasDiagram() {
 }
 const external = externalChanges({
   open: () => current,
-  busy: () => opening || saveBusy || !native(),
+  busy: () => opening || saveBusy || closeApproved || !native(),
   dirty,
   readHash: id => call('DocumentHash', id),
   reload: (id, hash) =>
     enqueue(() =>
       documentTransition({
-        guard: async () => current.id === id && current.hash === hash && !dirty(),
+        guard: async () => !closeApproved && current.id === id && current.hash === hash && !dirty(),
         load: () => call('ReadDocument', id),
         valid: () => current.id === id,
         apply: d => {
@@ -1219,29 +1229,26 @@ if (window.runtime?.EventsOn) {
   call('SetLanguage', language()).catch(() => {});
   window.runtime.OnFileDrop?.(() => {}, false);
   window.runtime.EventsOn('menu', name => runAction(name));
-  window.runtime.EventsOn('close-request', () => {
-    if (closeInFlight) return;
-    closeInFlight = true;
-    enqueue(async () => {
-      try {
-        if (await guard()) {
-          await libraryWrites;
-          closeApproved = true;
-          document.body.inert = true;
-          $('#editor').disabled = true;
-          await call('Quit');
-        } else await call('CancelClose');
-      } catch (e) {
-        closeApproved = false;
-        document.body.inert = false;
-        $('#editor').disabled = false;
-        await call('CancelClose');
-        toast(e, true);
-      } finally {
-        closeInFlight = false;
-      }
-    });
-  });
+  window.runtime.EventsOn(
+    'close-request',
+    createCloseRequest({
+      enqueue,
+      guard,
+      flush: async () => {
+        // Retry the current full state even if an earlier background write failed.
+        persistLibrary();
+        await libraryWriter.flush();
+      },
+      setLocked: value => {
+        closeApproved = value;
+        document.body.inert = value;
+        $('#editor').disabled = value;
+      },
+      quit: () => call('Quit'),
+      cancel: () => call('CancelClose'),
+      onError: e => toast(e, true),
+    }),
+  );
   $('#recent-setting').classList.remove('hidden');
   loadRecent().catch(e => toast(e, true));
   initializeDocuments({
