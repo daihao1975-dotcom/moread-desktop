@@ -4,6 +4,8 @@ import { readPreferences, normalizeWidth, resolveTheme } from './preferences.js'
 import { bindTitlebar } from './titlebar.js';
 import { documentTransition } from './document-transition.js';
 import { initializeDocuments } from './initial-documents.js';
+import { createLibrary } from './library.js';
+import { assignDocuments, savedDocument } from './library-model.js';
 import { matchLanguage, setLanguage, language, t, translate, localizeMessage } from './i18n.js';
 import { bindTooltips } from './tooltip.js';
 import {
@@ -23,6 +25,7 @@ import {
   PanelLeft,
   FilePlus,
   FolderOpen,
+  FolderPlus,
   FileText,
   Save,
   Search,
@@ -75,6 +78,7 @@ createIcons({
     PanelLeft,
     FilePlus,
     FolderOpen,
+    FolderPlus,
     FileText,
     Save,
     Search,
@@ -126,6 +130,52 @@ let current = builtinDocument('welcome'),
   scrollLeadAt = 0,
   renderedTheme = '',
   countTimer;
+let libraryReady = !window.runtime?.EventsOn,
+  libraryWrites = Promise.resolve();
+const library = createLibrary({
+  list: $('#side-list'),
+  changed: () => persistLibrary(),
+  activate: d => {
+    if (!d.draft) enqueue(() => activate(d));
+  },
+  newDocument: folder => enqueue(() => newDocument(folder)),
+  openFiles: folder => enqueue(async () => addResult(await call('OpenFiles'), folder, true)),
+  removeDocument: id =>
+    enqueue(async () => {
+      if (id === current.id) {
+        if (!(await guard())) return;
+        useDocument(builtinDocument('welcome'));
+      }
+      files = files.filter(f => f.id !== id);
+      library.state().entries = library.state().entries.filter(e => e.id !== id);
+      persistLibrary();
+      side();
+    }),
+  folderRemoved: (id, parent) => {
+    if (current.untitled && current.folder === id) current.folder = parent;
+  },
+  onError: e => toast(e, true),
+});
+function persistLibrary() {
+  if (!libraryReady || !native()) return libraryWrites;
+  const state = JSON.parse(JSON.stringify(library.state()));
+  libraryWrites = libraryWrites.then(() => call('SetLibrary', state)).catch(e => toast(e, true));
+  return libraryWrites;
+}
+async function restoreLibrary() {
+  try {
+    const result = await call('GetLibrary');
+    library.restore(result);
+    const seen = new Map(result.documents.map(d => [d.id, d]));
+    for (const d of files) seen.set(d.id, d);
+    files = [...seen.values()];
+    assignDocuments(library.state(), files);
+    libraryReady = true;
+    side();
+  } catch (e) {
+    toast(e, true);
+  }
+}
 const native = () => window.go?.main?.App;
 async function call(name, ...args) {
   if (!native()) throw new Error(t('toast.desktopOnly'));
@@ -231,6 +281,8 @@ function side() {
   const list = $('#side-list');
   list.replaceChildren();
   $('#filter').parentElement.classList.toggle('hidden', sideTab !== 'files');
+  $('.library-tools').classList.toggle('hidden', sideTab !== 'files');
+  library.closeMenu();
   document
     .querySelectorAll('[data-tab]')
     .forEach(b => b.classList.toggle('active', b.dataset.tab === sideTab));
@@ -256,52 +308,46 @@ function side() {
     }
     return;
   }
-  const shown = files.filter(f =>
-    (f.relative || f.name).toLowerCase().includes($('#filter').value.toLowerCase()),
+  const draft = current.untitled
+    ? { ...current, id: 'draft', draft: true, folder: current.folder || '' }
+    : null;
+  const empty = library.render(
+    draft ? [...files, draft] : files,
+    draft ? 'draft' : current.id,
+    $('#filter').value,
   );
-  if (!shown.length) {
-    if (files.length) note(t('side.noMatch'));
-    else {
-      const box = document.createElement('div');
-      box.className = 'empty-side';
-      const p = document.createElement('p');
-      p.textContent = t('side.emptyHint');
-      box.append(p);
-      for (const [action, key, cls] of [
-        ['folder', 'side.openFolder', 'primary'],
-        ['open', 'side.openFile', ''],
-        ['sample', 'side.sample', 'link'],
-      ]) {
-        const b = document.createElement('button');
-        b.className = ('empty-action ' + cls).trim();
-        b.textContent = t(key);
-        b.onclick = () => runAction(action);
-        box.append(b);
-      }
-      if (recent.items.length) {
-        const title = document.createElement('p');
-        title.className = 'recent-title';
-        title.textContent = t('side.recent');
-        box.append(title);
-      }
-      for (const r of recent.items) {
-        const b = document.createElement('button');
-        b.className = 'file-row';
-        b.textContent = r.folder ? r.name + '/' : r.name;
-        b.dataset.tip = r.path;
-        b.onclick = () => openRecent(r.path);
-        box.append(b);
-      }
-      list.append(box);
+  if (empty) {
+    const box = document.createElement('div');
+    box.className = 'empty-side';
+    const p = document.createElement('p');
+    p.textContent = t('side.emptyHint');
+    box.append(p);
+    for (const [action, key, cls] of [
+      ['folder', 'side.openFolder', 'primary'],
+      ['open', 'side.openFile', ''],
+      ['sample', 'side.sample', 'link'],
+    ]) {
+      const b = document.createElement('button');
+      b.className = ('empty-action ' + cls).trim();
+      b.textContent = t(key);
+      b.onclick = () => runAction(action);
+      box.append(b);
     }
-  }
-  for (const f of shown) {
-    const b = document.createElement('button');
-    b.className = 'file-row' + (f.id === current.id ? ' active' : '');
-    b.textContent = f.relative || f.name;
-    b.dataset.tip = f.relative || f.name;
-    b.onclick = () => enqueue(() => activate(f));
-    list.append(b);
+    if (recent.items.length) {
+      const title = document.createElement('p');
+      title.className = 'recent-title';
+      title.textContent = t('side.recent');
+      box.append(title);
+    }
+    for (const r of recent.items) {
+      const b = document.createElement('button');
+      b.className = 'file-row';
+      b.textContent = r.folder ? r.name + '/' : r.name;
+      b.dataset.tip = r.path;
+      b.onclick = () => openRecent(r.path);
+      box.append(b);
+    }
+    list.append(box);
   }
 }
 function setMode(v) {
@@ -383,10 +429,13 @@ async function activate(d, force = false) {
   if (d.id === current.id && !force) return;
   await switchDocument(() => call('ReadDocument', d.id));
 }
-async function addResult(r) {
+async function addResult(r, folder = library.selected(), replace = false) {
   if (r?.skipped?.length) toast(t('toast.skipped') + '\n' + r.skipped.slice(0, 5).join('\n'), true);
   const ds = r?.documents || [];
+  assignDocuments(library.state(), ds, folder, replace);
+  library.reveal(folder);
   files = mergeFiles(files, ds, language());
+  if (ds.length) persistLibrary();
   side();
   if (recent.enabled) loadRecent().catch(e => toast(e, true));
   if (ds.length) await activate(ds[0], true);
@@ -415,6 +464,9 @@ async function refreshFolders() {
     const next = applyFolderUpdate(files, await call('RefreshFolders'), current.id, language());
     if (next !== files) {
       files = next;
+      assignDocuments(library.state(), files);
+      library.state().entries = library.state().entries.filter(e => files.some(f => f.id === e.id));
+      persistLibrary();
       side();
     }
   } catch {
@@ -428,6 +480,8 @@ async function save(as) {
   saveBusy = true;
   update();
   const text = source;
+  const beforeID = current.id,
+    folder = current.untitled ? current.folder || '' : library.selected();
   const savedEndings = [...lineEndings];
   try {
     const r = await call(
@@ -439,11 +493,13 @@ async function save(as) {
       as,
     );
     if (r.cancelled) return false;
+    savedDocument(library.state(), beforeID, r.document.id, folder);
     current = { ...r.document, content: source };
     baseline = text;
     baselineEndings = savedEndings;
     external.reset();
     if (!files.some(f => f.id === current.id)) files.push(current);
+    persistLibrary();
     side();
     update();
     toast(source === text ? t('toast.saved') : t('toast.savedMore'));
@@ -581,6 +637,12 @@ async function previewAction(action) {
       const result = await readRelativeDocument(expectedId, href, call, valid);
       if (!result || !valid()) return null;
       if (!files.some(f => f.id === result.registered.id)) files.push(result.registered);
+      assignDocuments(
+        library.state(),
+        [result.registered],
+        library.state().entries.find(e => e.id === expectedId)?.folder || '',
+      );
+      persistLibrary();
       return result.document;
     }, valid);
   });
@@ -780,19 +842,24 @@ async function snapshot() {
 }
 $('#open').onclick = () => enqueue(async () => addResult(await call('OpenFiles')));
 $('#folder').onclick = () => enqueue(async () => addResult(await call('OpenFolder')));
-$('#new').onclick = () =>
-  enqueue(async () => {
-    if (!(await guard())) return;
-    useDocument({
-      id: '',
-      name: t('doc.untitled'),
-      content: '',
-      encoding: 'UTF-8',
-      hash: '',
-      untitled: true,
-    });
-    setMode('split');
+async function newDocument(folder = library.selected()) {
+  if (!(await guard())) return;
+  if (!library.state().folders.some(f => f.id === folder)) folder = '';
+  library.reveal(folder);
+  useDocument({
+    id: '',
+    name: t('doc.untitled'),
+    content: '',
+    encoding: 'UTF-8',
+    hash: '',
+    untitled: true,
+    folder,
   });
+  setMode('split');
+}
+$('#new').onclick = () => enqueue(() => newDocument());
+$('#new-group').onclick = () => enqueue(() => library.addFolder());
+$('#group-new-file').onclick = () => enqueue(() => newDocument());
 const loadSample = () =>
   enqueue(async () => {
     if (await guard()) useDocument(builtinDocument('sample'));
@@ -1009,6 +1076,7 @@ const actions = {
 // A menu accelerator and the in-page shortcut can both fire for one key press; run each action once.
 function runAction(name) {
   if (closeApproved || !actions[name]) return;
+  if (document.querySelector('.library-dialog[open]')) return;
   const now = Date.now();
   if (lastAction.name === name && now - lastAction.at < 400) return;
   lastAction = { name, at: now };
@@ -1157,6 +1225,7 @@ if (window.runtime?.EventsOn) {
     enqueue(async () => {
       try {
         if (await guard()) {
+          await libraryWrites;
           closeApproved = true;
           document.body.inert = true;
           $('#editor').disabled = true;
@@ -1177,7 +1246,10 @@ if (window.runtime?.EventsOn) {
   loadRecent().catch(e => toast(e, true));
   initializeDocuments({
     runtime: window.runtime,
-    ready: () => call('FrontendReady'),
+    ready: async () => {
+      await restoreLibrary();
+      return call('FrontendReady');
+    },
     enqueue,
     addResult,
     ensureRendered: () => {

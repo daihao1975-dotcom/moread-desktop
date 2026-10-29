@@ -56,6 +56,7 @@ type App struct {
 	ctx            context.Context
 	mu             sync.Mutex
 	saveMu         sync.Mutex
+	libraryMu      sync.Mutex
 	files          map[string]*record
 	folders        map[string][]string
 	pending        []string

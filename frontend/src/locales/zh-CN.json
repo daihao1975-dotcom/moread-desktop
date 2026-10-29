@@ -309,5 +309,22 @@
   "settings.splitOrder": "分栏顺序",
   "split.sourceLeft": "左侧源码 · 右侧预览",
   "split.previewLeft": "左侧预览 · 右侧源码",
-  "settings.splitWidth": "左栏占比"
+  "settings.splitWidth": "左栏占比",
+  "library.title": "逻辑分类",
+  "library.hint": "分类仅保存在墨阅中，不移动磁盘文件。",
+  "library.newFolder": "新建文件夹",
+  "library.newFile": "新建文档",
+  "library.addFiles": "加入已有文档…",
+  "library.rename": "重命名文件夹",
+  "library.move": "移动到…",
+  "library.removeFolder": "移除文件夹（子项回到上一级）",
+  "library.removeFile": "从列表移除（保留磁盘文件）",
+  "library.ungrouped": "未分组 / 根目录",
+  "library.emptyFolder": "空文件夹 · 点击右侧 ⋯ 新建或加入文档",
+  "library.actions": "更多操作",
+  "library.folderName": "文件夹名称",
+  "library.destination": "目标文件夹",
+  "library.confirm": "确定",
+  "library.nameRequired": "请输入有效的文件夹名称",
+  "err.libraryInvalid": "分类数据无效或超出数量、层级限制"
 }

@@ -309,5 +309,22 @@
   "settings.splitOrder": "Pane order",
   "split.sourceLeft": "Source left · Preview right",
   "split.previewLeft": "Preview left · Source right",
-  "settings.splitWidth": "Left pane width"
+  "settings.splitWidth": "Left pane width",
+  "library.title": "Logical folders",
+  "library.hint": "Folders are stored in MoRead and do not move files on disk.",
+  "library.newFolder": "New folder",
+  "library.newFile": "New document",
+  "library.addFiles": "Add existing documents…",
+  "library.rename": "Rename folder",
+  "library.move": "Move to…",
+  "library.removeFolder": "Remove folder (keep contents in parent)",
+  "library.removeFile": "Remove from list (keep file on disk)",
+  "library.ungrouped": "Ungrouped / Root",
+  "library.emptyFolder": "Empty folder · Use ⋯ to create or add documents",
+  "library.actions": "More actions",
+  "library.folderName": "Folder name",
+  "library.destination": "Destination folder",
+  "library.confirm": "Confirm",
+  "library.nameRequired": "Enter a valid folder name",
+  "err.libraryInvalid": "Invalid library data or too many items or folder levels"
 }
