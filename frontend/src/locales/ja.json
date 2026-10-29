@@ -309,5 +309,22 @@
   "settings.splitOrder": "ペインの順序",
   "split.sourceLeft": "左にソース · 右にプレビュー",
   "split.previewLeft": "左にプレビュー · 右にソース",
-  "settings.splitWidth": "左ペインの幅"
+  "settings.splitWidth": "左ペインの幅",
+  "library.title": "論理フォルダー",
+  "library.hint": "分類は墨阅内に保存され、ディスク上のファイルは移動しません。",
+  "library.newFolder": "新規フォルダー",
+  "library.newFile": "新規文書",
+  "library.addFiles": "既存の文書を追加…",
+  "library.rename": "フォルダー名を変更",
+  "library.move": "移動先…",
+  "library.removeFolder": "フォルダーを除去（内容は親へ）",
+  "library.removeFile": "一覧から除去（ファイルは保持）",
+  "library.ungrouped": "未分類 / ルート",
+  "library.emptyFolder": "空のフォルダー · ⋯ から文書を作成・追加",
+  "library.actions": "その他の操作",
+  "library.folderName": "フォルダー名",
+  "library.destination": "移動先フォルダー",
+  "library.confirm": "確定",
+  "library.nameRequired": "有効なフォルダー名を入力してください",
+  "err.libraryInvalid": "分類データが無効か、項目数・階層の上限を超えています"
 }

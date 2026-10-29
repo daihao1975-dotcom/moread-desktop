@@ -309,5 +309,22 @@
   "settings.splitOrder": "패널 순서",
   "split.sourceLeft": "왼쪽 소스 · 오른쪽 미리보기",
   "split.previewLeft": "왼쪽 미리보기 · 오른쪽 소스",
-  "settings.splitWidth": "왼쪽 패널 너비"
+  "settings.splitWidth": "왼쪽 패널 너비",
+  "library.title": "논리 폴더",
+  "library.hint": "분류는 MoRead에 저장되며 디스크의 파일을 이동하지 않습니다.",
+  "library.newFolder": "새 폴더",
+  "library.newFile": "새 문서",
+  "library.addFiles": "기존 문서 추가…",
+  "library.rename": "폴더 이름 변경",
+  "library.move": "이동…",
+  "library.removeFolder": "폴더 제거 (내용은 상위로 이동)",
+  "library.removeFile": "목록에서 제거 (디스크 파일 유지)",
+  "library.ungrouped": "미분류 / 루트",
+  "library.emptyFolder": "빈 폴더 · ⋯ 에서 문서를 만들거나 추가하세요",
+  "library.actions": "추가 작업",
+  "library.folderName": "폴더 이름",
+  "library.destination": "대상 폴더",
+  "library.confirm": "확인",
+  "library.nameRequired": "올바른 폴더 이름을 입력하세요",
+  "err.libraryInvalid": "분류 데이터가 잘못되었거나 항목 수 또는 폴더 깊이 제한을 초과했습니다"
 }
