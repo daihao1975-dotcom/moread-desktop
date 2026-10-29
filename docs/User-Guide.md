@@ -27,7 +27,11 @@ MoRead is an offline Markdown reader and light editor. Documents are read and sa
 | Drag and drop | Drop files or folders onto the window |
 | From Finder / Explorer | Open `.md`, `.markdown`, `.mdown` or `.mkd` files with MoRead |
 
-The **Files** tab lists opened documents and filters by name. The **Outline** tab lists the headings of the current document; click one to jump there. The heading you are reading is highlighted.
+The **Files** tab supports logical folders. Use the folder-plus button to create a folder or a subfolder inside the selected folder. Use the document-plus button or a folder’s **⋯** menu to create a document or add existing documents. A new document appears as an unsaved draft; you still choose its disk location when saving.
+
+Use **⋯**, the context menu or drag and drop to organise files and folders. Drop onto **Ungrouped / Root** to return to the top level. Filtering matches document and folder names and reveals matching ancestors. Removing a folder promotes its documents and subfolders to its parent. Removing a document from the list keeps the disk file. These actions change only the local library index; they never move, rename or delete disk files. Folders, collapsed states and saved file references survive a restart; unsaved drafts must be saved first.
+
+The **Outline** tab lists the headings of the current document; click one to jump there. The heading you are reading is highlighted.
 
 Each document can be up to 10 MB. UTF-8, UTF-8 with BOM and UTF-16 LE / BE are supported; saving keeps the original encoding and line endings (LF / CRLF).
 
@@ -86,7 +90,7 @@ Click **Reading settings** at the right of the toolbar (⌘ / Ctrl + ,):
 - **Language**: system default, or 简体中文, 繁體中文, English, 日本語 or 한국어. Menus, dialogs, messages and the built-in example all switch.
 - **Remember recent files**: off by default. When it is on and the sidebar is empty, it lists the last 10 files or folders you opened; click one to open it again. Items that were moved or deleted drop off the list. Turning it off clears the list at once.
 
-MoRead remembers only these preferences and the window size, never document contents. File and folder paths are stored only while **Remember recent files** is on.
+MoRead remembers these preferences, the window size, logical folders, collapsed states and file path references in a local `library.json`, never document contents. **Remember recent files** independently controls the recent list; turning it off clears that list without changing sidebar folders.
 
 ## 8. Questions
 
