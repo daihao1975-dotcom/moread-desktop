@@ -197,7 +197,7 @@ button svg {
   min-height: 0;
 }
 aside {
-  width: 232px;
+  width: 264px;
   flex-shrink: 0;
   border-right: 1px solid var(--line);
   background: var(--panel);
@@ -243,6 +243,126 @@ aside {
   overflow: auto;
   flex: 1;
   padding: 0 10px 15px;
+}
+.library-tools {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 16px 10px;
+}
+.library-tools span {
+  margin-left: 5px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.library-root {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 8px 10px;
+  margin-bottom: 4px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.library-root.selected,
+.library-folder.selected {
+  background: var(--hover);
+  border-radius: 6px;
+}
+.library-file,
+.library-folder {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.library-file .file-row,
+.folder-row {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  padding: 8px 6px;
+  text-align: left;
+  justify-content: flex-start;
+  font-size: 13px;
+}
+.library-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.library-file svg,
+.library-folder svg {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.folder-row .folder-chevron {
+  width: 12px;
+  height: 12px;
+}
+.folder-row[aria-expanded='true'] .folder-chevron {
+  transform: rotate(90deg);
+}
+.library-more {
+  padding: 5px 3px;
+  flex-shrink: 0;
+  opacity: 0.45;
+}
+.library-file:hover .library-more,
+.library-folder:hover .library-more,
+.library-more:focus-visible {
+  opacity: 1;
+}
+.library-children {
+  margin-left: 12px;
+  padding-left: 4px;
+  border-left: 1px solid var(--line);
+}
+.library-empty {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 5px 10px 9px;
+  margin: 0;
+}
+.drop-target {
+  background: var(--accent-soft);
+  outline: 1px solid var(--brand);
+  border-radius: 6px;
+}
+.library-menu {
+  position: fixed;
+  z-index: 45;
+  min-width: 180px;
+  max-width: calc(100vw - 16px);
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--paper);
+  box-shadow: 0 8px 28px #0002;
+}
+.library-menu button {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 12px;
+}
+.library-dialog {
+  width: min(420px, calc(100vw - 32px));
+}
+.library-dialog input,
+.library-dialog select {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  margin-bottom: 22px;
+}
+.library-dialog .library-hint {
+  font-size: 12px;
+  margin-bottom: 16px;
 }
 .file-row,
 .outline-row {
