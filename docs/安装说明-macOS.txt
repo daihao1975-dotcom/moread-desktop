@@ -1,17 +1,15 @@
-墨阅 MoRead 1.0.7 · macOS 安装说明
+墨阅 MoRead 1.0.8 · macOS 安装说明
 
 1. 把「MoRead」拖入「应用程序」文件夹。
-2. 首次打开：在「应用程序」中按住 Control 点按 MoRead，选择「打开」。
-   若仍被阻止，前往「系统设置 → 隐私与安全性」，点按页面下方的「仍要打开」。只需一次。
+2. 双击「应用程序」中的 MoRead 启动。安装包使用 Developer ID 签名并已通过 Apple 公证。
 3. 完整说明见同目录《使用手册.md》（可直接用墨阅打开）。
 
 系统要求：macOS 12 或更新版本，Apple 芯片（M 系列）。
 
-MoRead 1.0.7 · macOS installation
+MoRead 1.0.8 · macOS installation
 
 1. Drag MoRead into the Applications folder.
-2. First launch: Control-click MoRead in Applications and choose Open.
-   If it is still blocked, go to System Settings → Privacy & Security and click Open Anyway. Needed only once.
+2. Double-click MoRead in Applications to launch. Packages are Developer ID signed and notarised by Apple.
 3. See User-Guide.md (open it with MoRead) for details.
 
 Requires macOS 12 or later on Apple silicon.
