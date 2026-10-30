@@ -326,5 +326,9 @@
   "library.destination": "目标文件夹",
   "library.confirm": "确定",
   "library.nameRequired": "请输入有效的文件夹名称",
-  "err.libraryInvalid": "分类数据无效或超出数量、层级限制"
+  "err.libraryInvalid": "分类数据无效或超出数量、层级限制",
+  "toast.pasteSaveFirst": "请先保存文档，截图会存放在文档旁的 assets 文件夹中。",
+  "err.clipboardImageType": "支持粘贴 PNG、JPEG 或 GIF 图片。",
+  "err.clipboardImageSize": "每次最多粘贴 20 张图片，合计不超过 20 MB。",
+  "err.clipboardImageRead": "无法读取剪贴板中的图片，请重新复制后粘贴。"
 }

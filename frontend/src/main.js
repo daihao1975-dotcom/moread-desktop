@@ -50,6 +50,7 @@ import { applySplitLayout, bindSplitter, clampSplit } from './splitter.js';
 import { layout } from './layout.js';
 import { printTocHTML } from './print-toc.js';
 import { createSourceHighlight } from './source-highlight.js';
+import { bindImagePaste } from './image-paste.js';
 const $ = s => document.querySelector(s),
   app = $('#app');
 const isMac = /Mac/.test(navigator.userAgent),
@@ -113,6 +114,8 @@ let current = builtinDocument('welcome'),
   rendered = null,
   resetScroll = true,
   saveBusy = false,
+  pasteBusy = false,
+  documentKey = 0,
   opening = false,
   toastTimer,
   newline = '\n',
@@ -206,7 +209,7 @@ function update() {
   $('#doc-state').textContent = stateLabel();
   $('#encoding').textContent =
     current.encoding + (newline === '\r\n' ? ' · CRLF' : newline === '\r' ? ' · CR' : ' · LF');
-  $('#save').disabled = saveBusy || opening;
+  $('#save').disabled = saveBusy || pasteBusy || opening;
   const title = (dirty() ? '• ' : '') + current.name + ' — ' + t('app.name');
   if (title !== windowTitle) {
     windowTitle = title;
@@ -411,6 +414,7 @@ function switchDocument(load, valid) {
   return documentTransition({ guard, load, valid, apply: useDocument, setOpening });
 }
 function useDocument(d, keepScroll = false) {
+  documentKey++;
   current = d;
   currentHeading = '';
   pendingAnchor = d.navigationAnchor || '';
@@ -764,7 +768,7 @@ function replaceEvery() {
 // Edits go through insertText so the native undo stack keeps working; setRangeText is the fallback.
 function applyEdit(c) {
   const ed = $('#editor');
-  if (!c || ed.disabled) return;
+  if (!c || ed.disabled || ed.readOnly) return;
   if (ed.value.slice(c.start, c.end) === c.text) {
     ed.setSelectionRange(...c.select);
     return;
@@ -945,6 +949,22 @@ $('#editor').oninput = e => {
   scheduleRender();
   if ($('#findbar').classList.contains('open') && $('#query').value && sourceFind()) runFind(false);
 };
+bindImagePaste($('#editor'), {
+  enqueue,
+  documentKey: () => documentKey,
+  ensureSaved: async () => {
+    if (current.id) return true;
+    toast(t('toast.pasteSaveFirst'));
+    return save(false);
+  },
+  store: encoded => call('SaveClipboardImages', current.id, encoded),
+  apply: applyEdit,
+  busy: value => {
+    pasteBusy = value;
+    update();
+  },
+  onError: e => toast(e, true),
+});
 $('#editor').addEventListener('mousedown', () => {
   findCycling = false;
 });
@@ -1085,7 +1105,7 @@ const actions = {
 };
 // A menu accelerator and the in-page shortcut can both fire for one key press; run each action once.
 function runAction(name) {
-  if (closeApproved || !actions[name]) return;
+  if (closeApproved || pasteBusy || !actions[name]) return;
   if (document.querySelector('.library-dialog[open]')) return;
   const now = Date.now();
   if (lastAction.name === name && now - lastAction.at < 400) return;
@@ -1119,7 +1139,7 @@ function hasDiagram() {
 }
 const external = externalChanges({
   open: () => current,
-  busy: () => opening || saveBusy || closeApproved || !native(),
+  busy: () => opening || saveBusy || pasteBusy || closeApproved || !native(),
   dirty,
   readHash: id => call('DocumentHash', id),
   reload: (id, hash) =>
