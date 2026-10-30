@@ -71,7 +71,8 @@ jobs:
           go test ./...
 
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
+    # A tag push or a version bump on main both produce a draft release; the draft is created once per version.
+    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main'
     needs: [build, windows-test]
     runs-on: ubuntu-latest
     permissions:
@@ -85,5 +86,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft \
-            --title "MoRead ${GITHUB_REF_NAME#v}" --notes-file release/Release-Notes.md release/*
+          exe=$(ls release/MoRead-*-Windows-x64.exe)
+          version=${exe#release/MoRead-}
+          version=${version%-Windows-x64.exe}
+          tag="v$version"
+          if [ "$GITHUB_REF_TYPE" = tag ] && [ "$GITHUB_REF_NAME" != "$tag" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package version $version" >&2
+            exit 1
+          fi
+          # Drafts have no tag yet, so look for the version among all releases, drafts included.
+          if gh release list --repo "$GITHUB_REPOSITORY" --limit 100 --json tagName --jq '.[].tagName' | grep -qx "$tag"; then
+            echo "A release for $tag already exists; nothing to do."
+            exit 0
+          fi
+          gh release create "$tag" --repo "$GITHUB_REPOSITORY" --draft --target "$GITHUB_SHA" \
+            --title "MoRead $version" --notes-file release/Release-Notes.md release/*
