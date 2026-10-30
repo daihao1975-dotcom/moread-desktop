@@ -4,6 +4,9 @@ export const normalizeWidth = value =>
 export const FLUID_WIDTH = 'none';
 export const widthCSS = value =>
   normalizeWidth(value) === 'auto' ? FLUID_WIDTH : normalizeWidth(value) + 'px';
+// The source view centres the same measure inside its pane; fluid keeps the whole pane.
+export const sourceWidthCSS = value =>
+  normalizeWidth(value) === 'auto' ? '100%' : normalizeWidth(value) + 'px';
 export const THEMES = ['auto', 'light', 'paper', 'dark'];
 // "auto" follows the system appearance; the reading pane only ever receives a concrete theme.
 export const resolveTheme = (theme, systemDark) =>

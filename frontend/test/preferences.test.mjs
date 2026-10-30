@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readPreferences, widthCSS } from '../src/preferences.js';
+import { readPreferences, widthCSS, sourceWidthCSS } from '../src/preferences.js';
 test('legacy default width migrates to fluid without changing typography', () => {
   const p = readPreferences({ width: 860, size: 19, theme: 'dark', sidebar: false });
   assert.equal(p.width, 'auto');
@@ -18,6 +18,12 @@ test('width CSS accepts only fluid or bounded fixed widths', () => {
   assert.equal(widthCSS('auto'), 'none');
   assert.equal(widthCSS(860), '860px');
   for (const w of ['NaN', 'undefined', '100%;color:red', null, Infinity]) assert.equal(widthCSS(w), 'none');
+});
+test('source view centres the fixed reading measure and keeps the pane when fluid', () => {
+  assert.equal(sourceWidthCSS('auto'), '100%');
+  assert.equal(sourceWidthCSS('720'), '720px');
+  assert.equal(sourceWidthCSS(1040), '1040px');
+  for (const w of ['NaN', '100%;color:red', null, 500]) assert.equal(sourceWidthCSS(w), '100%');
 });
 test('split ratio is kept only within the draggable range', () => {
   assert.equal(readPreferences({}).split, 50);

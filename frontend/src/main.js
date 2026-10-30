@@ -1,6 +1,6 @@
 import { readRelativeDocument } from './relative-link.js';
 import { readLineEndings, editLineEndings, writeLineEndings } from './line-endings.js';
-import { readPreferences, normalizeWidth, resolveTheme } from './preferences.js';
+import { readPreferences, normalizeWidth, resolveTheme, sourceWidthCSS } from './preferences.js';
 import { bindTitlebar } from './titlebar.js';
 import { documentTransition } from './document-transition.js';
 import { initializeDocuments } from './initial-documents.js';
@@ -247,6 +247,7 @@ function applyPrefs() {
     .forEach(b => b.classList.toggle('active', b.dataset.theme === prefs.theme));
   savePrefs();
   document.documentElement.style.setProperty('--editor-size', Math.max(13, prefs.size - 2) + 'px');
+  document.documentElement.style.setProperty('--source-width', sourceWidthCSS(prefs.width));
   syncToggles();
   sourceHighlight?.refresh();
   previewFrame?.prefs({ theme, size: prefs.size, width: prefs.width }).catch(e => toast(e, true));

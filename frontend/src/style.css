@@ -560,9 +560,10 @@ textarea,
 .md-em {
   color: var(--md-emphasis);
 }
-/* Source-only view follows the available pane with a small, bounded gutter. */
+/* Source-only view uses the preview's gutter and, for a fixed reading width, centres the same measure. */
 .view-area:not(.split) textarea {
-  padding-inline: clamp(22px, 3.5vw, 64px);
+  --gutter: clamp(22px, 3.5vw, 64px);
+  padding-inline: max(var(--gutter), calc((100% - var(--source-width, 100%)) / 2 + var(--gutter)));
 }
 .split textarea {
   flex: 0 0 var(--split, 50%);
