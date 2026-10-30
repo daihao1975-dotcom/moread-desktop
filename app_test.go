@@ -189,6 +189,10 @@ func TestRegisterChecksMetadataWithoutReadingBody(t *testing.T) {
 		if st.Mode().Perm()&0444 != 0 {
 			t.Skip("filesystem does not represent chmod(000) as unreadable")
 		}
+		if f, err := os.Open(blocked); err == nil {
+			f.Close()
+			t.Skip("process can read chmod(000) files, for example when running as root")
+		}
 		if _, err := a.register(blocked, root, true); err == nil {
 			t.Fatal("unreadable file registered")
 		}
