@@ -565,6 +565,37 @@ textarea,
   --gutter: clamp(22px, 3.5vw, 64px);
   padding-inline: max(var(--gutter), calc((100% - var(--source-width, 100%)) / 2 + var(--gutter)));
 }
+/* Reading progress sits on the preview's top edge; in split view it spans only the preview pane. */
+.read-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 3;
+  pointer-events: none;
+  background: var(--accent);
+  transform-origin: left;
+  transform: scaleX(var(--progress, 0));
+  transition: transform 0.12s linear;
+}
+#preview.hidden ~ .read-progress {
+  display: none;
+}
+.split:not(.preview-left) .read-progress {
+  left: var(--split, 50%);
+}
+.split.preview-left .read-progress {
+  right: calc(100% - var(--split, 50%));
+}
+#read-percent {
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  .read-progress {
+    transition: none;
+  }
+}
 .split textarea {
   flex: 0 0 var(--split, 50%);
   width: auto;

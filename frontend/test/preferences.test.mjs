@@ -25,6 +25,12 @@ test('source view centres the fixed reading measure and keeps the pane when flui
   assert.equal(sourceWidthCSS(1040), '1040px');
   for (const w of ['NaN', '100%;color:red', null, 500]) assert.equal(sourceWidthCSS(w), '100%');
 });
+test('reading typeface defaults to sans and keeps only known faces', () => {
+  assert.equal(readPreferences({}).font, 'sans');
+  assert.equal(readPreferences({ font: 'serif' }).font, 'serif');
+  for (const f of ['Comic Sans', 'serif;color:red', null, 1])
+    assert.equal(readPreferences({ font: f }).font, 'sans');
+});
 test('split ratio is kept only within the draggable range', () => {
   assert.equal(readPreferences({}).split, 50);
   assert.equal(readPreferences({ split: 35 }).split, 35);

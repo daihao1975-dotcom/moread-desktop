@@ -54,6 +54,18 @@ body {
     sans-serif;
   overflow-wrap: anywhere;
 }
+/* Serif reading face: a Latin book face first, then the platform's Song / Mincho / Myeongjo faces. */
+html[data-font='serif'] body {
+  font-family:
+    'Iowan Old Style', Charter, 'Palatino Linotype', Georgia, 'Songti SC', 'Songti TC', STSong,
+    'Hiragino Mincho ProN', 'Yu Mincho', 'AppleMyungjo', 'Noto Serif CJK SC', 'Source Han Serif SC', SimSun,
+    'Batang', serif;
+}
+html[data-font='serif'] h1,
+html[data-font='serif'] h2,
+html[data-font='serif'] h3 {
+  letter-spacing: 0;
+}
 article {
   width: 100%;
   max-width: var(--content-width, none);

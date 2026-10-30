@@ -1,4 +1,4 @@
-import { widthCSS } from './preferences.js';
+import { widthCSS, normalizeFont } from './preferences.js';
 import { t, language, localizeMessage } from './i18n.js';
 import MarkdownIt from 'markdown-it';
 import DOMPurify from 'dompurify';
@@ -144,8 +144,8 @@ export async function getCSS(math = false) {
 }
 const CSP =
   "default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:; script-src 'none'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'";
-export function page(body, css, theme = 'light', size = 16, width = 'auto') {
-  return `<!doctype html><html lang="${language()}" data-theme="${theme}"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${CSP}"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(t('export.title'))}</title><style>${css.replace(/<\/style/gi, '<\\/style')}\n:root{--font-size:${Number(size)}px;--content-width:${widthCSS(width)}}</style></head><body><article>${body}</article>${css.includes('data:font/woff2') ? `<template id="katex-font-license">${escape(fontNotice)}</template>` : ''}</body></html>`;
+export function page(body, css, theme = 'light', size = 16, width = 'auto', font = 'sans') {
+  return `<!doctype html><html lang="${language()}" data-theme="${theme}" data-font="${normalizeFont(font)}"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${CSP}"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(t('export.title'))}</title><style>${css.replace(/<\/style/gi, '<\\/style')}\n:root{--font-size:${Number(size)}px;--content-width:${widthCSS(width)}}</style></head><body><article>${body}</article>${css.includes('data:font/woff2') ? `<template id="katex-font-license">${escape(fontNotice)}</template>` : ''}</body></html>`;
 }
 const mermaidConfig = {
   startOnLoad: false,

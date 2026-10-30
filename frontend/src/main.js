@@ -1,6 +1,12 @@
 import { readRelativeDocument } from './relative-link.js';
 import { readLineEndings, editLineEndings, writeLineEndings } from './line-endings.js';
-import { readPreferences, normalizeWidth, resolveTheme, sourceWidthCSS } from './preferences.js';
+import {
+  readPreferences,
+  normalizeWidth,
+  normalizeFont,
+  resolveTheme,
+  sourceWidthCSS,
+} from './preferences.js';
 import { bindTitlebar } from './titlebar.js';
 import { documentTransition } from './document-transition.js';
 import { initializeDocuments } from './initial-documents.js';
@@ -240,6 +246,7 @@ function applyPrefs() {
   $('#font-size').value = prefs.size;
   $('#size-label').textContent = prefs.size;
   $('#width').value = prefs.width;
+  $('#font').value = prefs.font;
   $('#language').value = prefs.lang;
   $('#print-toc').checked = prefs.printToc;
   document
@@ -250,7 +257,9 @@ function applyPrefs() {
   document.documentElement.style.setProperty('--source-width', sourceWidthCSS(prefs.width));
   syncToggles();
   sourceHighlight?.refresh();
-  previewFrame?.prefs({ theme, size: prefs.size, width: prefs.width }).catch(e => toast(e, true));
+  previewFrame
+    ?.prefs({ theme, size: prefs.size, width: prefs.width, font: prefs.font })
+    .catch(e => toast(e, true));
   // Apply the new theme first, then redraw diagrams in the matching palette.
   if (renderedTheme && (renderedTheme === 'dark') !== (theme === 'dark') && hasDiagram()) scheduleRender(0);
 }
@@ -364,6 +373,7 @@ function setMode(v) {
   $('#swap-panes').classList.toggle('hidden', v !== 'split');
   $('#editor').classList.toggle('hidden', v === 'read');
   $('#preview').classList.toggle('hidden', v === 'source');
+  if (v === 'source') $('#read-percent').textContent = '';
   if (v !== 'read') $('#editor').focus();
   if (v !== 'source') scheduleRender(0);
   clearFind();
@@ -556,6 +566,7 @@ async function render(v) {
               theme,
               size: prefs.size,
               width: prefs.width,
+              font: prefs.font,
             });
             if (v !== version_ || result.cancelled) return;
             previewShown = true;
@@ -572,6 +583,7 @@ async function render(v) {
       theme,
       size: prefs.size,
       width: prefs.width,
+      font: prefs.font,
     });
     if (v !== version_ || result.cancelled) return;
     await reportPaint();
@@ -845,7 +857,7 @@ async function snapshot() {
   const clean = document.createElement('div');
   clean.innerHTML = rendered.body;
   clean.querySelectorAll('.copy-code').forEach(b => b.remove());
-  return page(clean.innerHTML, rendered.css, activeTheme(), prefs.size, prefs.width);
+  return page(clean.innerHTML, rendered.css, activeTheme(), prefs.size, prefs.width, prefs.font);
 }
 $('#open').onclick = () => enqueue(async () => addResult(await call('OpenFiles')));
 $('#folder').onclick = () => enqueue(async () => addResult(await call('OpenFolder')));
@@ -915,6 +927,10 @@ $('#font-size').oninput = e => {
 };
 $('#width').onchange = e => {
   prefs.width = normalizeWidth(e.target.value);
+  applyPrefs();
+};
+$('#font').onchange = e => {
+  prefs.font = normalizeFont(e.target.value);
   applyPrefs();
 };
 $('#language').onchange = e => {
@@ -1155,8 +1171,14 @@ setInterval(() => {
   if (document.hasFocus()) refreshFolders();
 }, 10000);
 const editorTops = headingTops();
+// Reading progress: a thin bar over the preview and a percentage in the status bar once the reader moves.
+function showProgress(ratio) {
+  $('#read-progress').style.setProperty('--progress', ratio);
+  $('#read-percent').textContent = ratio > 0 && mode !== 'source' ? Math.round(ratio * 100) + '%' : '';
+}
 // Reading position from the preview drives the outline highlight and, in split view, the editor.
 function handlePosition({ ratio, heading, section, progress }) {
+  showProgress(ratio);
   if (heading !== currentHeading) {
     currentHeading = heading;
     for (const row of document.querySelectorAll('.outline-row')) {

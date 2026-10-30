@@ -107,6 +107,7 @@
         'theme',
         'size',
         'width',
+        'font',
         'reset',
         'query',
         'move',
@@ -180,10 +181,12 @@
           if (
             !['light', 'dark', 'paper'].includes(m.theme) ||
             !integer(m.size, 13, 24) ||
-            !['auto', 720, 860, 1040].includes(m.width)
+            !['auto', 720, 860, 1040].includes(m.width) ||
+            !['sans', 'serif'].includes(m.font)
           )
             return;
           document.documentElement.dataset.theme = m.theme;
+          document.documentElement.dataset.font = m.font;
           document.documentElement.style.setProperty('--font-size', m.size + 'px');
           document.documentElement.style.setProperty(
             '--content-width',

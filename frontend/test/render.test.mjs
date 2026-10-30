@@ -83,6 +83,12 @@ test('offline snapshots preserve fluid and fixed selections without invalid CSS'
   }
 });
 
+test('offline snapshots carry only a known reading typeface', () => {
+  assert.match(page('<p>x</p>', ''), /data-font="sans"/);
+  assert.match(page('<p>x</p>', '', 'light', 16, 'auto', 'serif'), /data-font="serif"/);
+  assert.match(page('<p>x</p>', '', 'light', 16, 'auto', '"><script>'), /data-font="sans"/);
+});
+
 test('documents without math skip KaTeX styles, fonts and the font license', async () => {
   const r = await renderDocument('# 标题\n\n正文');
   assert.equal(r.math, false);
