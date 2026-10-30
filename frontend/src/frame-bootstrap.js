@@ -187,7 +187,7 @@
           document.documentElement.style.setProperty('--font-size', m.size + 'px');
           document.documentElement.style.setProperty(
             '--content-width',
-            m.width === 'auto' ? 'min(100%, 48em)' : m.width + 'px',
+            m.width === 'auto' ? 'none' : m.width + 'px',
           );
           break;
         case 'find':

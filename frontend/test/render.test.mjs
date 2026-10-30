@@ -70,11 +70,11 @@ test('safe inline HTML wraps its actual text', async () => {
 
 test('offline snapshots preserve fluid and fixed selections without invalid CSS', () => {
   for (const [width, expected] of [
-    ['auto', 'min\\(100%, 48em\\)'],
+    ['auto', 'none'],
     [720, '720px'],
     [860, '860px'],
     [1040, '1040px'],
-    ['bad', 'min\\(100%, 48em\\)'],
+    ['bad', 'none'],
   ]) {
     const html = page('<p>content</p>', '', 'light', 19, width);
     assert.match(html, new RegExp('--content-width:' + expected));

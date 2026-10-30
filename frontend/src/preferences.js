@@ -1,7 +1,7 @@
 export const normalizeWidth = value =>
   value === 'auto' ? 'auto' : [720, 860, 1040].includes(Number(value)) ? Number(value) : 'auto';
-// Fluid width follows the window but stops at a comfortable reading measure.
-export const FLUID_WIDTH = 'min(100%, 48em)';
+// Fluid width uses the available pane; fixed widths remain an explicit reading preference.
+export const FLUID_WIDTH = 'none';
 export const widthCSS = value =>
   normalizeWidth(value) === 'auto' ? FLUID_WIDTH : normalizeWidth(value) + 'px';
 export const THEMES = ['auto', 'light', 'paper', 'dark'];

@@ -560,9 +560,9 @@ textarea,
 .md-em {
   color: var(--md-emphasis);
 }
-/* Source-only view keeps the same reading measure as the preview; the scrollbar stays at the window edge. */
+/* Source-only view follows the available pane with a small, bounded gutter. */
 .view-area:not(.split) textarea {
-  padding-inline: max(36px, calc((100% - 48em) / 2));
+  padding-inline: clamp(22px, 3.5vw, 64px);
 }
 .split textarea {
   flex: 0 0 var(--split, 50%);

@@ -15,10 +15,9 @@ test('intentional fixed width choices survive migration and restart', () => {
   assert.equal(readPreferences({ layoutVersion: 2, width: 'auto' }).width, 'auto');
 });
 test('width CSS accepts only fluid or bounded fixed widths', () => {
-  assert.equal(widthCSS('auto'), 'min(100%, 48em)');
+  assert.equal(widthCSS('auto'), 'none');
   assert.equal(widthCSS(860), '860px');
-  for (const w of ['NaN', 'undefined', '100%;color:red', null, Infinity])
-    assert.equal(widthCSS(w), 'min(100%, 48em)');
+  for (const w of ['NaN', 'undefined', '100%;color:red', null, Infinity]) assert.equal(widthCSS(w), 'none');
 });
 test('split ratio is kept only within the draggable range', () => {
   assert.equal(readPreferences({}).split, 50);
