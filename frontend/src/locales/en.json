@@ -326,5 +326,9 @@
   "library.destination": "Destination folder",
   "library.confirm": "Confirm",
   "library.nameRequired": "Enter a valid folder name",
-  "err.libraryInvalid": "Invalid library data or too many items or folder levels"
+  "err.libraryInvalid": "Invalid library data or too many items or folder levels",
+  "toast.pasteSaveFirst": "Save the document first to store pasted images beside it.",
+  "err.clipboardImageType": "Paste PNG, JPEG or GIF images.",
+  "err.clipboardImageSize": "Paste at most 20 images and 20 MB in total at a time.",
+  "err.clipboardImageRead": "Could not read the image from the clipboard."
 }

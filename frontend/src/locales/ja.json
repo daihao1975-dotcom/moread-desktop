@@ -326,5 +326,9 @@
   "library.destination": "移動先フォルダー",
   "library.confirm": "確定",
   "library.nameRequired": "有効なフォルダー名を入力してください",
-  "err.libraryInvalid": "分類データが無効か、項目数・階層の上限を超えています"
+  "err.libraryInvalid": "分類データが無効か、項目数・階層の上限を超えています",
+  "toast.pasteSaveFirst": "画像を文書の隣に保存するため、先に文書を保存してください。",
+  "err.clipboardImageType": "PNG、JPEG、GIF 画像を貼り付けられます。",
+  "err.clipboardImageSize": "一度に貼り付けられるのは 20 枚、合計 20 MB までです。",
+  "err.clipboardImageRead": "クリップボードの画像を読み取れません。もう一度コピーしてください。"
 }

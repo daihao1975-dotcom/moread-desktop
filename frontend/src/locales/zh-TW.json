@@ -326,5 +326,9 @@
   "library.destination": "目標資料夾",
   "library.confirm": "確定",
   "library.nameRequired": "請輸入有效的資料夾名稱",
-  "err.libraryInvalid": "分類資料無效或超出數量、層級限制"
+  "err.libraryInvalid": "分類資料無效或超出數量、層級限制",
+  "toast.pasteSaveFirst": "請先儲存文件，截圖會存放在文件旁的 assets 資料夾中。",
+  "err.clipboardImageType": "支援貼上 PNG、JPEG 或 GIF 圖片。",
+  "err.clipboardImageSize": "每次最多貼上 20 張圖片，總計不超過 20 MB。",
+  "err.clipboardImageRead": "無法讀取剪貼簿中的圖片，請重新複製後貼上。"
 }

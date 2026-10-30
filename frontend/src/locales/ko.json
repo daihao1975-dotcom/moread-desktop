@@ -326,5 +326,9 @@
   "library.destination": "대상 폴더",
   "library.confirm": "확인",
   "library.nameRequired": "올바른 폴더 이름을 입력하세요",
-  "err.libraryInvalid": "분류 데이터가 잘못되었거나 항목 수 또는 폴더 깊이 제한을 초과했습니다"
+  "err.libraryInvalid": "분류 데이터가 잘못되었거나 항목 수 또는 폴더 깊이 제한을 초과했습니다",
+  "toast.pasteSaveFirst": "이미지를 문서 옆에 저장하려면 먼저 문서를 저장하세요.",
+  "err.clipboardImageType": "PNG, JPEG, GIF 이미지를 붙여넣을 수 있습니다.",
+  "err.clipboardImageSize": "한 번에 최대 20개 이미지, 총 20 MB까지 붙여넣을 수 있습니다.",
+  "err.clipboardImageRead": "클립보드 이미지를 읽을 수 없습니다. 다시 복사해 주세요."
 }
