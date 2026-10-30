@@ -225,7 +225,7 @@ export function createFrame(element, { onAction, onShortcut, onDrop, onError, on
     async render(
       body,
       css,
-      { reset = false, theme = 'light', size = 16, width = 'auto', font = 'sans' } = {},
+      { reset = false, theme = 'light', size = 16, width = 'auto', font = 'sans', leading = 'normal' } = {},
     ) {
       if (typeof body !== 'string' || body.length > 64 * 1024 * 1024) throw new Error(t('frame.tooLarge'));
       const renderVersion = version;
@@ -274,7 +274,7 @@ export function createFrame(element, { onAction, onShortcut, onDrop, onError, on
         renderVersion,
       );
       if (result.cancelled || version !== renderVersion) return { cancelled: true };
-      await command('prefs', { theme, size, width, font }, renderVersion);
+      await command('prefs', { theme, size, width, font, leading }, renderVersion);
       return result;
     },
     prefs(prefs) {

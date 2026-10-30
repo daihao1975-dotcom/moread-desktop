@@ -43,9 +43,18 @@ test('render forwards the reading typeface with the other display preferences', 
   const t = setup();
   t.frame.begin(1);
   t.incoming('ready', {}, 0);
-  await t.frame.render('<p>x</p>', '', { theme: 'paper', size: 18, width: 860, font: 'serif' });
+  await t.frame.render('<p>x</p>', '', {
+    theme: 'paper',
+    size: 18,
+    width: 860,
+    font: 'serif',
+    leading: 'relaxed',
+  });
   const prefs = t.sent.find(m => m.type === 'prefs');
-  assert.deepEqual([prefs.theme, prefs.size, prefs.width, prefs.font], ['paper', 18, 860, 'serif']);
+  assert.deepEqual(
+    [prefs.theme, prefs.size, prefs.width, prefs.font, prefs.leading],
+    ['paper', 18, 860, 'serif', 'relaxed'],
+  );
 });
 test('opaque frame exposes only current indexed actions and strips navigation', async () => {
   const t = setup();

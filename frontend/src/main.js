@@ -4,6 +4,7 @@ import {
   readPreferences,
   normalizeWidth,
   normalizeFont,
+  normalizeLeading,
   resolveTheme,
   sourceWidthCSS,
 } from './preferences.js';
@@ -247,6 +248,7 @@ function applyPrefs() {
   $('#size-label').textContent = prefs.size;
   $('#width').value = prefs.width;
   $('#font').value = prefs.font;
+  $('#leading').value = prefs.leading;
   $('#language').value = prefs.lang;
   $('#print-toc').checked = prefs.printToc;
   document
@@ -258,10 +260,10 @@ function applyPrefs() {
   syncToggles();
   sourceHighlight?.refresh();
   previewFrame
-    ?.prefs({ theme, size: prefs.size, width: prefs.width, font: prefs.font })
+    ?.prefs({ theme, size: prefs.size, width: prefs.width, font: prefs.font, leading: prefs.leading })
     .catch(e => toast(e, true));
   // Apply the new theme first, then redraw diagrams in the matching palette.
-  if (renderedTheme && (renderedTheme === 'dark') !== (theme === 'dark') && hasDiagram()) scheduleRender(0);
+  if (renderedTheme && renderedTheme !== theme && hasDiagram()) scheduleRender(0);
 }
 darkQuery?.addEventListener?.('change', () => {
   if (prefs.theme === 'auto') applyPrefs();
@@ -567,6 +569,7 @@ async function render(v) {
               size: prefs.size,
               width: prefs.width,
               font: prefs.font,
+              leading: prefs.leading,
             });
             if (v !== version_ || result.cancelled) return;
             previewShown = true;
@@ -584,6 +587,7 @@ async function render(v) {
       size: prefs.size,
       width: prefs.width,
       font: prefs.font,
+      leading: prefs.leading,
     });
     if (v !== version_ || result.cancelled) return;
     await reportPaint();
@@ -857,7 +861,15 @@ async function snapshot() {
   const clean = document.createElement('div');
   clean.innerHTML = rendered.body;
   clean.querySelectorAll('.copy-code').forEach(b => b.remove());
-  return page(clean.innerHTML, rendered.css, activeTheme(), prefs.size, prefs.width, prefs.font);
+  return page(
+    clean.innerHTML,
+    rendered.css,
+    activeTheme(),
+    prefs.size,
+    prefs.width,
+    prefs.font,
+    prefs.leading,
+  );
 }
 $('#open').onclick = () => enqueue(async () => addResult(await call('OpenFiles')));
 $('#folder').onclick = () => enqueue(async () => addResult(await call('OpenFolder')));
@@ -931,6 +943,10 @@ $('#width').onchange = e => {
 };
 $('#font').onchange = e => {
   prefs.font = normalizeFont(e.target.value);
+  applyPrefs();
+};
+$('#leading').onchange = e => {
+  prefs.leading = normalizeLeading(e.target.value);
   applyPrefs();
 };
 $('#language').onchange = e => {

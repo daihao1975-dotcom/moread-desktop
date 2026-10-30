@@ -108,6 +108,7 @@
         'size',
         'width',
         'font',
+        'leading',
         'reset',
         'query',
         'move',
@@ -182,11 +183,16 @@
             !['light', 'dark', 'paper'].includes(m.theme) ||
             !integer(m.size, 13, 24) ||
             !['auto', 720, 860, 1040].includes(m.width) ||
-            !['sans', 'serif'].includes(m.font)
+            !['sans', 'serif'].includes(m.font) ||
+            !['compact', 'normal', 'relaxed'].includes(m.leading)
           )
             return;
           document.documentElement.dataset.theme = m.theme;
           document.documentElement.dataset.font = m.font;
+          document.documentElement.style.setProperty(
+            '--line-height',
+            { compact: '1.6', normal: '1.75', relaxed: '1.95' }[m.leading],
+          );
           document.documentElement.style.setProperty('--font-size', m.size + 'px');
           document.documentElement.style.setProperty(
             '--content-width',

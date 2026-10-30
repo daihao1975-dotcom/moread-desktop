@@ -47,7 +47,7 @@ body {
   background: var(--paper);
   color: var(--ink);
   font:
-    var(--font-size) / 1.75 -apple-system,
+    var(--font-size) / var(--line-height, 1.75) -apple-system,
     BlinkMacSystemFont,
     'Segoe UI',
     'Microsoft YaHei',
@@ -255,6 +255,10 @@ img {
 .diagram svg {
   max-width: 100%;
   height: auto;
+}
+html[data-theme='paper'] .diagram {
+  background: #fbf7ee;
+  color: var(--ink);
 }
 html[data-theme='dark'] .diagram {
   background: var(--tint);

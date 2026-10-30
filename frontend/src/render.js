@@ -1,4 +1,4 @@
-import { widthCSS, normalizeFont } from './preferences.js';
+import { widthCSS, normalizeFont, normalizeLeading, LEADINGS } from './preferences.js';
 import { t, language, localizeMessage } from './i18n.js';
 import MarkdownIt from 'markdown-it';
 import DOMPurify from 'dompurify';
@@ -144,8 +144,16 @@ export async function getCSS(math = false) {
 }
 const CSP =
   "default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:; script-src 'none'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'";
-export function page(body, css, theme = 'light', size = 16, width = 'auto', font = 'sans') {
-  return `<!doctype html><html lang="${language()}" data-theme="${theme}" data-font="${normalizeFont(font)}"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${CSP}"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(t('export.title'))}</title><style>${css.replace(/<\/style/gi, '<\\/style')}\n:root{--font-size:${Number(size)}px;--content-width:${widthCSS(width)}}</style></head><body><article>${body}</article>${css.includes('data:font/woff2') ? `<template id="katex-font-license">${escape(fontNotice)}</template>` : ''}</body></html>`;
+export function page(
+  body,
+  css,
+  theme = 'light',
+  size = 16,
+  width = 'auto',
+  font = 'sans',
+  leading = 'normal',
+) {
+  return `<!doctype html><html lang="${language()}" data-theme="${theme}" data-font="${normalizeFont(font)}"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${CSP}"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(t('export.title'))}</title><style>${css.replace(/<\/style/gi, '<\\/style')}\n:root{--font-size:${Number(size)}px;--content-width:${widthCSS(width)};--line-height:${LEADINGS[normalizeLeading(leading)]}}</style></head><body><article>${body}</article>${css.includes('data:font/woff2') ? `<template id="katex-font-license">${escape(fontNotice)}</template>` : ''}</body></html>`;
 }
 const mermaidConfig = {
   startOnLoad: false,
@@ -156,7 +164,41 @@ const mermaidConfig = {
   flowchart: { htmlLabels: false },
   suppressErrorRendering: true,
 };
-// Diagrams are rendered for the reading theme so dark pages do not carry bright blocks.
+// Diagrams are drawn in the reading theme's own palette, so they sit on the page instead of as grey blocks.
+const diagramFont = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif";
+const diagramPalettes = {
+  light: {
+    background: '#ffffff',
+    primaryColor: '#e8f1ff',
+    primaryBorderColor: '#7aa7ee',
+    primaryTextColor: '#1f2329',
+    secondaryColor: '#f6f8fa',
+    tertiaryColor: '#ffffff',
+    lineColor: '#5f6670',
+    fontFamily: diagramFont,
+  },
+  paper: {
+    background: '#fbf7ee',
+    primaryColor: '#f1e6cf',
+    primaryBorderColor: '#b68b50',
+    primaryTextColor: '#3f3a2f',
+    secondaryColor: '#efe8da',
+    tertiaryColor: '#fbf7ee',
+    lineColor: '#6b6352',
+    fontFamily: diagramFont,
+  },
+  dark: {
+    darkMode: true,
+    background: '#1f2329',
+    primaryColor: '#1d2c47',
+    primaryBorderColor: '#4f8fd9',
+    primaryTextColor: '#e6e8eb',
+    secondaryColor: '#262b33',
+    tertiaryColor: '#1f2329',
+    lineColor: '#a0a7b1',
+    fontFamily: diagramFont,
+  },
+};
 let mermaidPromise,
   mermaidTheme = '';
 async function loadMermaid(theme) {
@@ -166,9 +208,9 @@ async function loadMermaid(theme) {
       mermaidPromise = undefined;
       throw error;
     }));
-  const next = theme === 'dark' ? 'dark' : 'neutral';
+  const next = Object.hasOwn(diagramPalettes, theme) ? theme : 'light';
   if (next !== mermaidTheme) {
-    mermaid.initialize({ ...mermaidConfig, theme: next });
+    mermaid.initialize({ ...mermaidConfig, theme: 'base', themeVariables: diagramPalettes[next] });
     mermaidTheme = next;
   }
   return mermaid;

@@ -10,6 +10,9 @@ export const sourceWidthCSS = value =>
 export const THEMES = ['auto', 'light', 'paper', 'dark'];
 export const FONTS = ['sans', 'serif'];
 export const normalizeFont = value => (FONTS.includes(value) ? value : 'sans');
+// Line spacing choices; the frame bootstrap keeps the same table.
+export const LEADINGS = { compact: 1.6, normal: 1.75, relaxed: 1.95 };
+export const normalizeLeading = value => (Object.hasOwn(LEADINGS, value) ? value : 'normal');
 // "auto" follows the system appearance; the reading pane only ever receives a concrete theme.
 export const resolveTheme = (theme, systemDark) =>
   theme === 'auto' ? (systemDark ? 'dark' : 'light') : theme;
@@ -20,6 +23,7 @@ export function readPreferences(raw = {}) {
     size: 16,
     width: 'auto',
     font: 'sans',
+    leading: 'normal',
     sidebar: true,
     split: 50,
     previewOnLeft: false,
@@ -31,6 +35,7 @@ export function readPreferences(raw = {}) {
   if (THEMES.includes(raw.theme)) p.theme = raw.theme;
   if (Number.isInteger(raw.size) && raw.size >= 13 && raw.size <= 24) p.size = raw.size;
   p.font = normalizeFont(raw.font);
+  p.leading = normalizeLeading(raw.leading);
   if (typeof raw.sidebar === 'boolean') p.sidebar = raw.sidebar;
   if (typeof raw.printToc === 'boolean') p.printToc = raw.printToc;
   if (typeof raw.lang === 'string' && /^(auto|[a-z]{2}(-[A-Z]{2})?)$/.test(raw.lang))

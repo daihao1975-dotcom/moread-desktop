@@ -1,6 +1,6 @@
 # MoRead User Guide
 
-Version 1.0.9 · macOS 12 or later (Apple silicon) and Windows 10 / 11 (64-bit)
+Version 1.0.10 · macOS 12 or later (Apple silicon) and Windows 10 / 11 (64-bit)
 
 MoRead is an offline Markdown reader and light editor. Documents are read and saved only on your computer: nothing is uploaded, no network connection is made, and scripts inside documents never run.
 
@@ -8,13 +8,13 @@ MoRead is an offline Markdown reader and light editor. Documents are read and sa
 
 ### macOS
 
-1. Open `MoRead-1.0.9-macOS-arm64.dmg` and drag **MoRead** into **Applications**.
+1. Open `MoRead-1.0.10-macOS-arm64.dmg` and drag **MoRead** into **Applications**.
 2. Double-click MoRead in Applications to launch it. macOS packages are Developer ID signed and notarised by Apple.
 3. To open every Markdown file with MoRead, select any `.md` file in Finder → **Get Info** → **Open with: MoRead** → **Change All**.
 
 ### Windows
 
-1. Run `MoRead-1.0.9-Windows-x64.exe`. No installation is needed; keep it in any folder and create a shortcut if you like.
+1. Run `MoRead-1.0.10-Windows-x64.exe`. No installation is needed; keep it in any folder and create a shortcut if you like.
 2. Microsoft Edge WebView2 Runtime is required (included in Windows 11 and up-to-date Windows 10). If it is missing, MoRead tells you and exits; download it from Microsoft.
 3. If SmartScreen appears on first run, click **More info → Run anyway**.
 
@@ -88,6 +88,7 @@ Click **Reading settings** at the right of the toolbar (⌘ / Ctrl + ,):
 - **Font size**: 13–24, also from the View menu or ⌘ / Ctrl + = / - / 0.
 - **Text width**: Fluid follows the available window width with modest page margins. Compact, Comfortable and Wide keep a fixed reading width, in both the Read and Source views.
 - **Typeface**: Sans serif or Serif (Song / Mincho / Myeongjo for CJK text). Code and math keep their own fonts; offline HTML exports use the same face.
+- **Line spacing**: Compact, Standard or Relaxed for the reading view and exports.
 - **Reading progress**: a thin bar on the top edge of the reading pane and a percentage in the status bar show how far you have read.
 - **Language**: system default, or 简体中文, 繁體中文, English, 日本語 or 한국어. Menus, dialogs, messages and the built-in example all switch.
 - **Remember recent files**: off by default. When it is on and the sidebar is empty, it lists the last 10 files or folders you opened; click one to open it again. Items that were moved or deleted drop off the list. Turning it off clears the list at once.

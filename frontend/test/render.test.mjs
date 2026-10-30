@@ -89,6 +89,12 @@ test('offline snapshots carry only a known reading typeface', () => {
   assert.match(page('<p>x</p>', '', 'light', 16, 'auto', '"><script>'), /data-font="sans"/);
 });
 
+test('offline snapshots carry the chosen line spacing', () => {
+  assert.match(page('<p>x</p>', ''), /--line-height:1\.75/);
+  assert.match(page('<p>x</p>', '', 'light', 16, 'auto', 'sans', 'relaxed'), /--line-height:1\.95/);
+  assert.match(page('<p>x</p>', '', 'light', 16, 'auto', 'sans', '3;color:red'), /--line-height:1\.75}/);
+});
+
 test('documents without math skip KaTeX styles, fonts and the font license', async () => {
   const r = await renderDocument('# 标题\n\n正文');
   assert.equal(r.math, false);

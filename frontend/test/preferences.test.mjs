@@ -31,6 +31,12 @@ test('reading typeface defaults to sans and keeps only known faces', () => {
   for (const f of ['Comic Sans', 'serif;color:red', null, 1])
     assert.equal(readPreferences({ font: f }).font, 'sans');
 });
+test('line spacing defaults to standard and keeps only known choices', () => {
+  assert.equal(readPreferences({}).leading, 'normal');
+  for (const l of ['compact', 'relaxed']) assert.equal(readPreferences({ leading: l }).leading, l);
+  for (const l of ['2', 'toString', '__proto__', null])
+    assert.equal(readPreferences({ leading: l }).leading, 'normal');
+});
 test('split ratio is kept only within the draggable range', () => {
   assert.equal(readPreferences({}).split, 50);
   assert.equal(readPreferences({ split: 35 }).split, 35);
