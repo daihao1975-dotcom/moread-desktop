@@ -157,3 +157,5 @@ export function countWords(value) {
   const minutes = cjk + words ? Math.max(1, Math.round(cjk / 400 + words / 220)) : 0;
   return { words: cjk + words, minutes };
 }
+// Minutes left at a reading position; 0 once the end is in sight, so the status bar shows only the percentage.
+export const minutesLeft = (minutes, ratio) => (ratio >= 0.99 ? 0 : Math.ceil(minutes * (1 - ratio)));

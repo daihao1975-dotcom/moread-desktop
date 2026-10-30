@@ -8,6 +8,7 @@ import {
   findAll,
   replaceAll,
   countWords,
+  minutesLeft,
 } from '../src/editing.js';
 const apply = (v, c) => v.slice(0, c.start) + c.text + v.slice(c.end);
 test('Enter continues bullet, numbered, task and quote lines', () => {
@@ -83,4 +84,12 @@ test('Unicode casing never shifts source offsets or leaves partial replacements'
   assert.deepEqual(findAll('𐐀 𐐨', '𐐨'), [0, 3]);
   assert.deepEqual(findAll('[a].* [A].*', '[a].*'), [0, 6]);
   assert.deepEqual(findAll('İ ABC', 'abc', 0), []);
+});
+
+test('remaining reading time rounds up and disappears near the end', () => {
+  assert.equal(minutesLeft(10, 0), 10);
+  assert.equal(minutesLeft(10, 0.55), 5);
+  assert.equal(minutesLeft(2, 0.6), 1);
+  assert.equal(minutesLeft(10, 0.995), 0);
+  assert.equal(minutesLeft(0, 0.3), 0);
 });

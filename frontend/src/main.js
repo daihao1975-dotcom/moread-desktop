@@ -25,6 +25,7 @@ import {
   findAll,
   replaceAll,
   countWords,
+  minutesLeft,
 } from './editing.js';
 import { version } from '../package.json';
 import './style.css';
@@ -44,6 +45,7 @@ import {
   ChevronDown,
   X,
   ArrowLeftRight,
+  ArrowUp,
 } from 'lucide';
 import { sample, welcome } from './sample.js';
 import { applyFolderUpdate, mergeFiles } from './file-list.js';
@@ -96,6 +98,7 @@ createIcons({
     ChevronDown,
     X,
     ArrowLeftRight,
+    ArrowUp,
   },
 });
 // builtin marks the welcome page and the full example, which follow the interface language until edited.
@@ -137,6 +140,8 @@ let current = builtinDocument('welcome'),
   scrollLead = '',
   scrollLeadAt = 0,
   renderedTheme = '',
+  readingMinutes = 0,
+  readingRatio = 0,
   countTimer;
 let libraryReady = !window.runtime?.EventsOn;
 const libraryWriter = createLibraryWriter({
@@ -228,6 +233,7 @@ function countLater(delay = 300) {
   clearTimeout(countTimer);
   countTimer = setTimeout(() => {
     const c = countWords(source);
+    readingMinutes = c.minutes;
     $('#words').textContent = t('status.count', { n: c.words.toLocaleString(language()), m: c.minutes });
   }, delay);
 }
@@ -285,6 +291,7 @@ function applyLanguage() {
   if (native()) call('SetLanguage', language()).catch(e => toast(e, true));
   if (current.untitled) current = { ...current, name: t('doc.untitled') };
   relabel();
+  showProgress();
   if (current.builtin && !dirty() && !opening) useDocument(builtinDocument(current.builtin), true);
   else scheduleRender(0);
 }
@@ -375,7 +382,7 @@ function setMode(v) {
   $('#swap-panes').classList.toggle('hidden', v !== 'split');
   $('#editor').classList.toggle('hidden', v === 'read');
   $('#preview').classList.toggle('hidden', v === 'source');
-  if (v === 'source') $('#read-percent').textContent = '';
+  showProgress();
   if (v !== 'read') $('#editor').focus();
   if (v !== 'source') scheduleRender(0);
   clearFind();
@@ -1188,10 +1195,17 @@ setInterval(() => {
 }, 10000);
 const editorTops = headingTops();
 // Reading progress: a thin bar over the preview and a percentage in the status bar once the reader moves.
-function showProgress(ratio) {
+// Back to top appears once the reader is past the opening screen of the document.
+function showProgress(ratio = readingRatio) {
+  readingRatio = ratio;
+  const shown = ratio > 0 && mode !== 'source',
+    p = Math.round(ratio * 100) + '%',
+    left = minutesLeft(readingMinutes, ratio);
   $('#read-progress').style.setProperty('--progress', ratio);
-  $('#read-percent').textContent = ratio > 0 && mode !== 'source' ? Math.round(ratio * 100) + '%' : '';
+  $('#read-percent').textContent = !shown ? '' : left > 0 ? t('status.remaining', { p, m: left }) : p;
+  $('#to-top').classList.toggle('visible', shown && ratio > 0.1);
 }
+$('#to-top').onclick = () => previewFrame?.scrollTo(0).catch(e => toast(e, true));
 // Reading position from the preview drives the outline highlight and, in split view, the editor.
 function handlePosition({ ratio, heading, section, progress }) {
   showProgress(ratio);
