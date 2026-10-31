@@ -453,3 +453,15 @@ func TestFileOpenBeforeStartupQueuesWithoutRuntime(t *testing.T) {
 		t.Fatal("file open before startup must queue without calling window runtime")
 	}
 }
+func TestRevealDocumentRequiresAuthorizedExistingFile(t *testing.T) {
+	a, d, p := fixture(t)
+	if e := a.RevealDocument("unknown"); e == nil || !strings.Contains(e.Error(), "notAuthorized") {
+		t.Fatalf("unknown id: %v", e)
+	}
+	if e := os.Remove(p); e != nil {
+		t.Fatal(e)
+	}
+	if e := a.RevealDocument(d.ID); e == nil || !strings.Contains(e.Error(), "moved") {
+		t.Fatalf("missing file: %v", e)
+	}
+}

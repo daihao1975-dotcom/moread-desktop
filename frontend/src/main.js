@@ -175,6 +175,7 @@ const library = createLibrary({
       persistLibrary();
       side();
     }),
+  revealDocument: id => call('RevealDocument', id).catch(e => toast(e, true)),
   folderRemoved: (id, parent) => {
     if (current.untitled && current.folder === id) current.folder = parent;
   },

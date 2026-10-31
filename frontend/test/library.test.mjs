@@ -78,6 +78,7 @@ function harness() {
     newDocument: folder => calls.push(['new', folder]),
     openFiles: folder => calls.push(['open', folder]),
     removeDocument: id => calls.push(['remove', id]),
+    revealDocument: id => calls.push(['reveal', id]),
     onError: error => {
       throw error;
     },
@@ -179,5 +180,12 @@ test('dragging changes logical membership and rejects moving an ancestor into it
   h.list.querySelector('[data-folder="work"] > .library-folder').ondragstart(event);
   h.list.querySelector('[data-folder="project"] > .library-folder').ondrop(event);
   assert.equal(h.library.state().folders.find(f => f.id === 'work').parent, '');
+  h.dom.window.close();
+});
+test('file menu reveals the saved document in the system file manager', async () => {
+  const h = harness();
+  h.render();
+  await h.menu('[data-file="b"]', 'library.reveal');
+  assert.deepEqual(h.calls.at(-1), ['reveal', 'b']);
   h.dom.window.close();
 });

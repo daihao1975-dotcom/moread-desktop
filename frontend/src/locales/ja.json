@@ -327,6 +327,8 @@
   "library.addFiles": "既存の文書を追加…",
   "library.rename": "フォルダー名を変更",
   "library.move": "移動先…",
+  "library.reveal": "エクスプローラーで表示",
+  "library.revealMac": "Finder で表示",
   "library.removeFolder": "フォルダーを除去（内容は親へ）",
   "library.removeFile": "一覧から除去（ファイルは保持）",
   "library.ungrouped": "未分類 / ルート",

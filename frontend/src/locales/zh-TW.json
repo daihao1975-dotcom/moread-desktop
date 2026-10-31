@@ -327,6 +327,8 @@
   "library.addFiles": "加入現有文件…",
   "library.rename": "重新命名資料夾",
   "library.move": "移動至…",
+  "library.reveal": "在檔案總管中顯示",
+  "library.revealMac": "在 Finder 中顯示",
   "library.removeFolder": "移除資料夾（子項移至上一層）",
   "library.removeFile": "從清單移除（保留磁碟檔案）",
   "library.ungrouped": "未分組 / 根目錄",

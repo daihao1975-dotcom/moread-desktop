@@ -327,6 +327,8 @@
   "library.addFiles": "加入已有文档…",
   "library.rename": "重命名文件夹",
   "library.move": "移动到…",
+  "library.reveal": "在资源管理器中显示",
+  "library.revealMac": "在访达中显示",
   "library.removeFolder": "移除文件夹（子项回到上一级）",
   "library.removeFile": "从列表移除（保留磁盘文件）",
   "library.ungrouped": "未分组 / 根目录",

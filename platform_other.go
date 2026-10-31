@@ -2,7 +2,11 @@
 
 package main
 
-import "os"
+import (
+	"os"
+	"os/exec"
+	"path/filepath"
+)
 
 // Only macOS and Windows are released; this keeps tests and tooling building elsewhere.
 func systemLanguages() []string  { return []string{os.Getenv("LANG")} }
@@ -11,3 +15,5 @@ func localizeNativeMenus(string) {}
 func hideOtherApps()             {}
 func showAllApps()               {}
 func showWindowAfterLaunch()     {}
+
+func revealPath(p string) error { return exec.Command("xdg-open", filepath.Dir(p)).Start() }

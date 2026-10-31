@@ -58,6 +58,15 @@ static void moreadShowWindowAfterLaunch(void) {
 		}];
 }
 
+// Selects the file in a Finder window, as "Show in Finder" does elsewhere. NSWorkspace is
+// thread safe, so this does not wait for the main thread.
+static void moreadRevealPath(const char *path) {
+	@autoreleasepool {
+		NSURL *url = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path]];
+		[[NSWorkspace sharedWorkspace] activateFileViewerSelectingURLs:@[url]];
+	}
+}
+
 static char *moreadPreferredLanguages(void) {
 	return strdup([[NSLocale preferredLanguages] componentsJoinedByString:@"\n"].UTF8String);
 }
@@ -93,3 +102,10 @@ func showAllApps()     { C.moreadShowAll() }
 func systemDark() bool { return C.moreadSystemDark() != 0 }
 
 func showWindowAfterLaunch() { C.moreadShowWindowAfterLaunch() }
+
+func revealPath(p string) error {
+	s := C.CString(p)
+	defer C.free(unsafe.Pointer(s))
+	C.moreadRevealPath(s)
+	return nil
+}

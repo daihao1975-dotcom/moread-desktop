@@ -753,6 +753,21 @@ func (a *App) OpenRelative(id, ref string) (Document, error) {
 	a.mu.Unlock()
 	return a.register(p, root, false)
 }
+
+// RevealDocument shows a library document in the system file manager.
+func (a *App) RevealDocument(id string) error {
+	a.mu.Lock()
+	r, ok := a.files[id]
+	a.mu.Unlock()
+	if !ok {
+		return fail("notAuthorized")
+	}
+	real, e := filepath.EvalSymlinks(r.Path)
+	if e != nil || !within(r.Root, real) {
+		return fail("moved")
+	}
+	return revealPath(r.Path)
+}
 func (a *App) OpenLink(raw string) error {
 	u, e := url.Parse(raw)
 	if e != nil {

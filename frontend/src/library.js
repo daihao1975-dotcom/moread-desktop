@@ -19,6 +19,7 @@ export function createLibrary({
   newDocument,
   openFiles,
   removeDocument,
+  revealDocument,
   folderRemoved,
   onError,
 }) {
@@ -265,6 +266,14 @@ export function createLibrary({
         if (!f.draft)
           more(row, [
             [t('library.move'), () => destination(f.id, false)],
+            ...(revealDocument
+              ? [
+                  [
+                    t(/Mac/.test(navigator.userAgent) ? 'library.revealMac' : 'library.reveal'),
+                    () => revealDocument(f.id),
+                  ],
+                ]
+              : []),
             [t('library.removeFile'), () => removeDocument(f.id)],
           ]);
         if (!f.draft) draggable(row, f.id, 'file');

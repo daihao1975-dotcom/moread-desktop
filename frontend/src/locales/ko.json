@@ -327,6 +327,8 @@
   "library.addFiles": "기존 문서 추가…",
   "library.rename": "폴더 이름 변경",
   "library.move": "이동…",
+  "library.reveal": "파일 탐색기에서 보기",
+  "library.revealMac": "Finder에서 보기",
   "library.removeFolder": "폴더 제거 (내용은 상위로 이동)",
   "library.removeFile": "목록에서 제거 (디스크 파일 유지)",
   "library.ungrouped": "미분류 / 루트",

@@ -327,6 +327,8 @@
   "library.addFiles": "Add existing documents…",
   "library.rename": "Rename folder",
   "library.move": "Move to…",
+  "library.reveal": "Show in File Explorer",
+  "library.revealMac": "Show in Finder",
   "library.removeFolder": "Remove folder (keep contents in parent)",
   "library.removeFile": "Remove from list (keep file on disk)",
   "library.ungrouped": "Ungrouped / Root",

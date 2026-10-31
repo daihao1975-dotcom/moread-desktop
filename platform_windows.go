@@ -3,6 +3,9 @@
 package main
 
 import (
+	"os/exec"
+	"syscall"
+
 	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/registry"
 )
@@ -30,3 +33,11 @@ func localizeNativeMenus(string) {}
 func hideOtherApps()             {}
 func showAllApps()               {}
 func showWindowAfterLaunch()     {}
+
+// revealPath selects the file in an Explorer window. Explorer parses its own command line and
+// rejects Go's quoting of "/select,<path>", so the line is written out directly.
+func revealPath(p string) error {
+	cmd := exec.Command("explorer.exe")
+	cmd.SysProcAttr = &syscall.SysProcAttr{CmdLine: `explorer.exe /select,"` + p + `"`}
+	return cmd.Start()
+}
