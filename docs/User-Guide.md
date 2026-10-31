@@ -90,6 +90,7 @@ Click **Reading settings** at the right of the toolbar (⌘ / Ctrl + ,):
 - **Typeface**: Sans serif or Serif (Song / Mincho / Myeongjo for CJK text). Code and math keep their own fonts; offline HTML exports use the same face.
 - **Line spacing**: Compact, Standard or Relaxed for the reading view and exports.
 - **Reading progress**: a thin bar on the top edge of the reading pane and a percentage in the status bar show how far you have read, with an estimate of the minutes left. Once you scroll down, a round button in the lower corner of the reading pane returns to the top.
+- **Remembered position**: switching back to or reopening a document returns to where you left off (up to the 200 most recent documents; scrolling back to the top clears it).
 - **Language**: system default, or 简体中文, 繁體中文, English, 日本語 or 한국어. Menus, dialogs, messages and the built-in example all switch.
 - **Remember recent files**: off by default. When it is on and the sidebar is empty, it lists the last 10 files or folders you opened; click one to open it again. Items that were moved or deleted drop off the list. Turning it off clears the list at once.
 

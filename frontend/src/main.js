@@ -59,6 +59,7 @@ import { applySplitLayout, bindSplitter, clampSplit } from './splitter.js';
 import { layout } from './layout.js';
 import { printTocHTML } from './print-toc.js';
 import { createSourceHighlight } from './source-highlight.js';
+import { createReadingPositions } from './reading-positions.js';
 const $ = s => document.querySelector(s),
   app = $('#app');
 const isMac = /Mac/.test(navigator.userAgent),
@@ -67,6 +68,11 @@ let prefs = readPreferences();
 try {
   prefs = readPreferences(JSON.parse(localStorage.getItem('moread-preferences') || '{}'));
 } catch {}
+const positions = createReadingPositions({
+  load: () => JSON.parse(localStorage.getItem('moread-positions') || '[]'),
+  save: list => localStorage.setItem('moread-positions', JSON.stringify(list)),
+});
+addEventListener('pagehide', () => positions.flush());
 const darkQuery = window.matchMedia?.('(prefers-color-scheme: dark)');
 const activeTheme = () => resolveTheme(prefs.theme, !!darkQuery?.matches);
 const preferredLanguage = () =>
@@ -142,6 +148,8 @@ let current = builtinDocument('welcome'),
   renderedTheme = '',
   readingMinutes = 0,
   readingRatio = 0,
+  restoreFor = '',
+  trackPosition = false,
   countTimer;
 let libraryReady = !window.runtime?.EventsOn;
 const libraryWriter = createLibraryWriter({
@@ -434,6 +442,10 @@ function useDocument(d, keepScroll = false) {
   current = d;
   currentHeading = '';
   pendingAnchor = d.navigationAnchor || '';
+  // A fresh open returns to where the reader left off; positions are ignored until that restore runs.
+  positions.flush();
+  restoreFor = keepScroll || pendingAnchor || d.builtin ? '' : d.id;
+  trackPosition = keepScroll;
   const text = readLineEndings(d.content);
   newline = text.preferred;
   lineEndings = text.endings;
@@ -607,6 +619,13 @@ async function render(v) {
       if (v !== version_ || navigated?.cancelled) return;
       pendingAnchor = '';
     }
+    if (restoreFor) {
+      const at = restoreFor === current.id ? positions.get(restoreFor) : null;
+      restoreFor = '';
+      if (at) await previewFrame.scrollTo(at.progress, at.section);
+      if (v !== version_) return;
+    }
+    trackPosition = true;
     outline = r.outline;
     resetScroll = false;
     side();
@@ -614,6 +633,8 @@ async function render(v) {
     if ($('#findbar').classList.contains('open') && !sourceFind()) runFind(false);
   } catch (e) {
     if (v === version_) {
+      restoreFor = '';
+      trackPosition = true;
       $('#render-status').textContent = t('status.renderFailed');
       toast(e, true);
     }
@@ -1209,6 +1230,8 @@ $('#to-top').onclick = () => previewFrame?.scrollTo(0).catch(e => toast(e, true)
 // Reading position from the preview drives the outline highlight and, in split view, the editor.
 function handlePosition({ ratio, heading, section, progress }) {
   showProgress(ratio);
+  if (trackPosition && current.id && !current.builtin)
+    positions.remember(current.id, { section, progress, ratio });
   if (heading !== currentHeading) {
     currentHeading = heading;
     for (const row of document.querySelectorAll('.outline-row')) {
@@ -1290,6 +1313,7 @@ if (window.runtime?.EventsOn) {
       flush: async () => {
         // Retry the current full state even if an earlier background write failed.
         persistLibrary();
+        positions.flush();
         await libraryWriter.flush();
       },
       setLocked: value => {
