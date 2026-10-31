@@ -260,3 +260,42 @@ test('older webviews retain visible native selection when custom highlights are 
   assert.equal(window.document.documentElement.classList.contains('text-selection'), false);
   dom.window.close();
 });
+test('only footnote references to an existing note are marked for preview', async () => {
+  const t = setup();
+  t.frame.begin(1);
+  t.incoming('ready', {}, 0);
+  await t.frame.render(
+    '<p>a<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup><sup class="footnote-ref"><a href="#fn9">[9]</a></sup> <a href="#fn1">plain</a></p><ol><li id="fn1" class="footnote-item"><p>Note</p></li></ol>',
+    '',
+  );
+  const body = t.sent.find(m => m.type === 'render').body;
+  assert.equal(body.match(/data-moread-note="fn1"/g).length, 1);
+  assert.doesNotMatch(body, /data-moread-note="fn9"/);
+});
+test('hovering or focusing a footnote reference previews the note without its ids or back link', () => {
+  const dom = new JSDOM(
+    '<style></style><article><p>Text<sup class="footnote-ref"><a data-moread-note="fn1" data-moread-action="1" id="fnref1">[1]</a></sup></p><ol><li id="fn1" class="footnote-item"><p id="inner">Note <strong>bold</strong> <a class="footnote-backref" data-moread-action="2">↩︎</a></p></li></ol></article><script nonce="test"></script>',
+    { runScripts: 'outside-only' },
+  );
+  const { window } = dom;
+  Object.defineProperty(window.document, 'currentScript', { value: window.document.querySelector('script') });
+  window.postMessage = () => {};
+  window.eval(readFileSync(new URL('../src/frame-bootstrap.js', import.meta.url), 'utf8'));
+  const ref = window.document.getElementById('fnref1');
+  const popover = window.document.querySelector('.footnote-popover');
+  assert.equal(popover.hidden, true);
+  ref.dispatchEvent(new window.MouseEvent('mouseover', { bubbles: true }));
+  assert.equal(popover.hidden, false);
+  assert.equal(popover.textContent.trim(), 'Note bold');
+  assert.equal(popover.querySelector('[id],[data-moread-action],.footnote-backref'), null);
+  assert.equal(ref.getAttribute('aria-describedby'), popover.id);
+  assert.equal(window.document.querySelectorAll('#inner').length, 1);
+  ref.dispatchEvent(new window.MouseEvent('mouseout', { bubbles: true }));
+  assert.equal(popover.hidden, true);
+  assert.equal(ref.hasAttribute('aria-describedby'), false);
+  ref.dispatchEvent(new window.FocusEvent('focusin', { bubbles: true }));
+  assert.equal(popover.hidden, false);
+  window.document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape' }));
+  assert.equal(popover.hidden, true);
+  dom.window.close();
+});

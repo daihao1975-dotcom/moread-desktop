@@ -300,6 +300,30 @@ dd {
   font-size: 0.86em;
   color: var(--muted);
 }
+.footnote-popover {
+  position: fixed;
+  z-index: 10;
+  max-width: min(420px, calc(100vw - 24px));
+  max-height: 40vh;
+  overflow: hidden;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 14%);
+  font-size: 0.86em;
+  line-height: 1.6;
+  pointer-events: none;
+}
+.footnote-popover[hidden] {
+  display: none;
+}
+.footnote-popover > :first-child {
+  margin-top: 0;
+}
+.footnote-popover > :last-child {
+  margin-bottom: 0;
+}
 .hljs .hljs-comment,
 .hljs .hljs-code,
 .hljs .hljs-formula {
@@ -389,6 +413,9 @@ mark.search-hit.current {
   }
 }
 @media print {
+  .footnote-popover {
+    display: none !important;
+  }
   html,
   body {
     background: #fff !important;

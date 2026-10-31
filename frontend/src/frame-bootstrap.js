@@ -143,6 +143,7 @@
             return;
           labels = m.labels;
           version = m.version;
+          hideNote();
           clearFind();
           sheet.textContent = m.css;
           article.innerHTML =
@@ -286,11 +287,66 @@
     if (integer(id, 1, 200000) && actionNodes.get(id) === node) send('action', { id });
   }
   document.addEventListener('click', activate);
+  // Footnote references preview their note beside the reference; the link still jumps to it.
+  const notePopover = document.createElement('div');
+  notePopover.className = 'footnote-popover';
+  notePopover.id = 'moread-footnote-preview';
+  notePopover.setAttribute('role', 'tooltip');
+  notePopover.hidden = true;
+  document.body.append(notePopover);
+  let noteRef = null;
+  const hideNote = () => {
+    noteRef?.removeAttribute('aria-describedby');
+    noteRef = null;
+    notePopover.hidden = true;
+    notePopover.replaceChildren();
+  };
+  const showNote = ref => {
+    const note = document.getElementById(ref.getAttribute('data-moread-note') || '');
+    if (!note || !article.contains(note) || !note.matches('li.footnote-item')) return;
+    hideNote();
+    const copy = note.cloneNode(true);
+    for (const n of copy.querySelectorAll('.footnote-backref')) n.remove();
+    for (const n of [copy, ...copy.querySelectorAll('*')])
+      for (const name of ['id', 'data-moread-action', 'data-moread-note', 'tabindex', 'role'])
+        n.removeAttribute(name);
+    notePopover.replaceChildren(...copy.childNodes);
+    notePopover.hidden = false;
+    noteRef = ref;
+    ref.setAttribute('aria-describedby', notePopover.id);
+    const r = ref.getBoundingClientRect(),
+      w = notePopover.offsetWidth,
+      h = notePopover.offsetHeight;
+    notePopover.style.left = Math.max(12, Math.min(r.left, innerWidth - w - 12)) + 'px';
+    notePopover.style.top =
+      Math.max(8, r.bottom + 8 + h > innerHeight - 8 ? r.top - h - 8 : r.bottom + 8) + 'px';
+  };
+  const noteTarget = event => event.target.closest?.('[data-moread-note]');
+  document.addEventListener('mouseover', event => {
+    const ref = noteTarget(event);
+    if (ref && ref !== noteRef) showNote(ref);
+  });
+  document.addEventListener('mouseout', event => {
+    if (noteRef && noteTarget(event) === noteRef && !noteRef.contains(event.relatedTarget)) hideNote();
+  });
+  document.addEventListener('focusin', event => {
+    const ref = noteTarget(event);
+    if (ref) showNote(ref);
+  });
+  document.addEventListener('focusout', event => {
+    if (noteRef && noteTarget(event) === noteRef) hideNote();
+  });
+  addEventListener('scroll', () => noteRef && hideNote(), { passive: true });
   document.addEventListener('auxclick', event => {
     event.preventDefault();
     if (event.button === 1) activate(event);
   });
   document.addEventListener('keydown', event => {
+    // Escape first dismisses a footnote preview; that only hides local UI, so it needs no trusted event.
+    if (event.key === 'Escape' && noteRef) {
+      hideNote();
+      return;
+    }
     if (!event.isTrusted) return;
     let key = '';
     if (event.key === 'Escape') key = 'escape';

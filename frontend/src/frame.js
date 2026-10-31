@@ -233,6 +233,7 @@ export function createFrame(element, { onAction, onShortcut, onDrop, onError, on
       container.innerHTML = body;
       const nextActions = new Map();
       const nextAnchors = new Set([...container.querySelectorAll('[id]')].map(n => n.id));
+      const notes = new Set([...container.querySelectorAll('li.footnote-item[id]')].map(n => n.id));
       const interactive = container.querySelectorAll('a,button.copy-code,img.zoomable');
       if (interactive.length > 200000) throw new Error(t('frame.tooMany'));
       for (const node of interactive) {
@@ -240,6 +241,9 @@ export function createFrame(element, { onAction, onShortcut, onDrop, onError, on
         if (node.matches('a')) {
           const value = node.getAttribute('href');
           if (value) action = { kind: 'link', value };
+          // Footnote references carry their note's id so the pane can preview it on hover.
+          const note = value?.startsWith('#') && node.closest('.footnote-ref') ? value.slice(1) : '';
+          if (note && notes.has(note)) node.setAttribute('data-moread-note', note);
           node.setAttribute('role', 'link');
           node.tabIndex = 0;
         } else if (node.matches('.copy-code')) {
