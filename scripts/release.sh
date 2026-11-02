@@ -123,5 +123,7 @@ for f in "$out"/*; do
   [ "$size" -le "$limit" ] || { echo "$f is $size bytes, over $limit" >&2; exit 1; }
 done
 (cd "$out" && shasum -a 256 -- * | grep -v SHA256SUMS > SHA256SUMS.txt)
-echo "==> Done"
+echo "==> Packages built; release closeout is NOT complete."
+echo "==> After publishing and installing the verified app on the release Mac, run:"
+echo "    python3 scripts/verify-release-closeout.py --version $version"
 ls -l "$out"

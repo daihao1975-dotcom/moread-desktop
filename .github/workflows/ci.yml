@@ -37,6 +37,9 @@ jobs:
         run: |
           python3 scripts/notices.py
           git diff --exit-code THIRD_PARTY_NOTICES.txt frontend/src/font-notice.txt
+      - name: Test release closeout failure cases
+        # Keep bytecode out of the tree: release.sh requires a clean checkout.
+        run: python3 -B -m unittest discover -s scripts -p 'test_*.py'
       - name: Test, build and package
         run: scripts/release.sh dist/release
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
