@@ -59,6 +59,8 @@ Pressing ⌘B / Ctrl+B again on bold text removes the bold. Tab nests a list ite
 
 Find and replace works on the Markdown text, literally and ignoring case. **Replace all** can be undone in one step.
 
+Press ⌘V / Ctrl+V in the Source or Split editor to paste screenshots or PNG, JPEG and GIF images from the clipboard. New documents first ask where to save; cancelling inserts nothing. Images are saved in an `assets` folder beside the Markdown file and relative references replace the current selection or are inserted at the caret, as one undoable edit. Paste up to 20 images and 20 MB in total at once. Include the `assets` folder when moving or sharing the document, or copy it when saving to another directory. Removing a reference or undoing a paste keeps the image files.
+
 ### Saving and safeguards
 
 - ⌘ / Ctrl + S saves, ⇧⌘S / Ctrl+Shift+S saves as. New documents ask where to save the first time.
