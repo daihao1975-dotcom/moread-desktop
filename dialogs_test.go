@@ -160,3 +160,32 @@ func TestOpenDialogsRegisterDocuments(t *testing.T) {
 		t.Fatal(e)
 	}
 }
+
+func TestSaveAsRejectsNonMarkdownSymlinkTarget(t *testing.T) {
+	a, d, p := fixture(t)
+	target := filepath.Join(filepath.Dir(p), "important.txt")
+	original := []byte("keep these bytes\x00\xff")
+	if e := os.WriteFile(target, original, 0644); e != nil {
+		t.Fatal(e)
+	}
+	link := filepath.Join(filepath.Dir(p), "alias.md")
+	if e := os.Symlink(target, link); e != nil {
+		t.Skip("symlinks unavailable:", e)
+	}
+	answer(a, link, nil)
+	if _, e := a.SaveDocument(d.ID, "must not overwrite", d.Hash, d.Encoding, true); e == nil || !strings.Contains(e.Error(), "markdownExt") {
+		t.Fatalf("target accepted: %v", e)
+	}
+	b, e := os.ReadFile(target)
+	if e != nil || string(b) != string(original) {
+		t.Fatalf("target changed: %q %v", b, e)
+	}
+	if st, e := os.Lstat(link); e != nil || st.Mode()&os.ModeSymlink == 0 {
+		t.Fatal("link changed", e)
+	}
+	// A rejected Save As leaves the original document usable for ordinary saves.
+	r, e := a.SaveDocument(d.ID, "ordinary save", d.Hash, d.Encoding, false)
+	if e != nil || r.Document.Content != "ordinary save" {
+		t.Fatal(r, e)
+	}
+}

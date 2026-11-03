@@ -66,6 +66,9 @@ Press ⌘V / Ctrl+V in the Source or Split editor to paste screenshots or PNG, J
 - ⌘ / Ctrl + S saves, ⇧⌘S / Ctrl+Shift+S saves as. New documents ask where to save the first time.
 - If you switch documents or close the window with unsaved changes, MoRead asks whether to save, discard or cancel.
 - Saving writes a temporary file first and then replaces the original, so an interrupted save never damages the file.
+- Save As checks that a symbolic link's resolved target is also a Markdown file; a non-Markdown target is rejected before writing.
+- A successful save uses the bytes just written as its comparison baseline. An external edit immediately after that write remains detectable, and the next save checks for conflicts.
+- Documents opened or saved as while a folder refresh is pending retain their list entries and categories. A failed refresh keeps the existing list.
 - If another program changes the file: an unedited document reloads automatically; an edited one shows a warning and saving is blocked so the other change is not overwritten. Use **Save As** to keep your version.
 
 ## 5. Supported Markdown

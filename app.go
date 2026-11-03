@@ -623,6 +623,11 @@ func (a *App) saveTo(id, content, baseline, p, enc string) (Document, error) {
 	if len(encoded) > maxDocument {
 		return Document{}, fail("encodedTooLarge")
 	}
+	// Build the receipt from the bytes we write, never a later external version.
+	writtenContent, writtenEncoding, e := decodeDocument(encoded)
+	if e != nil {
+		return Document{}, e
+	}
 	mode := fs.FileMode(0644)
 	if st, e := os.Stat(p); e == nil {
 		if !st.Mode().IsRegular() {
@@ -646,7 +651,14 @@ func (a *App) saveTo(id, content, baseline, p, enc string) (Document, error) {
 	if e != nil {
 		return Document{}, e
 	}
-	return a.ReadDocument(d.ID)
+	// register preserves an existing, possibly broader, authorised root.
+	a.mu.Lock()
+	r := *a.files[d.ID]
+	a.mu.Unlock()
+	rel, _ := filepath.Rel(r.Root, r.Path)
+	d.Relative = filepath.ToSlash(rel)
+	d.Content, d.Encoding, d.Hash = writtenContent, writtenEncoding, hashBytes(encoded)
+	return d, nil
 }
 func (a *App) SaveDocument(id, content, baseline, encoding string, saveAs bool) (SaveResult, error) {
 	a.mu.Lock()
@@ -677,6 +689,9 @@ func (a *App) SaveDocument(id, content, baseline, encoding string, saveAs bool) 
 		}
 		if real, e := filepath.EvalSymlinks(p); e == nil {
 			p = real
+		}
+		if !isMarkdown(p) {
+			return SaveResult{}, fail("markdownExt")
 		}
 		baseline = ""
 		encoding = "UTF-8"

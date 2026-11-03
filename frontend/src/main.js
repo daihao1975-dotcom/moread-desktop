@@ -48,7 +48,8 @@ import {
   ArrowUp,
 } from 'lucide';
 import { sample, welcome } from './sample.js';
-import { applyFolderUpdate, mergeFiles } from './file-list.js';
+import { mergeFiles } from './file-list.js';
+import { createFolderRefresher } from './folder-refresh.js';
 import { createFrame } from './frame.js';
 import { renderDocument, getCSS, page } from './render.js';
 import { locate, place, caretTop, headingTops } from './scroll-sync.js';
@@ -495,26 +496,19 @@ const openRecent = path =>
     }
   });
 // Opened folders are listed again when the window comes back and every few seconds while it is in front.
-let refreshingFolders = false;
-async function refreshFolders() {
-  if (refreshingFolders || !native() || document.hidden || opening || closeApproved) return;
-  refreshingFolders = true;
-  try {
-    const next = applyFolderUpdate(files, await call('RefreshFolders'), current.id, language());
-    if (closeApproved) return;
-    if (next !== files) {
-      files = next;
-      assignDocuments(library.state(), files);
-      library.state().entries = library.state().entries.filter(e => files.some(f => f.id === e.id));
-      persistLibrary();
-      side();
-    }
-  } catch {
-    // A folder that cannot be listed right now keeps its last known files.
-  } finally {
-    refreshingFolders = false;
-  }
-}
+const refreshFolders = createFolderRefresher({
+  canRefresh: () => native() && !document.hidden && !opening && !closeApproved,
+  request: () => call('RefreshFolders'),
+  isClosed: () => closeApproved,
+  snapshot: () => ({ files, openId: current.id, lang: language() }),
+  apply: next => {
+    files = next;
+    assignDocuments(library.state(), files);
+    library.state().entries = library.state().entries.filter(e => files.some(f => f.id === e.id));
+    persistLibrary();
+    side();
+  },
+});
 async function save(as) {
   if (saveBusy || opening) return false;
   saveBusy = true;

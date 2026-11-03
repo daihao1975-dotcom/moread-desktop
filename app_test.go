@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 )
 
 func fixture(t *testing.T) (*App, Document, string) {
@@ -463,5 +464,105 @@ func TestRevealDocumentRequiresAuthorizedExistingFile(t *testing.T) {
 	}
 	if e := a.RevealDocument(d.ID); e == nil || !strings.Contains(e.Error(), "moved") {
 		t.Fatalf("missing file: %v", e)
+	}
+}
+
+func TestSaveReceiptUsesWrittenVersion(t *testing.T) {
+	for _, enc := range []string{"UTF-8", "UTF-8 BOM", "UTF-16 LE", "UTF-16 BE"} {
+		t.Run(enc, func(t *testing.T) {
+			a, d, p := fixture(t)
+			content := "保存 A\r\n😀"
+			written := encodeDocument(content, enc)
+			type result struct {
+				doc Document
+				err error
+			}
+			done := make(chan result, 1)
+			// register first needs mu after the atomic rename. Hold it to deterministically
+			// insert an external version between the write and receipt construction.
+			a.mu.Lock()
+			locked := true
+			finished := false
+			defer func() {
+				if locked {
+					a.mu.Unlock()
+				}
+				if !finished {
+					select {
+					case <-done:
+					case <-time.After(5 * time.Second):
+						t.Error("save goroutine did not finish")
+					}
+				}
+			}()
+			go func() { got, e := a.saveTo(d.ID, content, d.Hash, p, enc); done <- result{got, e} }()
+			deadline := time.Now().Add(5 * time.Second)
+			for {
+				b, e := os.ReadFile(p)
+				if e == nil && string(b) == string(written) {
+					break
+				}
+				if time.Now().After(deadline) {
+					t.Fatal("save did not reach rename")
+				}
+				time.Sleep(time.Millisecond)
+			}
+			external := []byte("external B")
+			if e := os.WriteFile(p, external, 0644); e != nil {
+				t.Fatal(e)
+			}
+			a.mu.Unlock()
+			locked = false
+			var saved result
+			select {
+			case saved = <-done:
+				finished = true
+			case <-time.After(5 * time.Second):
+				t.Fatal("save did not return")
+			}
+			if saved.err != nil {
+				t.Fatal(saved.err)
+			}
+			got := saved.doc
+			if got.Content != content || got.Encoding != enc || got.Hash != hashBytes(written) || got.ID != d.ID || got.Name != d.Name || got.Relative != d.Relative {
+				t.Fatalf("wrong receipt: %+v", got)
+			}
+			if _, e := a.SaveDocument(got.ID, "next edit", got.Hash, got.Encoding, false); e == nil || !strings.Contains(e.Error(), "conflict") {
+				t.Fatalf("external edit accepted: %v", e)
+			}
+			if b, e := os.ReadFile(p); e != nil || string(b) != string(external) {
+				t.Fatalf("external edit lost: %q %v", b, e)
+			}
+		})
+	}
+}
+
+func TestSaveReceiptPreservesAuthorisedRoot(t *testing.T) {
+	root, e := filepath.EvalSymlinks(t.TempDir())
+	if e != nil {
+		t.Fatal(e)
+	}
+	p := filepath.Join(root, "sub", "nested.md")
+	if e := os.MkdirAll(filepath.Dir(p), 0755); e != nil {
+		t.Fatal(e)
+	}
+	if e := os.WriteFile(p, []byte("old"), 0644); e != nil {
+		t.Fatal(e)
+	}
+	a := NewApp()
+	d, e := a.register(p, root, true)
+	if e != nil {
+		t.Fatal(e)
+	}
+	d, e = a.ReadDocument(d.ID)
+	if e != nil {
+		t.Fatal(e)
+	}
+	got, e := a.SaveDocument(d.ID, "new", d.Hash, d.Encoding, false)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if got.Document.Relative != "sub/nested.md" || got.Document.ID != d.ID || got.Document.Name != "nested.md" || a.files[d.ID].Root != root {
+		t.Fatalf("metadata/root changed: %+v", got)
 	}
 }
