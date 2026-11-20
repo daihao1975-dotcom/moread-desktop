@@ -548,8 +548,7 @@ async function save(as) {
   }
 }
 // Null keeps remote images as placeholders; the reader must opt in from settings.
-const remoteImageReader = () =>
-  prefs.remoteImages ? url => call('ReadRemoteImage', url) : null;
+const remoteImageReader = () => (prefs.remoteImages ? url => call('ReadRemoteImage', url) : null);
 // Longer documents wait a little longer after typing before they are rendered again.
 function scheduleRender(delay = Math.min(1200, 220 + source.length / 5000)) {
   clearTimeout(timer);

@@ -310,9 +310,7 @@ export async function renderDocument(
       if (!remote && !id) throw new Error(t('img.saveFirst'));
       if (deferred) throw new Error(t('state.opening'));
       if (imageBudgetExhausted) throw new Error(t('img.budget'));
-      const uri =
-        imageSources.get(ref) ||
-        (await (remote ? readRemoteImage(remoteURL) : readImage(id, ref)));
+      const uri = imageSources.get(ref) || (await (remote ? readRemoteImage(remoteURL) : readImage(id, ref)));
       if (!isCurrent()) return null;
       if (!/^data:image\/(png|jpeg|gif|webp|avif|svg\+xml);base64,/.test(uri))
         throw new Error(t('img.format'));
