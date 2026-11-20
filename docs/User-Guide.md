@@ -2,7 +2,7 @@
 
 Version 1.0.11 · macOS 12 or later (Apple silicon) and Windows 10 / 11 (64-bit)
 
-MoRead is an offline Markdown reader and light editor. Documents are read and saved only on your computer: nothing is uploaded, no network connection is made, and scripts inside documents never run.
+MoRead is an offline Markdown reader and light editor. Documents are read and saved only on your computer: nothing is uploaded, no network connection is made by default, and scripts inside documents never run.
 
 ## 1. Installation
 
@@ -75,7 +75,7 @@ Press ⌘V / Ctrl+V in the Source or Split editor to paste screenshots or PNG, J
 
 GitHub-style tables, task lists, strikethrough and autolinks; highlighted code blocks with a copy button; footnotes, definition lists, abbreviations, sub- and superscript, ==highlight== and emoji; GitHub alerts (`> [!NOTE]` and others); KaTeX math (`$…$`, `$$…$$`); Mermaid flowcharts, sequence diagrams and more; safe native HTML such as `<details>` and `<kbd>`.
 
-**Images**: PNG, JPEG, GIF, WebP, AVIF and safe static SVG, with paths relative to the document's folder. Each image may be up to 20 MB and the images of one document up to 32 MB in total. Click an image to enlarge it. Remote images are not loaded; click the placeholder link to open one in your browser.
+**Images**: PNG, JPEG, GIF, WebP, AVIF and safe static SVG, with paths relative to the document's folder. Each image may be up to 20 MB and the images of one document up to 32 MB in total. Click an image to enlarge it. Remote images are not loaded by default; click the placeholder link to open one in your browser, or turn on **Load remote images** in Reading settings to show them.
 
 **Links**: web and email links open in your browser or mail app. Relative links to other Markdown files open in MoRead, but only within folders you opened.
 
@@ -98,6 +98,7 @@ Click **Reading settings** at the right of the toolbar (⌘ / Ctrl + ,):
 - **Remembered position**: switching back to or reopening a document returns to where you left off (up to the 200 most recent documents; scrolling back to the top clears it).
 - **Footnote preview**: hover over (or Tab to) a footnote number to see the note beside it without jumping to the end; clicking the number still jumps there, and Esc closes the preview.
 - **Language**: system default, or 简体中文, 繁體中文, English, 日本語 or 한국어. Menus, dialogs, messages and the built-in example all switch.
+- **Load remote images**: off by default. When on, MoRead downloads web images in documents (http / https, without a referrer, up to 20 MB each) and shows them as embedded images; offline HTML exports include them too. This makes network requests to the sites hosting the images. If a download fails the placeholder stays, shows the reason and still opens in your browser.
 - **Remember recent files**: off by default. When it is on and the sidebar is empty, it lists the last 10 files or folders you opened; click one to open it again. Items that were moved or deleted drop off the list. Turning it off clears the list at once.
 
 MoRead remembers these preferences, the window size, logical folders, collapsed states and file path references in a local `library.json`, never document contents. **Remember recent files** independently controls the recent list; turning it off clears that list without changing sidebar folders.

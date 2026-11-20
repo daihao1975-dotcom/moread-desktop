@@ -220,7 +220,7 @@
   "sample.summary": "展开这段小提示",
   "sample.details": "支持安全的原生 HTML，例如 details、表格和标记。文档里的脚本与远程资源不会自动运行。",
   "sample.hr": "水平分隔线：",
-  "sample.images": "本地图片随文档目录读取，可点击放大。远程图片默认阻止，可点击链接在浏览器打开。相对 Markdown 链接仅访问已授权文件夹。",
+  "sample.images": "本地图片随文档目录读取，可点击放大。远程图片默认阻止，可点击链接在浏览器打开，或在阅读设置中开启「加载远程图片」。相对 Markdown 链接仅访问已授权文件夹。",
   "sample.back": "回到开头",
   "sample.reference": "Markdown 语法参考",
   "sample.end": "阅读到这里，就开始写吧。",

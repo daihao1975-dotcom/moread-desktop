@@ -6,7 +6,7 @@ A light, offline and safe Markdown reader and editor for macOS (Apple silicon) a
 
 ## 特点
 
-- **完全离线**：不联网、不上传、无统计；公式、图表、代码高亮全部内置。
+- **默认离线**：不联网、不上传、无统计；公式、图表、代码高亮全部内置。远程图片只在你于设置中开启「加载远程图片」后才下载。
 - **安全阅读**：阅读区运行在隔离沙箱中，文档脚本不会执行，远程资源默认不加载，相对链接不能越出已打开的文件夹。
 - **文件保真**：保留原编码（UTF-8 / BOM / UTF-16）与换行符；原子保存；文件被其他程序修改时自动载入或阻止覆盖。
 - **阅读 / 源码 / 分栏** 三种视图，分栏按标题同步滚动；大纲导航、文件夹浏览、逻辑文件夹分类、查找替换、专注模式。
@@ -59,7 +59,7 @@ scripts/release.sh            # 测试 → 构建 → 打包，输出到 dist/Mo
 
 **Highlights**
 
-- **Fully offline**: no network, no uploads, no analytics; math, diagrams and code highlighting are built in.
+- **Offline by default**: no network, no uploads, no analytics; math, diagrams and code highlighting are built in. Remote images are downloaded only after you turn on **Load remote images** in settings.
 - **Safe reading**: the reading pane is sandboxed, document scripts never run, remote resources are not loaded, and relative links cannot leave the folder you opened.
 - **Faithful files**: original encoding (UTF-8 / BOM / UTF-16) and line endings are kept; saves are atomic; changes made by other programs are reloaded or protected from being overwritten.
 - **Read, Source and Split** views with heading-aligned scrolling; outline, folder browsing, logical folder organisation, find and replace, focus mode.

@@ -220,7 +220,7 @@
   "sample.summary": "展開這段小提示",
   "sample.details": "支援安全的原生 HTML，例如 details、表格和標記。文件中的指令碼與遠端資源不會自動執行。",
   "sample.hr": "水平分隔線：",
-  "sample.images": "本機圖片隨文件所在資料夾讀取，可點一下放大。遠端圖片預設封鎖，可點選連結在瀏覽器開啟。相對 Markdown 連結只會存取已授權的資料夾。",
+  "sample.images": "本機圖片隨文件所在資料夾讀取，可點一下放大。遠端圖片預設封鎖，可點選連結在瀏覽器開啟，或在閱讀設定中開啟「載入遠端圖片」。相對 Markdown 連結只會存取已授權的資料夾。",
   "sample.back": "回到開頭",
   "sample.reference": "Markdown 語法參考",
   "sample.end": "讀到這裡，就開始寫吧。",

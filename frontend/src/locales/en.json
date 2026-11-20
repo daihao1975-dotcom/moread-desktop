@@ -220,7 +220,7 @@
   "sample.summary": "Expand this tip",
   "sample.details": "Safe native HTML such as details, tables and marks is supported. Scripts and remote resources in documents never run on their own.",
   "sample.hr": "A horizontal rule:",
-  "sample.images": "Local images are read from the document's folder and can be clicked to enlarge. Remote images are blocked by default; click the link to open them in your browser. Relative Markdown links only reach folders you opened.",
+  "sample.images": "Local images are read from the document's folder and can be clicked to enlarge. Remote images are blocked by default; click the link to open them in your browser, or turn on Load remote images in Reading settings. Relative Markdown links only reach folders you opened.",
   "sample.back": "Back to top",
   "sample.reference": "Markdown syntax reference",
   "sample.end": "If you have read this far, start writing.",
