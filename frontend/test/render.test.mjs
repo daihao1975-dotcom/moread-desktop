@@ -36,6 +36,30 @@ test('remote and forged local images are never automatically loaded', async () =
   assert.doesNotMatch(r.body, /<img/);
   assert.match(r.body, /远程图片已阻止/);
 });
+test('remote images load only through the opt-in native reader', async () => {
+  const urls = [];
+  const png = 'data:image/png;base64,iVBORw0KGgo=';
+  const r = await renderDocument('![a](https://example.com/a.png)\n\n![b](//cdn.example.com/b.png)', {
+    readRemoteImage: async url => {
+      urls.push(url);
+      return png;
+    },
+  });
+  assert.deepEqual(urls, ['https://example.com/a.png', 'https://cdn.example.com/b.png']);
+  assert.equal((r.body.match(/<img[^>]*src="data:image\/png/g) || []).length, 2);
+  assert.doesNotMatch(r.body, /src="https?:/);
+});
+test('failed or non-image remote responses stay as clickable placeholders', async () => {
+  const r = await renderDocument('![x](https://example.com/x.png)\n\n![y](https://example.com/y.png)', {
+    readRemoteImage: async url => {
+      if (url.endsWith('x.png')) throw new Error('moread:remoteImage|HTTP 403 Forbidden');
+      return 'https://example.com/forged';
+    },
+  });
+  assert.doesNotMatch(r.body, /<img/);
+  assert.match(r.body, /远程图片加载失败（HTTP 403 Forbidden）/);
+  assert.match(r.body, /href="https:\/\/example.com\/y.png"/);
+});
 test('document directives cannot override mermaid security', async () => {
   const r = await renderDocument(
     '```mermaid\n%%{init: {securityLevel: "loose"}}%%\nflowchart LR\nA-->B\n```',

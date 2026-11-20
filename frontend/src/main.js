@@ -270,6 +270,7 @@ function applyPrefs() {
   $('#leading').value = prefs.leading;
   $('#language').value = prefs.lang;
   $('#print-toc').checked = prefs.printToc;
+  $('#remote-images').checked = prefs.remoteImages;
   document
     .querySelectorAll('.theme-options button')
     .forEach(b => b.classList.toggle('active', b.dataset.theme === prefs.theme));
@@ -546,6 +547,9 @@ async function save(as) {
     update();
   }
 }
+// Null keeps remote images as placeholders; the reader must opt in from settings.
+const remoteImageReader = () =>
+  prefs.remoteImages ? url => call('ReadRemoteImage', url) : null;
 // Longer documents wait a little longer after typing before they are rendered again.
 function scheduleRender(delay = Math.min(1200, 220 + source.length / 5000)) {
   clearTimeout(timer);
@@ -573,6 +577,7 @@ async function render(v) {
     const r = await renderDocument(source, {
       id: current.id,
       readImage: (...args) => call('ReadImage', ...args),
+      readRemoteImage: remoteImageReader(),
       isCurrent: () => v === version_,
       theme,
       onPreview: !resetScroll
@@ -985,6 +990,11 @@ $('#print-toc').onchange = e => {
   prefs.printToc = e.target.checked;
   savePrefs();
 };
+$('#remote-images').onchange = e => {
+  prefs.remoteImages = e.target.checked;
+  savePrefs();
+  if (current) scheduleRender(0);
+};
 $('#remember-recent').onchange = e =>
   call('SetRememberRecent', e.target.checked)
     .then(loadRecent)
@@ -1109,6 +1119,7 @@ async function printDocument() {
             await renderDocument(source, {
               id: current.id,
               readImage: (...args) => call('ReadImage', ...args),
+              readRemoteImage: remoteImageReader(),
               theme: 'light',
             })
           ).body

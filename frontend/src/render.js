@@ -221,6 +221,7 @@ export async function renderDocument(
   {
     id = '',
     readImage = async () => '',
+    readRemoteImage = null,
     isCurrent = () => true,
     theme = 'light',
     onPreview,
@@ -230,7 +231,13 @@ export async function renderDocument(
   // Publish readable, sanitized text before optional engines or image I/O can block it.
   // The final pass still owns exports and keeps the same cancellation boundary.
   if (onPreview && (hasMath(source) || /!\[|<img\b|mermaid|`{3,}|~{3,}/i.test(source))) {
-    const preview = await renderDocument(source, { id, isCurrent, theme, deferred: true });
+    const preview = await renderDocument(source, {
+      id,
+      isCurrent,
+      theme,
+      deferred: true,
+      readRemoteImage,
+    });
     if (!preview || !isCurrent()) return null;
     await onPreview(preview);
     if (!isCurrent()) return null;
@@ -295,12 +302,17 @@ export async function renderDocument(
     img.removeAttribute('src');
     img.removeAttribute('srcset');
     const remote = /^(https?:|\/\/)/i.test(ref);
+    // Remote images load only after the reader opts in, and only through the native layer.
+    const fetchRemote = remote && typeof readRemoteImage === 'function';
+    const remoteURL = ref.startsWith('//') ? 'https:' + ref : ref;
     try {
-      if (remote) throw new Error(t('img.remote'));
-      if (!id) throw new Error(t('img.saveFirst'));
+      if (remote && !fetchRemote) throw new Error(t('img.remote'));
+      if (!remote && !id) throw new Error(t('img.saveFirst'));
       if (deferred) throw new Error(t('state.opening'));
       if (imageBudgetExhausted) throw new Error(t('img.budget'));
-      const uri = imageSources.get(ref) || (await readImage(id, ref));
+      const uri =
+        imageSources.get(ref) ||
+        (await (remote ? readRemoteImage(remoteURL) : readImage(id, ref)));
       if (!isCurrent()) return null;
       if (!/^data:image\/(png|jpeg|gif|webp|avif|svg\+xml);base64,/.test(uri))
         throw new Error(t('img.format'));
@@ -316,8 +328,15 @@ export async function renderDocument(
     } catch (e) {
       const p = document.createElement(remote ? 'a' : 'span');
       p.className = 'image-placeholder';
-      p.textContent = `▧ ${img.alt || t('img.default')} · ${remote ? t('img.remote') : localizeMessage(e.message || e)}`;
-      if (remote && /^https?:/i.test(ref)) p.href = ref;
+      const reason = !remote
+        ? localizeMessage(e.message || e)
+        : !fetchRemote
+          ? t('img.remote')
+          : deferred
+            ? t('state.opening')
+            : t('img.remoteFailed', { detail: localizeMessage(e.message || e) });
+      p.textContent = `▧ ${img.alt || t('img.default')} · ${reason}`;
+      if (remote && /^https?:/i.test(remoteURL)) p.href = remoteURL;
       img.replaceWith(p);
     }
   }

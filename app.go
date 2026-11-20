@@ -10,7 +10,6 @@ import (
 	w "github.com/wailsapp/wails/v2/pkg/runtime"
 	"io"
 	"io/fs"
-	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -742,22 +741,10 @@ func (a *App) ReadImage(id, ref string) (string, error) {
 	if e != nil {
 		return "", e
 	}
-	mime := http.DetectContentType(b)
-	if strings.EqualFold(filepath.Ext(p), ".svg") {
-		b, e = sanitizeSVG(b)
-		if e != nil {
-			return "", e
-		}
-		mime = "image/svg+xml"
-	}
-	if len(b) > 12 && string(b[4:8]) == "ftyp" && (string(b[8:12]) == "avif" || string(b[8:12]) == "avis") {
-		mime = "image/avif"
-	}
-	if mime != "image/svg+xml" && mime != "image/avif" && mime != "image/png" && mime != "image/jpeg" && mime != "image/gif" && mime != "image/webp" {
-		return "", fail("imageType")
-	}
-	return "data:" + mime + ";base64," + base64.StdEncoding.EncodeToString(b), nil
+	return imageDataURI(b, strings.EqualFold(filepath.Ext(p), ".svg"))
 }
+
+func base64Encode(b []byte) string { return base64.StdEncoding.EncodeToString(b) }
 func (a *App) OpenRelative(id, ref string) (Document, error) {
 	p, e := a.relativePath(id, ref)
 	if e != nil {

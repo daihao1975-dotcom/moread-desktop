@@ -70,4 +70,7 @@ test('the printed table of contents is off unless chosen', () => {
   assert.equal(readPreferences({}).printToc, false);
   assert.equal(readPreferences({ printToc: true }).printToc, true);
   assert.equal(readPreferences({ printToc: 'yes' }).printToc, false);
+  assert.equal(readPreferences({}).remoteImages, false);
+  assert.equal(readPreferences({ remoteImages: true }).remoteImages, true);
+  assert.equal(readPreferences({ remoteImages: 1 }).remoteImages, false);
 });

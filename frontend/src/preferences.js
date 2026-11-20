@@ -29,6 +29,7 @@ export function readPreferences(raw = {}) {
     previewOnLeft: false,
     lang: 'auto',
     printToc: false,
+    remoteImages: false,
   };
   if (Number.isInteger(raw.split) && raw.split >= 20 && raw.split <= 80) p.split = raw.split;
   if (typeof raw.previewOnLeft === 'boolean') p.previewOnLeft = raw.previewOnLeft;
@@ -38,6 +39,7 @@ export function readPreferences(raw = {}) {
   p.leading = normalizeLeading(raw.leading);
   if (typeof raw.sidebar === 'boolean') p.sidebar = raw.sidebar;
   if (typeof raw.printToc === 'boolean') p.printToc = raw.printToc;
+  if (typeof raw.remoteImages === 'boolean') p.remoteImages = raw.remoteImages;
   if (typeof raw.lang === 'string' && /^(auto|[a-z]{2}(-[A-Z]{2})?)$/.test(raw.lang))
     p.lang = ['auto', 'en', 'zh-CN', 'zh-TW', 'ja', 'ko'].includes(raw.lang) ? raw.lang : 'en';
   const w = normalizeWidth(raw.width);
